@@ -20,13 +20,42 @@
    board-folder-uid arguments-board-folder-uid
    rules-folder-uid arguments-rules-folder-uid])
 
-;; FIXME: read values from env
+;; >>> Env variables or command line
+
+(defn board-uid-arg
+  [opts-map-options]
+  (or (:board-uid opts-map-options) (System/getenv "BOARD_UID")))
+
+(defn from-instance-arg
+  [opts-map-options]
+  (make-grafana-instance (or (:from-url   opts-map-options) (System/getenv "FROM_URL"))
+                         (or (:from-token opts-map-options) (System/getenv "FROM_TOKEN"))))
+
+(defn to-instance-arg
+  [opts-map-options]
+  (make-grafana-instance (or (:to-url   opts-map-options) (System/getenv "TO_URL"))
+                         (or (:to-token opts-map-options) (System/getenv "TO_TOKEN"))))
+
+(defn message-arg
+  [opts-map-options]
+  (or (:message opts-map-options) (System/getenv "MESSAGE")))
+
+(defn board-folder-uid-arg
+  [opts-map-options]
+  (or (:board-folder-uid opts-map-options) (System/getenv "BOARD_FOLDER_UID")))
+
+(defn rules-folder-uid-arg
+  [opts-map-options]
+  (or (:rules-folder-uid  opts-map-options) (System/getenv "RULES_FOLDER_UID")))
+
+;; <<<
+
 (defn create-arguments
   [opts-map-options]
-  (make-arguments (:rules     opts-map-options)
-                  (:board-uid opts-map-options)
-                  (make-grafana-instance (:from-url opts-map-options) (:from-token opts-map-options))
-                  (make-grafana-instance (:to-url   opts-map-options) (:to-token   opts-map-options))
-                  (or (:message opts-map-options) "Changes made by the active-grafana tool.")
-                  (:board-folder-uid  opts-map-options)
-                  (:rules-folder-uid  opts-map-options)))
+  (make-arguments (:rules               opts-map-options)
+                  (board-uid-arg        opts-map-options)
+                  (from-instance-arg    opts-map-options)
+                  (to-instance-arg      opts-map-options)
+                  (message-arg          opts-map-options)
+                  (board-folder-uid-arg opts-map-options)
+                  (rules-folder-uid-arg opts-map-options)))

@@ -5,18 +5,17 @@
 
 (def opts
   [["-h" "--help" "Print this help message and exit."]
-   ["-c" "--copy-dashboard" "Copy only a dashboard from one instance to another."]
+   ["-c" "--copy-dashboard" "Copy a dashboard from one instance to another."]
    ["-r" nil "Also copy the related alert-rules." :id :rules]
-   [nil "--board-uid DASHBOARD_UID" "The uid of the dashboard to copy."]
+   [nil "--board-uid BOARD_UID" "The uid of the dashboard to copy."]
    [nil "--from-url FROM_URL" "The grafana-url to copy from."]
    [nil "--from-token FROM_TOKEN" "The grafana-token of the grafana-instance to copy from."]
    [nil "--to-url TO_URL" "The grafana-url to copy to."]
    [nil "--to-token TO_TOKEN" "The grafana-token of the grafana-instance to copy to."]
-   [nil "--message MSG" "Optional: The change-message."]
+   [nil "--message MESSAGE" "Optional: The change-message."]
    [nil "--board-folder-uid BOARD_FOLDER_UID" "The folder-uid to copy the dashboard to."]
    [nil "--rules-folder-uid RULES_FOLDER_UID" "The folder-uid to copy the rules to."]])
 
-;; FIXME: use env-variables where possible.
 (defn print-usage [opts-map]
   (do (println "Usage:")
       (println "active-grafana
@@ -49,8 +48,5 @@
 
       :else
       (do
-        (prn (:options opts-map))
-        (println (:arguments opts-map))
-        (println "What shall I do?")))
-  )
-)
+        (println "I don't know what to do.")
+        (print-usage opts-map)))))
