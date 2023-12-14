@@ -5,14 +5,13 @@ A Clojure library designed to help dealing with Grafana.
 ## Features
 
 - Copying a grafana dashboard from one instance to another instance.
-- Additionally, alert-rules associated with this grafana dashboard can be copied
-  on the way.
+- Copying alert-rules associated with this grafana dashboard.
 
 ## Usage
 
 ### Installing active-grafana
 
-FIXME: Not tested.
+FIXME: Way to go, not available yet.
 
 ```
 $ active-grafana -h

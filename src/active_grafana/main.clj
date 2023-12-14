@@ -5,14 +5,16 @@
 
 (def opts
   [["-h" "--help" "Print this help message and exit."]
-   ["-c" "--copy-dashboard" "Copy a dashboard from one instance to another."]
-   ["-r" nil "Also copy the related alert-rules." :id :rules]
-   [nil "--board-uid BOARD_UID" "The uid of the dashboard to copy."]
+   ["-c" nil "Copy a dashboard from one instance to another." :id :board]
+   ["-r" nil "Copy alert-rules associated to a dashboard."    :id :rules]
+   [nil "--board-uid BOARD_UID" "Either the uid of the dashboard to copy
+                                           or the uid of the dashboard from which the
+                                           alert-rules should be copied."]
    [nil "--from-url FROM_URL" "The grafana-url to copy from."]
    [nil "--from-token FROM_TOKEN" "The grafana-token of the grafana-instance to copy from."]
    [nil "--to-url TO_URL" "The grafana-url to copy to."]
    [nil "--to-token TO_TOKEN" "The grafana-token of the grafana-instance to copy to."]
-   [nil "--message MESSAGE" "Optional: The change-message."]
+   [nil "--message MESSAGE" "Optional: The dashboard change-message."]
    [nil "--board-folder-uid BOARD_FOLDER_UID" "The folder-uid to copy the dashboard to."]
    [nil "--rules-folder-uid RULES_FOLDER_UID" "The folder-uid to copy the rules to."]])
 
@@ -43,8 +45,8 @@
       (:help (:options opts-map))
       (print-usage opts-map)
 
-      (or (:rules (:options opts-map)) (:copy-dashboard (:options opts-map)))
-      (core/copy (settings/create-arguments (:options opts-map)))
+      (or (:board (:options opts-map)) (:rules (:options opts-map)))
+      (core/copy (settings/create-arguments! (:options opts-map)))
 
       :else
       (do

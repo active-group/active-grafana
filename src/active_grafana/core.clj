@@ -7,33 +7,34 @@
   ^{:doc "Copy a dashboard from a grafana instance to another instance.
           Note: an existing dashboard in the 'to'-instance will be overwritten.
 
-          from-grafana-instance: url and token as GrafanaInstance record.
-          to-grafana-instance:   url and token as GrafanaInstance record.
-          dashboard-uid:         uid of a dashboard in the 'from'-instance,
-                                 that will be copied to the 'to'-instance.
-          folderUid:             uid of a folder within the 'to'-instance,
-                                 where the dashboard will be copied to.
-                                 If `nil` the General-folder of the
-                                 'to'-instance will be used.
-          message:               The change-message. "}
-  [from-grafana-instance to-grafana-instance dashboard-uid folderUid message]
+          from-grafana:  url and token as GrafanaInstance record.
+          to-grafana:    url and token as GrafanaInstance record.
+          dashboard-uid: uid of a dashboard in the 'from'-instance,
+                         that will be copied to the 'to'-instance.
+          folder-uid:    uid of a folder within the 'to'-instance,
+                         where the dashboard will be copied/moved to.
+                         If `nil` the General-folder of the
+                         'to'-instance will be used.
+          message:       The change-message. "}
+  [from-grafana to-grafana dashboard-uid folder-uid message]
   (let [dashboard        (helper/json->clj
                           (api/get-dashboard-by-uid
-                           (settings/grafana-instance-url   from-grafana-instance)
-                           (settings/grafana-instance-token from-grafana-instance)
+                           (settings/grafana-instance-url   from-grafana)
+                           (settings/grafana-instance-token from-grafana)
                            dashboard-uid))
         clean-board-data (-> dashboard
                              (get "dashboard")
                              ;; alternative: check for changes before overwriting
                              (dissoc "version")
                              (dissoc "id"))]
-    (api/create-update-dashboard (settings/grafana-instance-url   to-grafana-instance)
-                                 (settings/grafana-instance-token to-grafana-instance)
+    (api/create-update-dashboard (settings/grafana-instance-url   to-grafana)
+                                 (settings/grafana-instance-token to-grafana)
                                  (helper/clj->json {"dashboard" clean-board-data
                                                     "message"   message
                                                     ;; alternative: check for changes before overwriting
                                                     "overwrite" true
-                                                    "folderUid" folderUid}))))
+                                                    ;; folder must exist, otherwise it throws an exception
+                                                    "folderUid" folder-uid}))))
 
 (defn find-dashboard-related-alert-rules
   ^{:doc "Find alert-rules that are related to a specific dashboard.
@@ -108,17 +109,18 @@
 
           args: Provided arguments, as Arguments record. "}
   [args]
-  (do
-    (helper/log "copy dashboard")
-    (copy-dashboard (settings/arguments-from-instance    args)
-                    (settings/arguments-to-instance      args)
-                    (settings/arguments-board-uid        args)
-                    (settings/arguments-board-folder-uid args)
-                    (settings/arguments-message          args))
-    (when (settings/arguments-rules args)
-      (do
-        (helper/log "copy alert-rules")
-        (copy-rules (settings/arguments-from-instance    args)
-                    (settings/arguments-to-instance      args)
-                    (settings/arguments-board-uid        args)
-                    (settings/arguments-rules-folder-uid args))))))
+  (when (settings/arguments-board args)
+    (do
+      (helper/log "copy dashboard")
+      (copy-dashboard (settings/arguments-from-instance    args)
+                      (settings/arguments-to-instance      args)
+                      (settings/arguments-board-uid        args)
+                      (settings/arguments-board-folder-uid args)
+                      (settings/arguments-message          args))))
+  (when (settings/arguments-rules args)
+    (do
+      (helper/log "copy alert-rules")
+      (copy-rules (settings/arguments-from-instance    args)
+                  (settings/arguments-to-instance      args)
+                  (settings/arguments-board-uid        args)
+                  (settings/arguments-rules-folder-uid args)))))

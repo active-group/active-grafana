@@ -12,7 +12,8 @@
   Arguments
   make-arguments
   arguments?
-  [rules            arguments-rules
+  [board            arguments-board
+   rules            arguments-rules
    board-uid        arguments-board-uid
    from-instance    arguments-from-instance
    to-instance      arguments-to-instance
@@ -50,9 +51,10 @@
 
 ;; <<<
 
-(defn create-arguments
+(defn create-arguments!
   [opts-map-options]
-  (make-arguments (:rules               opts-map-options)
+  (make-arguments (:board               opts-map-options)
+                  (:rules               opts-map-options)
                   (board-uid-arg        opts-map-options)
                   (from-instance-arg    opts-map-options)
                   (to-instance-arg      opts-map-options)
