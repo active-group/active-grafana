@@ -12,7 +12,9 @@
   Arguments
   make-arguments
   arguments?
-  [board            arguments-board
+  [show-boards      arguments-show-boards
+   show-folders     arguments-show-folders
+   board            arguments-board
    rules            arguments-rules
    board-uid        arguments-board-uid
    from-instance    arguments-from-instance
@@ -53,7 +55,9 @@
 
 (defn create-arguments!
   [opts-map-options]
-  (make-arguments (:board               opts-map-options)
+  (make-arguments (:show-dashboards     opts-map-options)
+                  (:show-folders        opts-map-options)
+                  (:board               opts-map-options)
                   (:rules               opts-map-options)
                   (board-uid-arg        opts-map-options)
                   (from-instance-arg    opts-map-options)

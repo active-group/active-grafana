@@ -2,6 +2,35 @@
   (:require [clj-http.client       :as client]
             [active-grafana.helper :as helper]))
 
+;; GET /api/search/?type=dash-db
+;; https://grafana.com/docs/grafana/latest/developers/http_api/folder_dashboard_search/#search-folders-and-dashboards
+;; Note the following query-parameter:
+;; limit – Limit the number of returned results (max is 5000; default is 1000)
+(defn get-dashboards
+  [base-url token]
+  (let [api-url (str base-url "/api/search?type=dash-db")]
+    (helper/log (str "Api-url: " api-url))
+    (client/get api-url {:oauth-token token})))
+
+;; GET /api/search/?type=dash-folder
+;; https://grafana.com/docs/grafana/latest/developers/http_api/folder_dashboard_search/#search-folders-and-dashboards
+;; Note the following query-parameter:
+;; limit – Limit the number of returned results (max is 5000; default is 1000)
+#_(defn get-folders
+  [base-url token]
+  (let [api-url (str base-url "/api/search?type=dash-folder")]
+    (helper/log (str "Api-url: " api-url))
+    (client/get api-url {:oauth-token token})))
+
+;; GET /api/folders
+;; https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-all-folders
+;; Default limit: 1000 results
+(defn get-folders
+  [base-url token]
+  (let [api-url (str base-url "/api/folders")]
+    (helper/log (str "Api-url: " api-url))
+    (client/get api-url {:oauth-token token})))
+
 ;; GET /api/dashboards/uid/:uid
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#get-dashboard-by-uid
 (defn get-dashboard-by-uid
@@ -62,11 +91,3 @@
   (let [api-url (str base-url "/api/folders/" folder-uid)]
     (helper/log (str "Api-url: " api-url))
     (client/get api-url {:oauth-token token})))
-
-;; GET /api/folders
-;; https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-all-folders
-;;(defn get-folders
-;;  [base-url token]
-;;  (let [api-url (str base-url "/api/folders")]
-;;    (helper/log (str "Api-url: " api-url))
-;;    (client/get api-url {:oauth-token token})))

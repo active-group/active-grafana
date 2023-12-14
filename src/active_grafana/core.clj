@@ -1,7 +1,55 @@
 (ns active-grafana.core
   (:require [active-grafana.grafana-api :as api]
             [active-grafana.helper :as helper]
-            [active-grafana.settings :as settings]))
+            [active-grafana.settings :as settings]
+            [clojure.pprint :as pprint]))
+
+;; >>> SHOW
+
+(defn show-dashboards
+  ^{:doc "Print the title, uid and url of the first 1000 dashboards of the
+          grafana-instance.
+
+          grafana-instance: url and token as GrafanaInstance record."}
+  [grafana-instance]
+  (let [boards (helper/json->clj
+                (api/get-dashboards
+                 (settings/grafana-instance-url   grafana-instance)
+                 (settings/grafana-instance-token grafana-instance)))]
+    (println "First 1000 dashboards:")
+    (pprint/print-table ["title" "uid" "url"] boards)))
+
+(defn show-folders
+  ^{:doc "Print the title and uid of the first 1000 folders of the grafana
+          instance.
+
+          grafana-instance: url and token as GrafanaInstance record."}
+  [grafana-instance]
+  (let [folders (helper/json->clj
+                 (api/get-folders
+                  (settings/grafana-instance-url   grafana-instance)
+                  (settings/grafana-instance-token grafana-instance)))]
+    (println "First 1000 folders:")
+    (pprint/print-table ["title" "uid"] folders)))
+
+(defn show
+  ^{:doc "Based on the given arguments, print information about the first 1000
+          dashboards and/or the first 1000 folders.
+
+          args: Provided arguments, as Arguments record. "}
+  [args]
+  (when (settings/arguments-show-boards args)
+    (do
+      (helper/log "show dashboards")
+      (show-dashboards (settings/arguments-from-instance    args))))
+  (when (settings/arguments-show-folders args)
+    (do
+      (helper/log "show folders")
+      (show-folders (settings/arguments-from-instance    args)))))
+
+;; <<< SHOW
+
+;; >>> COPY
 
 (defn copy-dashboard
   ^{:doc "Copy a dashboard from a grafana instance to another instance.
@@ -124,3 +172,5 @@
                   (settings/arguments-to-instance      args)
                   (settings/arguments-board-uid        args)
                   (settings/arguments-rules-folder-uid args)))))
+
+;; <<< COPY

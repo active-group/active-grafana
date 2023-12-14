@@ -5,6 +5,8 @@
 
 (def opts
   [["-h" "--help" "Print this help message and exit."]
+   [nil  "--show-dashboards" "Show the first 1000 dashboards of 'from'-grafana-instance and exit."]
+   [nil  "--show-folders" "Show the first 1000 folders of 'from'-grafana-instance and exit."]
    ["-c" nil "Copy a dashboard from one instance to another." :id :board]
    ["-r" nil "Copy alert-rules associated to a dashboard."    :id :rules]
    [nil "--board-uid BOARD_UID" "Either the uid of the dashboard to copy
@@ -44,6 +46,9 @@
 
       (:help (:options opts-map))
       (print-usage opts-map)
+
+      (or (:show-dashboards (:options opts-map)) (:show-folders (:options opts-map)))
+      (core/show (settings/create-arguments! (:options opts-map)))
 
       (or (:board (:options opts-map)) (:rules (:options opts-map)))
       (core/copy (settings/create-arguments! (:options opts-map)))
