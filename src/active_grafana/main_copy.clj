@@ -1,4 +1,4 @@
-(ns active-grafana.main
+(ns active-grafana.main-copy
   (:require [clojure.tools.cli :refer [parse-opts]]
             [active-grafana.core :as core]
             [active-grafana.settings :as settings]))
@@ -21,19 +21,13 @@
    [nil "--rules-folder-uid RULES_FOLDER_UID" "The folder-uid to copy the rules to."]])
 
 (defn print-usage [opts-map]
-  (do (println "Usage:")
-      (println "active-grafana
-               [-c]
-               [-r]
-               [--board-uid=<dashboard-uid>]
-               [--from-url=<from-grafana-url]
-               [--from-token=<from-grafana-token>]
-               [--to-url<to-grafana-url>]
-               [--to-token=<to-grafana-token>]
-               [--message=<message>]
-               [--board-folder-uid=<board-folder-uid>]
-               [--rules-folder-uid=<rules-folder-uid>]")
-      (println "Options:")
+  (do (println "Usage Examples:\n")
+      (println "active-grafana --help")
+      (println "active-grafana --show-dashboards --from-url=<from-grafana-url --from-token=<from-grafana-token>")
+      (println "active-grafana --show-folders --from-url=<from-grafana-url --from-token=<from-grafana-token>")
+      (println "active-grafana -c --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--board-folder-uid=<board-folder-uid>] [--message=<message>]")
+      (println "active-grafana -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--rules-folder-uid=<rules-folder-uid>]")
+      (println "\nOptions:")
       (println (:summary opts-map))))
 
 (defn -main [& args]
@@ -48,10 +42,10 @@
       (print-usage opts-map)
 
       (or (:show-dashboards (:options opts-map)) (:show-folders (:options opts-map)))
-      (core/show (settings/create-arguments! (:options opts-map)))
+      (core/copy-show (settings/create-copy-arguments! (:options opts-map)))
 
       (or (:board (:options opts-map)) (:rules (:options opts-map)))
-      (core/copy (settings/create-arguments! (:options opts-map)))
+      (core/copy (settings/create-copy-arguments! (:options opts-map)))
 
       :else
       (do

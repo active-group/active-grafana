@@ -1,27 +1,12 @@
-(ns active-grafana.settings
-  (:require [active.clojure.record :refer [define-record-type]]))
+(ns active-grafana.settings)
 
-(define-record-type ^{:doc "Grafana instance: URL and Token"}
-  GrafanaInstance
-  make-grafana-instance
-  grafana-instance?
-  [url   grafana-instance-url
-   token grafana-instance-token])
+(defrecord Grafana-Instance [url token])
 
-(define-record-type ^{:doc "Provided arguments."}
-  Arguments
-  make-arguments
-  arguments?
-  [show-boards      arguments-show-boards
-   show-folders     arguments-show-folders
-   board            arguments-board
-   rules            arguments-rules
-   board-uid        arguments-board-uid
-   from-instance    arguments-from-instance
-   to-instance      arguments-to-instance
-   message          arguments-message
-   board-folder-uid arguments-board-folder-uid
-   rules-folder-uid arguments-rules-folder-uid])
+;; >>> COPY
+
+(defrecord Copy-Arguments [show-boards show-folders board rules board-uid
+                           from-instance to-instance message
+                           board-folder-uid rules-folder-uid])
 
 ;; >>> Env variables or command line
 
@@ -31,13 +16,13 @@
 
 (defn from-instance-arg
   [opts-map-options]
-  (make-grafana-instance (or (:from-url   opts-map-options) (System/getenv "FROM_URL"))
-                         (or (:from-token opts-map-options) (System/getenv "FROM_TOKEN"))))
+  (->Grafana-Instance (or (:from-url   opts-map-options) (System/getenv "FROM_URL"))
+                      (or (:from-token opts-map-options) (System/getenv "FROM_TOKEN"))))
 
 (defn to-instance-arg
   [opts-map-options]
-  (make-grafana-instance (or (:to-url   opts-map-options) (System/getenv "TO_URL"))
-                         (or (:to-token opts-map-options) (System/getenv "TO_TOKEN"))))
+  (->Grafana-Instance (or (:to-url   opts-map-options) (System/getenv "TO_URL"))
+                      (or (:to-token opts-map-options) (System/getenv "TO_TOKEN"))))
 
 (defn message-arg
   [opts-map-options]
@@ -51,17 +36,50 @@
   [opts-map-options]
   (or (:rules-folder-uid  opts-map-options) (System/getenv "RULES_FOLDER_UID")))
 
-;; <<<
+;; <<< Env variables or command line
 
-(defn create-arguments!
+(defn create-copy-arguments!
   [opts-map-options]
-  (make-arguments (:show-dashboards     opts-map-options)
-                  (:show-folders        opts-map-options)
-                  (:board               opts-map-options)
-                  (:rules               opts-map-options)
-                  (board-uid-arg        opts-map-options)
-                  (from-instance-arg    opts-map-options)
-                  (to-instance-arg      opts-map-options)
-                  (message-arg          opts-map-options)
-                  (board-folder-uid-arg opts-map-options)
-                  (rules-folder-uid-arg opts-map-options)))
+  (->Copy-Arguments (:show-dashboards     opts-map-options)
+                    (:show-folders        opts-map-options)
+                    (:board               opts-map-options)
+                    (:rules               opts-map-options)
+                    (board-uid-arg        opts-map-options)
+                    (from-instance-arg    opts-map-options)
+                    (to-instance-arg      opts-map-options)
+                    (message-arg          opts-map-options)
+                    (board-folder-uid-arg opts-map-options)
+                    (rules-folder-uid-arg opts-map-options)))
+
+;; <<< COPY
+
+;; >>> ADJUST PANEL
+
+(defrecord Adjust-Arguments [grafana-instance
+                            panel-uid
+                            datasource-uids])
+
+;; >>> Env variables or command line
+
+(defn grafana-instance-arg
+  [opts-map-options]
+  (->Grafana-Instance (or (:url   opts-map-options) (System/getenv "GRAFANA_URL"))
+                      (or (:token opts-map-options) (System/getenv "GRAFANA_TOKEN"))))
+
+(defn panel-uid-arg
+  [opts-map-options]
+  (or (:panel-uid opts-map-options) (System/getenv "PANEL_UID")))
+
+(defn datasource-uids-arg
+  [opts-map-options]
+  (or (:datasource-uids opts-map-options) (System/getenv "DATASOURCE_UIDS")))
+
+;; <<< Env variables or command line
+
+(defn create-adjust-arguments!
+  [opts-map-options]
+  (->Adjust-Arguments (grafana-instance-arg opts-map-options)
+                     (panel-uid-arg        opts-map-options)
+                     (datasource-uids-arg  opts-map-options)))
+
+;; <<< ADJUST PANEL
