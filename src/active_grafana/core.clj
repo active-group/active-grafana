@@ -33,20 +33,6 @@
     (println "First 1000 folders:")
     (pprint/print-table ["title" "uid"] folders)))
 
-(defn copy-show
-  ^{:doc "Based on the given arguments, print information about the first 1000
-          dashboards and/or the first 1000 folders.
-
-          args: Provided arguments, as Arguments record. "}
-  [args]
-  (when (-> args :show-boards)
-    (do
-      (helper/log "show dashboards")
-      (show-dashboards (-> args :from-instance))))
-  (when (-> args :show-folders)
-    (do
-      (helper/log "show folders")
-      (show-folders (-> args :from-instance)))))
 
 (defn show-library-panels
   ^{:doc "Show for a given grafana-instance the name, uid and folder-uid of the
@@ -65,9 +51,43 @@
     (println (str "totalCount: " (get-in library-panels ["result" "totalCount"])))
     (pprint/print-table panels)))
 
+(defn copy-show
+  ^{:doc "Based on the given arguments, print information about the first 1000
+          dashboards and/or the first 1000 folders and/or the first 100 library panels.
+
+          args: Provided arguments, as Copy-Arguments record. "}
+  [args]
+  (when (and (-> args :show-boards) (-> args :from))
+    (do
+      (helper/log "show from-dashboards")
+      (show-dashboards (-> args :from-instance))))
+  (when (and (-> args :show-boards) (-> args :to))
+    (do
+      (helper/log "show to-dashboards")
+      (show-dashboards (-> args :to-instance))))
+  (when (and (-> args :show-folders) (-> args :from))
+    (do
+      (helper/log "show from-folders")
+      (show-folders (-> args :from-instance))))
+  (when (and (-> args :show-folders) (-> args :to))
+    (do
+      (helper/log "show from-folders")
+      (show-folders (-> args :to-instance))))
+  (when (and (-> args :show-panels) (-> args :from))
+    (do
+      (helper/log "show from-panels")
+      (show-library-panels (-> args :from-instance))))
+  (when (and (-> args :show-panels) (-> args :to))
+    (do
+      (helper/log "show from-folders")
+      (show-library-panels (-> args :to-instance)))))
+
+
 (defn adjust-show
   ^{:doc "Show for a given grafana-instance the name, uid and folder-uid of the
-          first 100 library panels"}
+          first 100 library panels
+
+          args: Provided arguments, as Adjust-Arguments record. "}
   [args]
   (show-library-panels (-> args :grafana-instance)))
 
@@ -131,7 +151,6 @@
             alert-rules)))
 
 (defn copy-rule
-  [instance folder-uid rule-to-copy]
   ^{:doc "Copy (create/update) a rule to a given folder.
 
           instance:     url and token as GrafanaInstance record.
@@ -139,6 +158,7 @@
           folder-uid:   the folder-uid where the rule should be copied to."}
   ;; Note: inefficient to run the available-rules within copy-rule for every
   ;; rule within copy-rules
+  [instance folder-uid rule-to-copy]
   (let [available-rules (helper/json->clj
                          (api/get-all-alert-rules (-> instance :url  )
                                                   (-> instance :token)))]
@@ -175,12 +195,82 @@
                                     folder-uid)
       (run! (fn [rule] (copy-rule to-instance folder-uid rule)) alert-rules))))
 
-(defn copy
-  ^{:doc "Based on the given arguments, copy a dashboard and, if requested, its
-          associated alert-rules.
+;; FIXME: Is there any better way to find dashboard related library panels
 
-          args: Provided arguments, as Arguments record. "}
+;; alternative: get all library-panel - for each library-panel, search all connections, check whether connection is dashboard-uid
+;; note: you only get the first 100 library-panels
+(defn find-dashboard-related-panels
+  ^{:doc "Find library panels that are related to a specific dashboard.
+
+          grafana-instance: url and token as GrafanaInstance record.
+          dashboard-uid:    to search for in the alert-rules."}
+  [grafana-instance dashboard-uid]
+  (let [dashboard (helper/json->clj
+                   (api/get-dashboard-by-uid (-> grafana-instance :url  )
+                                             (-> grafana-instance :token)
+                                             dashboard-uid))
+
+        ;; go through all panels and search for "libraryPanel" entries
+        ;; (contains nil for every non-library-panel)
+        panel-uids (remove nil? (map (fn [panel]
+                                       (get-in panel ["libraryPanel" "uid"]))
+                                     (get-in dashboard ["dashboard" "panels"])))]
+    ;; get cannot be nil - since the dashboard points to this library-panel
+    (map (fn [panel-uid] (get (helper/json->clj
+                               (api/get-library-element-by-uid (-> grafana-instance :url  )
+                                                               (-> grafana-instance :token)
+                                                               panel-uid))
+                              "result"))
+         panel-uids)))
+
+(defn copy-panel
+  [grafana-instance panel]
+  ^{:doc "Copy (create/update) a library-panel.
+
+          instance: url and token as GrafanaInstance record.
+          panel:    the panel to copy."}
+    ;; Note: inefficient to run the available-panels within copy-rule for every
+    ;; panel within copy-panels
+  (let [available-panel-uids (map (fn [panel] (get panel "uid"))
+                                  (get-in (helper/json->clj
+                                           (api/get-library-panels (-> grafana-instance :url  )
+                                                                   (-> grafana-instance :token)))
+                                          ["result" "elements"]))
+        panel-uid (get panel "uid")]
+    (if (some #(= panel-uid %) available-panel-uids)
+      ;; before we can update the panel
+      ;; we need to have its most recent version and put this version in the patch
+      (let [panel-version (get-in (helper/json->clj
+                                   (api/get-library-element-by-uid (-> grafana-instance :url  )
+                                                                   (-> grafana-instance :token)
+                                                                   panel-uid))
+                                  ["result" "version"])]
+        (api/update-library-element (-> grafana-instance :url  )
+                                    (-> grafana-instance :token)
+                                    (get panel "uid")
+                                    (helper/clj->json (assoc panel "version" panel-version))))
+      (api/create-library-element (-> grafana-instance :url  )
+                                  (-> grafana-instance :token)
+                                  (helper/clj->json panel)))))
+
+(defn copy-panels
+  [from-instance to-instance dashboard-uid]
+  (let [panels (find-dashboard-related-panels from-instance dashboard-uid)]
+    (run! (fn [panel] (copy-panel to-instance panel)) panels)))
+
+(defn copy
+  ^{:doc "Based on the given arguments, copy a dashboard and/or its
+          associated alert-rules and/or panels.
+
+          args: Provided arguments, as Copy-Arguments record."}
   [args]
+  ;; if associated panels aren't there, the dashboard copy will fail
+  (when (-> args :panels)
+    (do
+      (helper/log "copy panels")
+      (copy-panels (-> args :from-instance)
+                   (-> args :to-instance)
+                   (-> args :board-uid))))
   (when (-> args :board)
     (do
       (helper/log "copy dashboard")
@@ -265,7 +355,9 @@
 (defn adjust
   ^{:doc "Adjust a given library-panel within a grafana-instance, where the
           targets of the panel-model are replaced based on the first target
-          of given library-panel and the provided datasource-uids."}
+          of given library-panel and the provided datasource-uids.
+
+          args: Provided arguments, as Adjust-Arguments record."}
   [args]
    (adjust-library-panel (-> args :grafana-instance)
                          (-> args :panel-uid       )

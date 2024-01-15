@@ -3,4 +3,7 @@
          org.clojure/clojure           {:mvn/version "1.11.1"}
          org.clojure/data.json         {:mvn/version "2.4.0"}
          org.clojure/tools.cli         {:mvn/version "1.0.219"}
-         org.babashka/http-client      {:mvn/version "0.3.11"}}}
+         org.babashka/http-client      {:mvn/version "0.3.11"}}
+ :tasks { adjust active-grafana.main-adjust/-main
+          copy   active-grafana.main-copy/-main }
+ }
