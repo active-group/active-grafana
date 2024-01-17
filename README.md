@@ -6,6 +6,7 @@ A Clojure script/project designed to help dealing with Grafana.
 
 - Copying a grafana dashboard from one instance to another instance.
 - Copying alert-rules associated with this grafana dashboard.
+- Copying library-panels associated with this grafana dashboard.
 
 - Adjusting library panels where a specific target structure needs repition
   with different datasources.
