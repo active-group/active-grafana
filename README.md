@@ -15,10 +15,7 @@ A Clojure script/project designed to help dealing with Grafana.
 
 ### Babashka
 
-This project is mainly designed to run as a
-[babashka](https://book.babashka.org/) script.
-
-Check out this repository.
+If you check out this repository you can use [babashka](https://book.babashka.org/).
 
 This project contains two main-functions:
 
