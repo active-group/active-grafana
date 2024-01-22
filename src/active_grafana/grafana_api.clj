@@ -3,6 +3,8 @@
             [active-grafana.helper :as helper]
             [babashka.http-client :as http]))
 
+(set! *warn-on-reflection* true)
+
 ;; FIXME: remove clj-http-lite; it doesn't provide 'PATCH'
 ;;        we can use babashka.http-client for all calls
 

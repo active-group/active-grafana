@@ -2,8 +2,9 @@
   (:require [active-grafana.grafana-api :as api]
             [active-grafana.helper :as helper]
             [active-grafana.settings :as settings]
-            [clojure.pprint :as pprint]
             [clojure.string :as str]))
+
+(set! *warn-on-reflection* true)
 
 ;; >>> SHOW
 
@@ -17,8 +18,8 @@
                 (api/get-dashboards
                  (-> grafana-instance :url)
                  (-> grafana-instance :token)))]
-    (println "First 1000 dashboards:")
-    (pprint/print-table ["title" "uid" "url"] boards)))
+    (helper/communicate! "First 1000 dashboards:")
+    (helper/print-table! ["title" "uid" "url"] boards)))
 
 (defn show-folders
   ^{:doc "Print the title and uid of the first 1000 folders of the grafana
@@ -30,8 +31,8 @@
                  (api/get-folders
                   (-> grafana-instance :url  )
                   (-> grafana-instance :token)))]
-    (println "First 1000 folders:")
-    (pprint/print-table ["title" "uid"] folders)))
+    (helper/communicate! "First 1000 folders:")
+    (helper/print-table! ["title" "uid"] folders)))
 
 
 (defn show-library-panels
@@ -47,9 +48,9 @@
                        "uid"       (get panel "uid")
                        "folderUid" (get panel "folderUid")})
                     (get-in library-panels ["result" "elements"]))]
-    (println "First 100 library panels:")
-    (println (str "totalCount: " (get-in library-panels ["result" "totalCount"])))
-    (pprint/print-table panels)))
+    (helper/communicate! "First 100 library panels:")
+    (helper/communicate! (str "totalCount: " (get-in library-panels ["result" "totalCount"])))
+    (helper/print-table! panels)))
 
 (defn copy-show
   ^{:doc "Based on the given arguments, print information about the first 1000
@@ -80,7 +81,8 @@
   (when (and (-> args :show-panels) (-> args :to))
     (do
       (helper/log "show from-folders")
-      (show-library-panels (-> args :to-instance)))))
+      (show-library-panels (-> args :to-instance))))
+  nil)
 
 
 (defn adjust-show
@@ -89,7 +91,8 @@
 
           args: Provided arguments, as Adjust-Arguments record. "}
   [args]
-  (show-library-panels (-> args :grafana-instance)))
+  (show-library-panels (-> args :grafana-instance))
+  nil)
 
 ;; <<< SHOW
 
@@ -285,7 +288,8 @@
       (copy-rules (-> args :from-instance   )
                   (-> args :to-instance     )
                   (-> args :board-uid       )
-                  (-> args :rules-folder-uid)))))
+                  (-> args :rules-folder-uid))))
+  nil)
 
 ;; <<< COPY
 
@@ -301,11 +305,11 @@
   (assert (contains? (get reference-target "datasource") "uid")
           (str "reference-target does not have the expected structure { datasource { \"uid\" ... }}\n"
                "current reference-target:\n"
-               (println reference-target)))
+               (helper/communicate! reference-target)))
   (assert (contains? reference-target "refId")
           (str "target does not have the expected structure { refId ... }\n"
                "current reference-target:\n"
-               (println reference-target)))
+               (helper/communicate! reference-target)))
 
   (map (fn [uid]
          (assoc (assoc-in reference-target ["datasource" "uid"] uid)
@@ -363,6 +367,7 @@
                          (-> args :panel-uid       )
                          (str/split (-> args :datasource-uids) #" "))
   ;; if we are here, adjusting the panel was successful
-  (println "Adjusted."))
+  (helper/communicate! "Adjusted.")
+  nil)
 
 ;; <<< ADJUST

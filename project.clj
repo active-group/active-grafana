@@ -7,8 +7,15 @@
                  [org.clojure/clojure "1.11.1"]
                  [org.clojure/data.json "2.4.0"]
                  [org.clojure/tools.cli "1.0.219"]
-                 [org.babashka/http-client "0.3.11"]]
+                 [org.babashka/http-client "0.3.11"]
+                 [com.github.clj-easy/graal-build-time "1.0.5"]
+                 [nrepl/bencode "1.1.0"]
+                 [instaparse/instaparse  "1.4.12"]
+                                        ; 1.0.333
+                 [com.cognitect/transit-clj "1.0.329"]
+                 ]
   ; This project has two main:
-  ; :main active-grafana.main-copy
+  :main active-grafana.pod
   ; :main active-grafana.main-creation
+  :profiles {:uberjar {:aot :all}}
   )

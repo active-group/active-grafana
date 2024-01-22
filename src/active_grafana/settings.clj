@@ -1,5 +1,7 @@
 (ns active-grafana.settings)
 
+(set! *warn-on-reflection* true)
+
 (defrecord Grafana-Instance [url token])
 
 ;; >>> COPY

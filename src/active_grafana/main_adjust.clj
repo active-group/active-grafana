@@ -1,7 +1,11 @@
 (ns active-grafana.main-adjust
   (:require [active-grafana.core     :as core]
+            [active-grafana.helper   :as helper]
             [active-grafana.settings :as settings]
-            [clojure.tools.cli       :refer [parse-opts]]))
+            [clojure.tools.cli       :refer [parse-opts]])
+  (:gen-class))
+
+(set! *warn-on-reflection* true)
 
 (def opts
   [["-h" "--help" "Print this help message."]
@@ -13,20 +17,21 @@
    [nil "--datasource-uids DATASOURCE_UIDS" "Datasource uids used within the target-template as space separated string."]])
 
 (defn print-usage [opts-map]
-  (do (println "Usage Examples with bb:\n")
-      (println "bb adjust --help")
-      (println "bb adjust --show   --url=<grafana-url> --token=<grafana-token>")
-      (println "bb adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> --datasource-uids=\"<datasource-uid-1> <datasource-uid-2> ... <datasource-uid-n>\"")
-      (println "\nOptions:")
-      (println (:summary opts-map))))
+  (do (helper/communicate! "Usage Examples with bb:\n")
+      (helper/communicate! "bb adjust --help")
+      (helper/communicate! "bb adjust --show   --url=<grafana-url> --token=<grafana-token>")
+      (helper/communicate! "bb adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> --datasource-uids=\"<datasource-uid-1> <datasource-uid-2> ... <datasource-uid-n>\"")
+      (helper/communicate! "\nOptions:")
+      (helper/communicate! (:summary opts-map)))
+  nil)
 
 (defn -main [& args]
   (let [opts-map (parse-opts args opts)]
     (cond
       (:errors opts-map)
-      (do (doall (map println (:errors opts-map)))
+      (do (doall (map helper/communicate! (:errors opts-map)))
           (print-usage opts-map)
-          (System/exit -1))
+          (helper/error-logic))
 
       (:help (:options opts-map))
       (print-usage opts-map)
@@ -39,5 +44,5 @@
 
       :else
       (do
-        (println "I don't know what to do.")
+        (helper/communicate! "I don't know what to do.")
         (print-usage opts-map)))))
