@@ -27,21 +27,21 @@
    [nil "--rules-folder-uid RULES_FOLDER_UID" "The folder-uid to copy the rules to."]])
 
 (defn print-usage [opts-map]
-  (do (helper/communicate! "Usage Examples with bb:\n")
-      (helper/communicate! "bb copy --help")
-      (helper/communicate! "bb copy --show-dashboards --from --from-url=<from-grafana-url --from-token=<from-grafana-token>")
-      (helper/communicate! "bb copy --show-folders --to --to-url=<to-grafana-url --to-token=<to-grafana-token>")
-      (helper/communicate! "bb copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--board-folder-uid=<board-folder-uid>] [--message=<message>]")
-      (helper/communicate! "bb copy -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --rules-folder-uid=<rules-folder-uid>")
-      (helper/communicate! "\nOptions:")
-      (helper/communicate! (:summary opts-map)))
+  (do (println "Usage Examples with bb:\n")
+      (println "bb copy --help")
+      (println "bb copy --show-dashboards --from --from-url=<from-grafana-url --from-token=<from-grafana-token>")
+      (println "bb copy --show-folders --to --to-url=<to-grafana-url --to-token=<to-grafana-token>")
+      (println "bb copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--board-folder-uid=<board-folder-uid>] [--message=<message>]")
+      (println "bb copy -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --rules-folder-uid=<rules-folder-uid>")
+      (println "\nOptions:")
+      (println (:summary opts-map)))
   nil)
 
 (defn -main [& args]
   (let [opts-map (parse-opts args opts)]
     (cond
       (:errors opts-map)
-      (do (doall (map helper/communicate! (:errors opts-map)))
+      (do (doall (map println (:errors opts-map)))
           (print-usage opts-map)
           (helper/error-logic))
 
@@ -56,5 +56,5 @@
 
       :else
       (do
-        (helper/communicate! "I don't know what to do.")
+        (println "I don't know what to do.")
         (print-usage opts-map)))))

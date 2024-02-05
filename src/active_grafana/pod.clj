@@ -6,8 +6,7 @@
             [instaparse.core :as insta]
 
             [active-grafana.main-adjust :as adjust]
-            [active-grafana.main-copy   :as copy]
-            [active-grafana.helper      :as helper])
+            [active-grafana.main-copy   :as copy])
   (:import [java.io PushbackInputStream])
   (:gen-class))
 
@@ -75,15 +74,14 @@
                                 args (read-string args)
                                 args (read-transit args)
                                 res-map (do
-                                          (helper/forget!)
                                           (case var
-                                            "active-grafana.pod/adjust" {"value"  (write-transit (serialize (apply adjust/-main args)))
+                                            "active-grafana.pod/adjust" {"value"  (write-transit (serialize nil))
                                                                          "id"     id
-                                                                         "out"    (deref helper/memory)
+                                                                         "out"    (with-out-str (apply adjust/-main args))
                                                                          "status" ["done"]}
-                                            "active-grafana.pod/copy"   {"value"  (write-transit (serialize (apply copy/-main args)))
+                                            "active-grafana.pod/copy"   {"value"  (write-transit (serialize nil))
                                                                          "id"     id
-                                                                         "out"    (deref helper/memory)
+                                                                         "out"    (with-out-str (apply copy/-main args))
                                                                          "status" ["done"]}
                                             (throw (ex-info (str "Var not found: " var) {}))))]
                             (write res-map))
@@ -91,7 +89,6 @@
                             (let [reply {"ex-message" (ex-message e)
                                          "ex-data"    (write-transit (assoc (ex-data e) :type (str (class e))))
                                          "id"         id
-                                         "out"        (deref helper/memory)
                                          "status"     ["done" "error"]}]
                               (write reply))))
                         (recur))
@@ -100,7 +97,6 @@
               (let [reply {"ex-message" "Unknown op"
                            "ex-data" (pr-str {:op op})
                            "id"      id
-                           "out"     (deref helper/memory)
                            "status"  ["done" "error"]}]
                 (write reply))
               (recur))

@@ -4,33 +4,7 @@
 
 (set! *warn-on-reflection* true)
 
-;; BB communication
-
-(defn fresh-memory
-  []
-  (atom ""))
-
-(defonce memory (fresh-memory))
-
-(defn forget!
-  []
-  (reset! memory ""))
-
- (defn communicate!
-   [msg]
-   (if (System/getenv "BABASHKA_POD")
-     (swap! memory str "\n" msg "\n")
-     (println msg)))
-
-(defn print-table!
-  ([ks rows]
-   (if (System/getenv "BABASHKA_POD")
-     (swap! memory str "\n" (with-out-str (pprint/print-table ks rows)))
-     (pprint/print-table ks rows)))
-  ([rows]
-   (if (System/getenv "BABASHKA_POD")
-     (swap! memory str "\n" (with-out-str (pprint/print-table rows)))
-     (pprint/print-table rows))))
+;; POD vs PROGRAM behaviour
 
 (defn error-logic
   []
@@ -42,7 +16,7 @@
 
 (defn log
   [log-str]
-  (communicate! log-str))
+  (println log-str))
 
 (defn debug
   [deb]
