@@ -19,7 +19,7 @@
  (defn communicate!
    [msg]
    (if (System/getenv "BABASHKA_POD")
-     (swap! memory str "\n" msg)
+     (swap! memory str "\n" msg "\n")
      (println msg)))
 
 (defn print-table!
