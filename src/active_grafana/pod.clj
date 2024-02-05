@@ -27,9 +27,7 @@
 
 (def describe-map
   (walk/postwalk
-   (fn [v]
-     (if (ident? v) (name v)
-         v))
+   (fn [v] (if (ident? v) (name v) v))
    {:format :transit+json
     :namespaces [{:name "active-grafana.pod"
                   :vars [{"name" "adjust"}
@@ -108,4 +106,3 @@
               (recur))
 
             ))))))
-
