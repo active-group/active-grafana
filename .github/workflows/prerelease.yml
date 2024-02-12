@@ -1,0 +1,54 @@
+name: Pre-Release-on-tag
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  Create-Pre-Release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code (of tagged code)
+        uses: actions/checkout@v4
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+
+      # It is important to install java before installing clojure tools which needs java
+      # exclusions: babashka, clj-kondo and cljstyle
+      - name: Prepare java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@12.3
+        with:
+          lein: latest
+
+      - name: Leiningen version
+        run: lein -v
+
+      - name: Lein uberjar pod
+        run: lein with-profile as-pod uberjar
+      - name: Make folder and move file to save space
+        run: mkdir output-jars && mv target/active-grafana-pod.jar output-jars/
+
+      - name: Lein uberjar copy
+        run: lein with-profile as-copy uberjar
+      - name: Move file to save space
+        run: mv target/active-grafana-copy.jar output-jars/
+
+      - name: Lein uberjar adjust
+        run: lein with-profile as-adjust uberjar
+      - name: Move file to save space
+        run: mv target/active-grafana-adjust.jar output-jars/
+
+      - name: Release draft
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: ${{ github.workspace }}/output-jars/*
+          file_glob: true
+          overwrite: true
+          prerelease: true
+
