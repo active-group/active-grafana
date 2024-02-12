@@ -22,7 +22,7 @@ jobs:
           java-version: '17'
 
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@12
+        uses: DeLaGuardo/setup-clojure@12.5
         with:
           lein: latest
 
