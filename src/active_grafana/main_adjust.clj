@@ -17,10 +17,10 @@
    [nil "--datasource-uids DATASOURCE_UIDS" "Datasource uids used within the target-template as space separated string."]])
 
 (defn print-usage [opts-map]
-  (do (println "Usage Examples with bb:\n")
-      (println "bb adjust --help")
-      (println "bb adjust --show   --url=<grafana-url> --token=<grafana-token>")
-      (println "bb adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> --datasource-uids=\"<datasource-uid-1> <datasource-uid-2> ... <datasource-uid-n>\"")
+  (do (println "Usage Examples:\n")
+      (println "adjust --help")
+      (println "adjust --show   --url=<grafana-url> --token=<grafana-token>")
+      (println "adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> --datasource-uids=\"<datasource-uid-1> <datasource-uid-2> ... <datasource-uid-n>\"")
       (println "\nOptions:")
       (println (:summary opts-map)))
   nil)

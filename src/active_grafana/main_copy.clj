@@ -27,12 +27,12 @@
    [nil "--rules-folder-uid RULES_FOLDER_UID" "The folder-uid to copy the rules to."]])
 
 (defn print-usage [opts-map]
-  (do (println "Usage Examples with bb:\n")
-      (println "bb copy --help")
-      (println "bb copy --show-dashboards --from --from-url=<from-grafana-url --from-token=<from-grafana-token>")
-      (println "bb copy --show-folders --to --to-url=<to-grafana-url --to-token=<to-grafana-token>")
-      (println "bb copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--board-folder-uid=<board-folder-uid>] [--message=<message>]")
-      (println "bb copy -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --rules-folder-uid=<rules-folder-uid>")
+  (do (println "Usage Examples:\n")
+      (println "copy --help")
+      (println "copy --show-dashboards --from --from-url=<from-grafana-url --from-token=<from-grafana-token>")
+      (println "copy --show-folders --to --to-url=<to-grafana-url --to-token=<to-grafana-token>")
+      (println "copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--board-folder-uid=<board-folder-uid>] [--message=<message>]")
+      (println "copy -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --rules-folder-uid=<rules-folder-uid>")
       (println "\nOptions:")
       (println (:summary opts-map)))
   nil)

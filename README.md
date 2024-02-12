@@ -70,14 +70,25 @@ active-grafana.main-copy
 active-grafana.main-adjust
 ```
 
-To starty, type at the root of the repository:
+To start, type at the root of the repository:
 
+For main-copy:
 ```
 active-grafana $ lein run -m active-grafana.main-copy -- -h
 ```
 or
 ```
+active-grafana $ lein with-profile as-copy run -- -h
+```
+
+For main-adjust:
+```
 active-grafana $ lein run -m active-grafana.main-adjust -- -h
+```
+or
+
+```
+active-grafana $ lein with-profile as-adjust run -- -h
 ```
 
 The help shows variables like `URL`, `FROM_URL` or `MESSAGE`, which can
@@ -96,6 +107,62 @@ active-grafana $ TO_URL=http://localhost:3001 \
 ```
 
 All variables can be found in `active-grafana.settings`.
+
+### Babashka-Pod
+
+This project can also be used as a [babashka-pod](https://github.com/babashka/pods).
+The pod-interface can be found in `active-grafana.pod`.
+
+A usage example with [docker](https://www.docker.com/).
+Check out this repository as `active-grafana`.`
+
+```
+active-grafana $ docker build -t active-grafana -f Dockerfile-pod .
+active-grafana $ docker run active-grafana
+active-grafana $ docker run active-grafana copy --help
+active-grafana $ docker run active-grafana adjust --help
+```
+
+### Standalone Applications
+
+With the help of [GraalVM](https://www.graalvm.org/) we can create a [native
+image](https://www.graalvm.org/latest/reference-manual/native-image/).
+
+A usage example with [docker](https://www.docker.com/).
+Check out this repository as `active-grafana`.`
+
+#### For copy:
+
+```
+active-grafana $ docker build -t active-grafana-copy -f Dockerfile-standalone-copy .
+active-grafana $ docker run -it active-grafana-copy sh
+# ./active-grafana-copy --help
+```
+
+Note: The Dockerfile contains this line:
+
+```
+RUN wget https://github.com/active-group/active-grafana/releases/download/v0.1/active-grafana-copy.jar
+```
+
+Check https://github.com/active-group/active-grafana/releases for other releases.
+
+#### For adjust:
+
+```
+active-grafana $ docker build -t active-grafana-adjust -f Dockerfile-standalone-adjust .
+active-grafana $ docker run -it active-grafana-adjust sh
+# ./active-grafana-adjust --help
+```
+
+Note: The Dockerfile contains this line:
+
+```
+RUN wget https://github.com/active-group/active-grafana/releases/download/v0.1/active-grafana-adjust.jar
+```
+
+Check https://github.com/active-group/active-grafana/releases for other releases.
+
 
 ## Known Issues
 

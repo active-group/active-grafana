@@ -1,0 +1,16 @@
+FROM debian:bookworm as native
+
+RUN apt update
+RUN apt install -yy build-essential libz-dev zlib1g-dev wget
+
+WORKDIR /opt/graalvm
+
+RUN wget https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz
+RUN tar -xzf graalvm-jdk-21_linux-x64_bin.tar.gz
+ENV JAVA_HOME=/opt/graalvm/graalvm-jdk-21.0.2+13.1
+ENV PATH=/opt/graalvm/graalvm-jdk-21.0.2+13.1/bin:$PATH
+
+WORKDIR /opt/active-grafana
+RUN wget https://github.com/active-group/active-grafana/releases/download/v0.1/active-grafana-adjust.jar
+
+RUN native-image --no-fallback --features=clj_easy.graal_build_time.InitClojureClasses --enable-url-protocols=http --enable-url-protocols=https -jar active-grafana-adjust.jar active-grafana-adjust
