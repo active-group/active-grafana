@@ -13,6 +13,11 @@
    [nil  "--show-dashboards" "Show the first 1000 dashboards of a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]
    [nil  "--show-folders" "Show the first 1000 folders of a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]
    [nil  "--show-panels" "Show information on the first 100 library panels of the grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]
+
+
+   [nil  "--show-dashboard-alerts" "Show alerts related to a dashboard (BOARD_UID) within a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]
+   [nil  "--show-dashboard-panels" "Show library-panels related to a dashboard (BOARD_UID) within a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]
+
    ["-b" nil "Copy a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to another (TO_URL, TO_TOKEN). Optional provide a MESSAGE and BOARD_FOLDER_UID." :id :board]
    ["-r" nil "Copy alert-rules associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to the folder (RULES_FOLDER_UID) on another (TO_URL, TO_TOKEN)." :id :rules]
    ["-p" nil "Copy library-panels associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to another (TO_URL, TO_TOKEN)." :id :panels]
@@ -48,7 +53,8 @@
       (:help (:options opts-map))
       (print-usage opts-map)
 
-      (or (:show-dashboards (:options opts-map)) (:show-folders (:options opts-map)) (:show-panels (:options opts-map)))
+      (or (:show-dashboards (:options opts-map)) (:show-folders (:options opts-map)) (:show-panels (:options opts-map))
+          (:show-dashboard-alerts (:options opts-map)) (:show-dashboard-panels (:options opts-map)))
       (core/copy-show (settings/create-copy-arguments! (:options opts-map)))
 
       (or (:board (:options opts-map)) (:rules (:options opts-map)) (:panels (:options opts-map)))

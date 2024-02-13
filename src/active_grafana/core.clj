@@ -52,6 +52,76 @@
     (println (str "totalCount: " (get-in library-panels ["result" "totalCount"])))
     (pprint/print-table panels)))
 
+(defn find-dashboard-related-alert-rules
+  ^{:doc "Find alert-rules that are related to a specific dashboard.
+          Note: searches for the uid within `annotations` > `__dashboardUid__`.
+
+          grafana-instance: url and token as GrafanaInstance record.
+          dashboard-uid:    to search for in the alert-rules."}
+  [grafana-instance dashboard-uid]
+  (let [alert-rules (helper/json->clj
+                     (api/get-all-alert-rules
+                      (-> grafana-instance :url  )
+                      (-> grafana-instance :token)))]
+    ;; rule-structure:
+    ;; { ..., "uid" "my-uid", "annotations" { ..., "__dashboardUid__" "dash-uid", ...}, ...}
+    ;; note: there are several other fields within "annotations" where you could add a dashboard-uid,
+    ;; but this is the expected one
+    ;; alternative: search within all values in the annotations map for the dashboard-uid
+    (filter (fn [rule] (= dashboard-uid
+                          (-> rule
+                              (get "annotations")
+                              (get "__dashboardUid__" ))))
+            alert-rules)))
+
+(defn show-dashboard-rules
+  ^{:doc "Show alert-rules related to a specific dashboard.
+
+          grafana-instance: url and token as GrafanaInstance record.
+          dashboard-uid:    to search for in the alert-rules."}
+  [grafana-instance board-uid]
+  (let [alert-rules (find-dashboard-related-alert-rules grafana-instance board-uid)]
+    (println (str "Alert rule-uids related to dashboard: " board-uid))
+    (pprint/print-table ["uid" "title" ] alert-rules)))
+
+;; FIXME: Is there any better way to find dashboard related library panels
+
+;; alternative: get all library-panel - for each library-panel, search all connections, check whether connection is dashboard-uid
+;; note: you only get the first 100 library-panels
+(defn find-dashboard-related-panels
+  ^{:doc "Find library panels that are related to a specific dashboard.
+
+          grafana-instance: url and token as GrafanaInstance record.
+          dashboard-uid:    to search for in the panels."}
+  [grafana-instance dashboard-uid]
+  (let [dashboard (helper/json->clj
+                   (api/get-dashboard-by-uid (-> grafana-instance :url  )
+                                             (-> grafana-instance :token)
+                                             dashboard-uid))
+
+        ;; go through all panels and search for "libraryPanel" entries
+        ;; (contains nil for every non-library-panel)
+        panel-uids (remove nil? (map (fn [panel]
+                                       (get-in panel ["libraryPanel" "uid"]))
+                                     (get-in dashboard ["dashboard" "panels"])))]
+    ;; get cannot be nil - since the dashboard points to this library-panel
+    (map (fn [panel-uid] (get (helper/json->clj
+                               (api/get-library-element-by-uid (-> grafana-instance :url  )
+                                                               (-> grafana-instance :token)
+                                                               panel-uid))
+                              "result"))
+         panel-uids)))
+
+(defn show-dashboard-panels
+  ^{:doc "Show panels related to a specific dashboard.
+
+          grafana-instance: url and token as GrafanaInstance record.
+          dashboard-uid:    to search for in the panels."}
+  [grafana-instance board-uid]
+  (let [panels (find-dashboard-related-panels grafana-instance board-uid)]
+    (println (str "Panels related to dashboard: " board-uid))
+    (pprint/print-table ["uid" "name" ] panels)))
+
 (defn copy-show
   ^{:doc "Based on the given arguments, print information about the first 1000
           dashboards and/or the first 1000 folders and/or the first 100 library panels.
@@ -59,23 +129,44 @@
           args: Provided arguments, as Copy-Arguments record. "}
   [args]
   (when (and (-> args :show-boards) (-> args :from))
-      (helper/log "show from-dashboards")
-      (show-dashboards (-> args :from-instance)))
+    (helper/log "show from-dashboards")
+    (show-dashboards (-> args :from-instance)))
   (when (and (-> args :show-boards) (-> args :to))
-      (helper/log "show to-dashboards")
-      (show-dashboards (-> args :to-instance)))
+    (helper/log "show to-dashboards")
+    (show-dashboards (-> args :to-instance)))
+
   (when (and (-> args :show-folders) (-> args :from))
-      (helper/log "show from-folders")
-      (show-folders (-> args :from-instance)))
+    (helper/log "show from-folders")
+    (show-folders (-> args :from-instance)))
   (when (and (-> args :show-folders) (-> args :to))
-      (helper/log "show from-folders")
-      (show-folders (-> args :to-instance)))
+    (helper/log "show to-folders")
+    (show-folders (-> args :to-instance)))
+
   (when (and (-> args :show-panels) (-> args :from))
-      (helper/log "show from-panels")
-      (show-library-panels (-> args :from-instance)))
+    (helper/log "show from-panels")
+    (show-library-panels (-> args :from-instance)))
   (when (and (-> args :show-panels) (-> args :to))
-      (helper/log "show from-folders")
-      (show-library-panels (-> args :to-instance))))
+    (helper/log "show to-panels")
+    (show-library-panels (-> args :to-instance)))
+
+  (println args)
+  (when (and (-> args :show-board-rules) (-> args :from))
+    (helper/log "show from-dashboard related rules")
+    (show-dashboard-rules (-> args :from-instance)
+                          (-> args :board-uid)))
+  (when (and (-> args :show-board-rules) (-> args :to))
+    (helper/log "show to-dashboard related rules")
+    (show-dashboard-rules (-> args :to-instance)
+                          (-> args :board-uid)))
+
+  (when (and (-> args :show-board-panels) (-> args :from))
+    (helper/log "show from-dashboard related library panels")
+    (show-dashboard-panels (-> args :from-instance)
+                           (-> args :board-uid)))
+  (when (and (-> args :show-panels-rules) (-> args :to))
+    (helper/log "show to-dashboard related library panels")
+    (show-dashboard-panels (-> args :to-instance)
+                           (-> args :board-uid))))
 
 (defn adjust-show
   ^{:doc "Show for a given grafana-instance the name, uid and folder-uid of the
@@ -122,28 +213,6 @@
                                                     ;; folder must exist, otherwise it throws an exception
                                                     "folderUid" folder-uid}))))
 
-(defn find-dashboard-related-alert-rules
-  ^{:doc "Find alert-rules that are related to a specific dashboard.
-          Note: searches for the uid within `annotations` > `__dashboardUid__`.
-
-          grafana-instance: url and token as GrafanaInstance record.
-          dashboard-uid:    to search for in the alert-rules."}
-  [grafana-instance dashboard-uid]
-  (let [alert-rules (helper/json->clj
-                     (api/get-all-alert-rules
-                      (-> grafana-instance :url  )
-                      (-> grafana-instance :token)))]
-    ;; rule-structure:
-    ;; { ..., "uid" "my-uid", "annotations" { ..., "__dashboardUid__" "dash-uid", ...}, ...}
-    ;; note: there are several other fields within "annotations" where you could add a dashboard-uid,
-    ;; but this is the expected one
-    ;; alternative: search within all values in the annotations map for the dashboard-uid
-    (filter (fn [rule] (= dashboard-uid
-                          (-> rule
-                              (get "annotations")
-                              (get "__dashboardUid__" ))))
-            alert-rules)))
-
 (defn copy-rule
   ^{:doc "Copy (create/update) a rule to a given folder.
 
@@ -188,41 +257,13 @@
                                     folder-uid)
       (run! (fn [rule] (copy-rule to-instance folder-uid rule)) alert-rules)))
 
-;; FIXME: Is there any better way to find dashboard related library panels
-
-;; alternative: get all library-panel - for each library-panel, search all connections, check whether connection is dashboard-uid
-;; note: you only get the first 100 library-panels
-(defn find-dashboard-related-panels
-  ^{:doc "Find library panels that are related to a specific dashboard.
-
-          grafana-instance: url and token as GrafanaInstance record.
-          dashboard-uid:    to search for in the alert-rules."}
-  [grafana-instance dashboard-uid]
-  (let [dashboard (helper/json->clj
-                   (api/get-dashboard-by-uid (-> grafana-instance :url  )
-                                             (-> grafana-instance :token)
-                                             dashboard-uid))
-
-        ;; go through all panels and search for "libraryPanel" entries
-        ;; (contains nil for every non-library-panel)
-        panel-uids (remove nil? (map (fn [panel]
-                                       (get-in panel ["libraryPanel" "uid"]))
-                                     (get-in dashboard ["dashboard" "panels"])))]
-    ;; get cannot be nil - since the dashboard points to this library-panel
-    (map (fn [panel-uid] (get (helper/json->clj
-                               (api/get-library-element-by-uid (-> grafana-instance :url  )
-                                                               (-> grafana-instance :token)
-                                                               panel-uid))
-                              "result"))
-         panel-uids)))
-
 (defn copy-panel
   [grafana-instance panel]
   ^{:doc "Copy (create/update) a library-panel.
 
           instance: url and token as GrafanaInstance record.
           panel:    the panel to copy."}
-    ;; Note: inefficient to run the available-panels within copy-rule for every
+    ;; Note: inefficient to run the available-panels within copy-panel for every
     ;; panel within copy-panels
   (let [available-panel-uids (map (fn [panel] (get panel "uid"))
                                   (get-in (helper/json->clj

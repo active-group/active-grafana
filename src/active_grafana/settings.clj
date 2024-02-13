@@ -6,7 +6,9 @@
 
 ;; >>> COPY
 
-(defrecord Copy-Arguments [show-boards show-folders show-panels from to
+(defrecord Copy-Arguments [show-boards show-folders show-panels
+                           show-board-rules show-board-panels
+                           from to
                            board rules panels board-uid
                            from-instance to-instance message
                            board-folder-uid rules-folder-uid])
@@ -43,28 +45,30 @@
 
 (defn create-copy-arguments!
   [opts-map-options]
-  (->Copy-Arguments (:show-dashboards     opts-map-options)
-                    (:show-folders        opts-map-options)
-                    (:show-panels         opts-map-options)
-                    (:from                opts-map-options)
-                    (:to                  opts-map-options)
-                    (:board               opts-map-options)
-                    (:rules               opts-map-options)
-                    (:panels              opts-map-options)
-                    (board-uid-arg        opts-map-options)
-                    (from-instance-arg    opts-map-options)
-                    (to-instance-arg      opts-map-options)
-                    (message-arg          opts-map-options)
-                    (board-folder-uid-arg opts-map-options)
-                    (rules-folder-uid-arg opts-map-options)))
+  (->Copy-Arguments (:show-dashboards       opts-map-options)
+                    (:show-folders          opts-map-options)
+                    (:show-panels           opts-map-options)
+                    (:show-dashboard-alerts opts-map-options)
+                    (:show-dashboard-panels opts-map-options)
+                    (:from                  opts-map-options)
+                    (:to                    opts-map-options)
+                    (:board                 opts-map-options)
+                    (:rules                 opts-map-options)
+                    (:panels                opts-map-options)
+                    (board-uid-arg          opts-map-options)
+                    (from-instance-arg      opts-map-options)
+                    (to-instance-arg        opts-map-options)
+                    (message-arg            opts-map-options)
+                    (board-folder-uid-arg   opts-map-options)
+                    (rules-folder-uid-arg   opts-map-options)))
 
 ;; <<< COPY
 
 ;; >>> ADJUST PANEL
 
 (defrecord Adjust-Arguments [grafana-instance
-                            panel-uid
-                            datasource-uids])
+                             panel-uid
+                             datasource-uids])
 
 ;; >>> Env variables or command line
 
