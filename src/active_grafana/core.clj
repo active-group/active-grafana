@@ -162,7 +162,7 @@
     (helper/log "show from-dashboard related library panels")
     (show-dashboard-panels (-> args :from-instance)
                            (-> args :board-uid)))
-  (when (and (-> args :show-panels-rules) (-> args :to))
+  (when (and (-> args :show-board-panels) (-> args :to))
     (helper/log "show to-dashboard related library panels")
     (show-dashboard-panels (-> args :to-instance)
                            (-> args :board-uid))))
