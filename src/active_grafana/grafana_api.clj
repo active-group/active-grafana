@@ -1,7 +1,9 @@
 (ns active-grafana.grafana-api
-  (:require [clj-http.lite.client  :as client]
-            [active-grafana.helper :as helper]
-            [babashka.http-client :as http]))
+  (:require [active-grafana.helper :as helper]
+            [babashka.http-client  :as http]
+            [clj-http.lite.client  :as client]))
+
+(set! *warn-on-reflection* true)
 
 ;; FIXME: remove clj-http-lite; it doesn't provide 'PATCH'
 ;;        we can use babashka.http-client for all calls
@@ -14,7 +16,8 @@
   [base-url token]
   (let [api-url (str base-url "/api/v1/provisioning/alert-rules")]
     (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:oauth-token token})))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
 
 ;; POST /api/v1/provisioning/alert-rules
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/alerting_provisioning/#route-post-alert-rule
@@ -22,7 +25,8 @@
   [base-url token alert-rule]
   (let [api-url (str base-url "/api/v1/provisioning/alert-rules")]
     (helper/log (str "Api-url: " api-url))
-    (client/post api-url {:oauth-token  token
+    (client/post api-url {:insecure?    true
+                          :oauth-token  token
                           ;; without this header the rule is not editable in the gui
                           :headers      {"X-Disable-Provenance" "true"}
                           :body         alert-rule
@@ -35,7 +39,8 @@
   [base-url token alert-rule-uid alert-rule-update]
   (let [api-url (str base-url "/api/v1/provisioning/alert-rules/" alert-rule-uid)]
     (helper/log (str "Api-url: " api-url))
-    (client/put api-url {:oauth-token  token
+    (client/put api-url {:insecure?    true
+                         :oauth-token  token
                          ;; without this header the rule is not editable in the gui
                          :headers      {"X-Disable-Provenance" "true"}
                          :body         alert-rule-update
@@ -54,7 +59,8 @@
   [base-url token]
   (let [api-url (str base-url "/api/search?type=dash-db")]
     (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:oauth-token token})))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
 
 ;; GET /api/dashboards/uid/:uid
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#get-dashboard-by-uid
@@ -62,7 +68,8 @@
   [base-url token uid]
   (let [api-url (str base-url "/api/dashboards/uid/" uid)]
     (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:oauth-token token})))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
 
 ;; POST /api/dashboards/db
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#create--update-dashboard
@@ -70,7 +77,8 @@
   [base-url token dashboard]
   (let [api-url (str base-url "/api/dashboards/db")]
     (helper/log (str "Api-url: " api-url))
-    (client/post api-url {:oauth-token  token
+    (client/post api-url {:insecure?    true
+                          :oauth-token  token
                           :body         dashboard
                           :accept       :json
                           :content-type :json})))
@@ -87,7 +95,8 @@
   [base-url token]
   (let [api-url (str base-url "/api/search?type=dash-folder")]
     (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:oauth-token token})))
+    (client/get api-url {:insecure?    true
+                         :oauth-token token})))
 
 ;; GET /api/folders
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-all-folders
@@ -96,7 +105,8 @@
   [base-url token]
   (let [api-url (str base-url "/api/folders")]
     (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:oauth-token token})))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
 
 ;; GET /api/folders/:uid
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-folder-by-uid
@@ -104,7 +114,8 @@
   [base-url token folder-uid]
   (let [api-url (str base-url "/api/folders/" folder-uid)]
     (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:oauth-token token})))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
 
 ;; <<< FOLDERS
 
@@ -120,7 +131,8 @@
   [base-url token]
   (let [api-url (str base-url "/api/library-elements?kind=1")]
     (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:oauth-token token})))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
 
 ;; GET /api/library-elements/:uid
 ;;  https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#get-library-element-by-uid
@@ -128,7 +140,8 @@
   [base-url token uid]
   (let [api-url (str base-url "/api/library-elements/" uid)]
     (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:oauth-token token})))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
 
 ;; GET /api/library-elements/:uid/connections
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#get-library-element-connections
@@ -136,7 +149,8 @@
   [base-url token uid]
   (let [api-url (str base-url "/api/library-elements/" uid "/connections")]
     (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:oauth-token token})))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
 
 ;; POST /api/library-elements
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#create-library-element
@@ -144,7 +158,8 @@
   [base-url token panel]
   (let [api-url (str base-url "/api/library-elements")]
     (helper/log (str "Api-url: " api-url))
-    (client/post api-url {:oauth-token  token
+    (client/post api-url {:insecure?    true
+                          :oauth-token  token
                           :body         panel
                           :accept       :json
                           :content-type :json})))
@@ -155,9 +170,10 @@
   [base-url token uid patch]
   (let [api-url (str base-url "/api/library-elements/" uid)]
     (helper/log (str "Api-url: " api-url))
-    (http/patch api-url { :headers {:authorization (str "Bearer " token)
-                                    :accept        "application/json"
-                                    :content-type  "application/json"}
-                          :body    patch})))
+    (http/patch api-url {:client  (http/client (assoc-in http/default-client-opts [:ssl-context :insecure] true))
+                         :headers {:authorization (str "Bearer " token)
+                                   :accept        "application/json"
+                                   :content-type  "application/json"}
+                         :body    patch})))
 
 ;; <<< LIBRARY-ELEMENTS
