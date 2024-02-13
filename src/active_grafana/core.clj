@@ -149,7 +149,6 @@
     (helper/log "show to-panels")
     (show-library-panels (-> args :to-instance)))
 
-  (println args)
   (when (and (-> args :show-board-rules) (-> args :from))
     (helper/log "show from-dashboard related rules")
     (show-dashboard-rules (-> args :from-instance)
