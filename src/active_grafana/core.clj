@@ -82,9 +82,7 @@
   (when (and (-> args :show-panels) (-> args :to))
     (do
       (helper/log "show from-folders")
-      (show-library-panels (-> args :to-instance))))
-  nil)
-
+      (show-library-panels (-> args :to-instance)))))
 
 (defn adjust-show
   ^{:doc "Show for a given grafana-instance the name, uid and folder-uid of the
@@ -92,8 +90,7 @@
 
           args: Provided arguments, as Adjust-Arguments record. "}
   [args]
-  (show-library-panels (-> args :grafana-instance))
-  nil)
+  (show-library-panels (-> args :grafana-instance)))
 
 ;; <<< SHOW
 
@@ -289,8 +286,7 @@
       (copy-rules (-> args :from-instance   )
                   (-> args :to-instance     )
                   (-> args :board-uid       )
-                  (-> args :rules-folder-uid))))
-  nil)
+                  (-> args :rules-folder-uid)))))
 
 ;; <<< COPY
 
@@ -368,7 +364,6 @@
                          (-> args :panel-uid       )
                          (str/split (-> args :datasource-uids) #" "))
   ;; if we are here, adjusting the panel was successful
-  (println "Adjusted.")
-  nil)
+  (println "Adjusted."))
 
 ;; <<< ADJUST

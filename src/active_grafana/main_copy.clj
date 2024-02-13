@@ -34,8 +34,7 @@
       (println "copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--board-folder-uid=<board-folder-uid>] [--message=<message>]")
       (println "copy -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --rules-folder-uid=<rules-folder-uid>")
       (println "\nOptions:")
-      (println (:summary opts-map)))
-  nil)
+      (println (:summary opts-map))))
 
 (defn -main [& args]
   (let [opts-map (parse-opts args opts)]

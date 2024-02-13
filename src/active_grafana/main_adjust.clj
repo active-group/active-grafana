@@ -22,8 +22,7 @@
       (println "adjust --show   --url=<grafana-url> --token=<grafana-token>")
       (println "adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> --datasource-uids=\"<datasource-uid-1> <datasource-uid-2> ... <datasource-uid-n>\"")
       (println "\nOptions:")
-      (println (:summary opts-map)))
-  nil)
+      (println (:summary opts-map))))
 
 (defn -main [& args]
   (let [opts-map (parse-opts args opts)]
