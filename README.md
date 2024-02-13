@@ -164,7 +164,11 @@ RUN wget https://github.com/active-group/active-grafana/releases/download/v0.1/a
 Check https://github.com/active-group/active-grafana/releases for other releases.
 
 
-## Known Issues
+## Known Issues and 'good to know'
+
+- The application uses the environment variable `BABASHKA_POD` (as described
+  [here](https://github.com/babashka/pods?tab=readme-ov-file#environment)) to
+  determine, whether the application should behave as a pod.
 
 - Error handling:
   If something goes wrong, you are immediately provided with the plain
