@@ -1,8 +1,9 @@
 (ns active-grafana.main-copy
-  (:require [clojure.tools.cli :refer [parse-opts]]
-            [active-grafana.core :as core]
+  (:require [active-grafana.core     :as core]
+            [active-grafana.helper   :as helper]
             [active-grafana.settings :as settings]
-            [active-grafana.helper :as helper])
+            [clojure.tools.cli       :refer [parse-opts]]
+            )
   (:gen-class))
 
 (set! *warn-on-reflection* true)
@@ -27,14 +28,14 @@
    [nil "--rules-folder-uid RULES_FOLDER_UID" "The folder-uid to copy the rules to."]])
 
 (defn print-usage [opts-map]
-  (do (println "Usage Examples:\n")
-      (println "copy --help")
-      (println "copy --show-dashboards --from --from-url=<from-grafana-url --from-token=<from-grafana-token>")
-      (println "copy --show-folders --to --to-url=<to-grafana-url --to-token=<to-grafana-token>")
-      (println "copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--board-folder-uid=<board-folder-uid>] [--message=<message>]")
-      (println "copy -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --rules-folder-uid=<rules-folder-uid>")
-      (println "\nOptions:")
-      (println (:summary opts-map))))
+  (println "Usage Examples:\n")
+  (println "copy --help")
+  (println "copy --show-dashboards --from --from-url=<from-grafana-url --from-token=<from-grafana-token>")
+  (println "copy --show-folders --to --to-url=<to-grafana-url --to-token=<to-grafana-token>")
+  (println "copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--board-folder-uid=<board-folder-uid>] [--message=<message>]")
+  (println "copy -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --rules-folder-uid=<rules-folder-uid>")
+  (println "\nOptions:")
+  (println (:summary opts-map)))
 
 (defn -main [& args]
   (let [opts-map (parse-opts args opts)]

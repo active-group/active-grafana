@@ -1,6 +1,5 @@
 (ns active-grafana.helper
-  (:require [clojure.data.json :as json]
-            [clojure.pprint :as pprint]))
+  (:require [clojure.data.json :as json]))
 
 (set! *warn-on-reflection* true)
 
@@ -9,7 +8,7 @@
 (defn error-logic
   []
   (if (System/getenv "BABASHKA_POD")
-    (throw (ex-info "grafana-active: errors in opts-map" {}))
+    (throw (ex-info "grafana-active: pod equivalent to System exit -1" {}))
     (System/exit -1)))
 
 ;; LOG/DEBUG

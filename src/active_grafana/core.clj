@@ -1,9 +1,8 @@
 (ns active-grafana.core
   (:require [active-grafana.grafana-api :as api]
-            [active-grafana.helper :as helper]
-            [active-grafana.settings :as settings]
-            [clojure.pprint :as pprint]
-            [clojure.string :as str]))
+            [active-grafana.helper      :as helper]
+            [clojure.pprint             :as pprint]
+            [clojure.string             :as str]))
 
 (set! *warn-on-reflection* true)
 
@@ -60,29 +59,23 @@
           args: Provided arguments, as Copy-Arguments record. "}
   [args]
   (when (and (-> args :show-boards) (-> args :from))
-    (do
       (helper/log "show from-dashboards")
-      (show-dashboards (-> args :from-instance))))
+      (show-dashboards (-> args :from-instance)))
   (when (and (-> args :show-boards) (-> args :to))
-    (do
       (helper/log "show to-dashboards")
-      (show-dashboards (-> args :to-instance))))
+      (show-dashboards (-> args :to-instance)))
   (when (and (-> args :show-folders) (-> args :from))
-    (do
       (helper/log "show from-folders")
-      (show-folders (-> args :from-instance))))
+      (show-folders (-> args :from-instance)))
   (when (and (-> args :show-folders) (-> args :to))
-    (do
       (helper/log "show from-folders")
-      (show-folders (-> args :to-instance))))
+      (show-folders (-> args :to-instance)))
   (when (and (-> args :show-panels) (-> args :from))
-    (do
       (helper/log "show from-panels")
-      (show-library-panels (-> args :from-instance))))
+      (show-library-panels (-> args :from-instance)))
   (when (and (-> args :show-panels) (-> args :to))
-    (do
       (helper/log "show from-folders")
-      (show-library-panels (-> args :to-instance)))))
+      (show-library-panels (-> args :to-instance))))
 
 (defn adjust-show
   ^{:doc "Show for a given grafana-instance the name, uid and folder-uid of the
@@ -187,14 +180,13 @@
                          alert-rules should be copied to."}
   [from-instance to-instance dashboard-uid folder-uid]
   (let [alert-rules (find-dashboard-related-alert-rules from-instance dashboard-uid)]
-    (do
       ;; Note: folder must exist (otherwise rule will be added but cannot be
       ;; seen in the gui) the call will fail with an exception if the folder-uid
       ;; is not available
       (api/get-folder-by-folder-uid (-> to-instance :url  )
                                     (-> to-instance :token)
                                     folder-uid)
-      (run! (fn [rule] (copy-rule to-instance folder-uid rule)) alert-rules))))
+      (run! (fn [rule] (copy-rule to-instance folder-uid rule)) alert-rules)))
 
 ;; FIXME: Is there any better way to find dashboard related library panels
 
@@ -267,26 +259,23 @@
   [args]
   ;; if associated panels aren't there, the dashboard copy will fail
   (when (-> args :panels)
-    (do
       (helper/log "copy panels")
       (copy-panels (-> args :from-instance)
                    (-> args :to-instance)
-                   (-> args :board-uid))))
+                   (-> args :board-uid)))
   (when (-> args :board)
-    (do
       (helper/log "copy dashboard")
       (copy-dashboard (-> args :from-instance   )
                       (-> args :to-instance     )
                       (-> args :board-uid       )
                       (-> args :board-folder-uid)
-                      (-> args :message         ))))
+                      (-> args :message         )))
   (when (-> args :rules)
-    (do
       (helper/log "copy alert-rules")
       (copy-rules (-> args :from-instance   )
                   (-> args :to-instance     )
                   (-> args :board-uid       )
-                  (-> args :rules-folder-uid)))))
+                  (-> args :rules-folder-uid))))
 
 ;; <<< COPY
 

@@ -1,7 +1,7 @@
 (ns active-grafana.grafana-api
-  (:require [clj-http.lite.client  :as client]
-            [active-grafana.helper :as helper]
-            [babashka.http-client :as http]))
+  (:require [active-grafana.helper :as helper]
+            [babashka.http-client  :as http]
+            [clj-http.lite.client  :as client]))
 
 (set! *warn-on-reflection* true)
 

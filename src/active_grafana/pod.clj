@@ -1,9 +1,9 @@
 (ns active-grafana.pod
   (:refer-clojure :exclude [read-string read])
-  (:require [bencode.core :as bencode]
-            [clojure.walk :as walk]
+  (:require [bencode.core      :as bencode]
+            [clojure.walk      :as walk]
             [cognitect.transit :as transit]
-            [instaparse.core :as insta]
+            [instaparse.core   :as insta]
 
             [active-grafana.main-adjust :as adjust]
             [active-grafana.main-copy   :as copy])
@@ -73,17 +73,16 @@
                                 args (get message "args")
                                 args (read-string args)
                                 args (read-transit args)
-                                res-map (do
-                                          (case var
-                                            "active-grafana.pod/adjust" {"value"  (write-transit (serialize nil))
-                                                                         "id"     id
-                                                                         "out"    (with-out-str (apply adjust/-main args))
-                                                                         "status" ["done"]}
-                                            "active-grafana.pod/copy"   {"value"  (write-transit (serialize nil))
-                                                                         "id"     id
-                                                                         "out"    (with-out-str (apply copy/-main args))
-                                                                         "status" ["done"]}
-                                            (throw (ex-info (str "Var not found: " var) {}))))]
+                                res-map (case var
+                                          "active-grafana.pod/adjust" {"value"  (write-transit (serialize nil))
+                                                                       "id"     id
+                                                                       "out"    (with-out-str (apply adjust/-main args))
+                                                                       "status" ["done"]}
+                                          "active-grafana.pod/copy"   {"value"  (write-transit (serialize nil))
+                                                                       "id"     id
+                                                                       "out"    (with-out-str (apply copy/-main args))
+                                                                       "status" ["done"]}
+                                          (throw (ex-info (str "Var not found: " var) {})))]
                             (write res-map))
                           (catch Throwable e
                             (let [reply {"ex-message" (ex-message e)
