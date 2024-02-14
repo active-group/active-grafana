@@ -220,10 +220,14 @@
           folder-uid:   the folder-uid where the rule should be copied to."}
   ;; Note: inefficient to run the available-rules within copy-rule for every
   ;; rule within copy-rules
-  [instance folder-uid rule-to-copy]
+  [instance folder-uid rule-to-copy-with-id]
   (let [available-rules (helper/json->clj
                          (api/get-all-alert-rules (-> instance :url  )
-                                                  (-> instance :token)))]
+                                                  (-> instance :token)))
+        ;; the id within a grafana-instance needs to be unique
+        ;; if the rule-to-copy contains an already existing "id" the copy fails
+        ;; be aware: we have id, uid, title as some identifiers
+        rule-to-copy (dissoc rule-to-copy-with-id "id")]
     (if (some (fn [available-rule]
                 (= (get available-rule "uid")
                    (get rule-to-copy   "uid")))
