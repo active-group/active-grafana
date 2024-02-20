@@ -373,7 +373,7 @@
 (defn adjust-library-panel
   ^{:doc "Adjust a given library-panel within a grafana-instance, where the
           targets of the panel-model are replaced based on the first target
-          of given library-panel and the provided datasource-uids."}
+          of a given library-panel and the provided datasource-uids."}
   [grafana-instance panel-uid datasource-uids]
   (let [panel (helper/json->clj
                 (api/get-library-element-by-uid
@@ -395,7 +395,7 @@
   [args]
    (adjust-library-panel (-> args :grafana-instance)
                          (-> args :panel-uid       )
-                         (str/split (-> args :datasource-uids) #" "))
+                         (str/split (-> args :datasource-uids) #","))
   ;; if we are here, adjusting the panel was successful
   (println "Adjusted."))
 

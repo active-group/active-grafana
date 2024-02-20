@@ -14,13 +14,13 @@
    [nil "--url GRAFANA_URL" "The grafana-url."]
    [nil "--token GRAFANA_TOKEN" "The grafana-token."]
    [nil "--panel-uid PANEL_UID" "The panel uid."]
-   [nil "--datasource-uids DATASOURCE_UIDS" "Datasource uids used within the target-template as space separated string."]])
+   [nil "--datasource-uids DATASOURCE_UIDS" "Datasource uids used within the target-template as comma separated string."]])
 
 (defn print-usage [opts-map]
   (println "Usage Examples:\n")
   (println "adjust --help")
   (println "adjust --show   --url=<grafana-url> --token=<grafana-token>")
-  (println "adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> --datasource-uids=\"<datasource-uid-1> <datasource-uid-2> ... <datasource-uid-n>\"")
+  (println "adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> --datasource-uids=\"<datasource-uid-1>,<datasource-uid-2>,...,<datasource-uid-n>\"")
   (println "\nOptions:")
   (println (:summary opts-map)))
 
