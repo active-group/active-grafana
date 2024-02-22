@@ -20,7 +20,7 @@
 
    ["-b" nil "Copy a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to another (TO_URL, TO_TOKEN). Optional provide a MESSAGE and BOARD_FOLDER_UID." :id :board]
    ["-r" nil "Copy alert-rules associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to the folder (RULES_FOLDER_UID) on another (TO_URL, TO_TOKEN)." :id :rules]
-   ["-p" nil "Copy library-panels associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to another (TO_URL, TO_TOKEN)." :id :panels]
+   ["-p" nil "Copy library-panels associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to the folder (PANELS_FOLDER_UID) on another (TO_URL, TO_TOKEN)." :id :panels]
    [nil "--from" "Use the from-grafana-instance for show commands."]
    [nil "--to" "Use the to-grafana-instance for show commands."]
    [nil "--board-uid BOARD_UID" "Uid of the dashboard that is either be copied or from which the alert-rules are copied."]
@@ -30,7 +30,8 @@
    [nil "--to-token TO_TOKEN" "The grafana-token of the grafana-instance to copy to."]
    [nil "--message MESSAGE" "Optional: The dashboard change-message when copying a dashboard."]
    [nil "--board-folder-uid BOARD_FOLDER_UID" "The folder-uid to copy the dashboard to. If not provided the General-folder is used."]
-   [nil "--rules-folder-uid RULES_FOLDER_UID" "The folder-uid to copy the rules to."]])
+   [nil "--rules-folder-uid RULES_FOLDER_UID" "The folder-uid to copy the rules to."]
+   [nil "--panels-folder-uid PANELS_FOLDER_UID" "The folder-uid to copy the panels to."]])
 
 (defn print-usage [opts-map]
   (println "Usage Examples:\n")

@@ -11,7 +11,7 @@
                            from to
                            board rules panels board-uid
                            from-instance to-instance message
-                           board-folder-uid rules-folder-uid])
+                           board-folder-uid rules-folder-uid panels-folder-uid])
 
 ;; >>> Env variables or command line
 
@@ -41,6 +41,10 @@
   [opts-map-options]
   (or (:rules-folder-uid  opts-map-options) (System/getenv "RULES_FOLDER_UID")))
 
+(defn panels-folder-uid-arg
+  [opts-map-options]
+  (or (:panels-folder-uid  opts-map-options) (System/getenv "PANELS_FOLDER_UID")))
+
 ;; <<< Env variables or command line
 
 (defn create-copy-arguments!
@@ -60,7 +64,8 @@
                     (to-instance-arg        opts-map-options)
                     (message-arg            opts-map-options)
                     (board-folder-uid-arg   opts-map-options)
-                    (rules-folder-uid-arg   opts-map-options)))
+                    (rules-folder-uid-arg   opts-map-options)
+                    (panels-folder-uid-arg  opts-map-options)))
 
 ;; <<< COPY
 

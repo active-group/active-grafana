@@ -261,19 +261,23 @@
       (run! (fn [rule] (copy-rule to-instance folder-uid rule)) alert-rules)))
 
 (defn copy-panel
-  [grafana-instance panel]
+  [grafana-instance panel folder-uid]
   ^{:doc "Copy (create/update) a library-panel.
 
-          instance: url and token as GrafanaInstance record.
-          panel:    the panel to copy."}
+          instance:   url and token as GrafanaInstance record.
+          panel:      the panel to copy.
+          folder-uid: uid of a folder in the 'to'-instance, where the
+                      library-panel should be copied to."}
     ;; Note: inefficient to run the available-panels within copy-panel for every
     ;; panel within copy-panels
+    ;; However, if the panels-list contains duplicates, we can handle it.
   (let [available-panel-uids (map (fn [panel] (get panel "uid"))
                                   (get-in (helper/json->clj
                                            (api/get-library-panels (-> grafana-instance :url  )
                                                                    (-> grafana-instance :token)))
                                           ["result" "elements"]))
-        panel-uid (get panel "uid")]
+        panel-uid (get panel "uid")
+        adjusted-panel (assoc (dissoc (dissoc (dissoc panel "id") "folderId") "meta") "folderUid" folder-uid)]
     (if (some #(= panel-uid %) available-panel-uids)
       ;; before we can update the panel
       ;; we need to have its most recent version and put this version in the patch
@@ -285,15 +289,22 @@
         (api/update-library-element (-> grafana-instance :url  )
                                     (-> grafana-instance :token)
                                     (get panel "uid")
-                                    (helper/clj->json (assoc panel "version" panel-version))))
+                                    (helper/clj->json (assoc adjusted-panel "version" panel-version))))
       (api/create-library-element (-> grafana-instance :url  )
                                   (-> grafana-instance :token)
-                                  (helper/clj->json panel)))))
+                                  (helper/clj->json adjusted-panel)))))
 
 (defn copy-panels
-  [from-instance to-instance dashboard-uid]
+  ^{:doc "Copy (create/update) all library-panels associated with a dashboard.
+
+          from-instance: url and token as GrafanaInstance record.
+          to-instance:   url and token as GrafanaInstance record.
+          dashboard-uid: uid of a dashboard in the 'from'-instance
+          folder-uid:    uid of a folder in the 'to'-instance, where the
+                         library-panels should be copied to."}
+  [from-instance to-instance dashboard-uid folder-uid]
   (let [panels (find-dashboard-related-panels from-instance dashboard-uid)]
-    (run! (fn [panel] (copy-panel to-instance panel)) panels)))
+    (run! (fn [panel] (copy-panel to-instance panel folder-uid)) panels)))
 
 (defn copy
   ^{:doc "Based on the given arguments, copy a dashboard and/or its
@@ -306,7 +317,8 @@
       (helper/log "copy panels")
       (copy-panels (-> args :from-instance)
                    (-> args :to-instance)
-                   (-> args :board-uid)))
+                   (-> args :board-uid)
+                   (-> args :panels-folder-uid)))
   (when (-> args :board)
       (helper/log "copy dashboard")
       (copy-dashboard (-> args :from-instance   )
