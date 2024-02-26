@@ -10,9 +10,9 @@
 
 (def opts
   [["-h" "--help" "Print this help message."]
-   [nil  "--show-dashboards" "Show the first 1000 dashboards of a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]
-   [nil  "--show-folders" "Show the first 1000 folders of a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]
-   [nil  "--show-panels" "Show information on the first 100 library panels of the grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]
+   [nil  "--show-dashboards" "Show the first 1000 dashboards of a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."]
+   [nil  "--show-folders" "Show the first 1000 folders of a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."]
+   [nil  "--show-panels" "Show information on the first 100 library panels of the grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."]
 
 
    [nil  "--show-dashboard-alerts" "Show alerts related to a dashboard (BOARD_UID) within a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]

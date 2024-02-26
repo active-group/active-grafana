@@ -126,46 +126,50 @@
   ^{:doc "Based on the given arguments, print information about the first 1000
           dashboards and/or the first 1000 folders and/or the first 100 library panels.
 
-          args: Provided arguments, as Copy-Arguments record. "}
+          args: Provided arguments, as Copy-Arguments record.
+                If neither `from`, nor `to` is set, default to show both."}
   [args]
-  (when (and (-> args :show-boards) (-> args :from))
-    (helper/log "show from-dashboards")
-    (show-dashboards (-> args :from-instance)))
-  (when (and (-> args :show-boards) (-> args :to))
-    (helper/log "show to-dashboards")
-    (show-dashboards (-> args :to-instance)))
+  ;; if neither from nor to is set, show both
+  (let [from-to-not-set (and (nil? (-> args :from)) (nil? (-> args :to)))]
 
-  (when (and (-> args :show-folders) (-> args :from))
-    (helper/log "show from-folders")
-    (show-folders (-> args :from-instance)))
-  (when (and (-> args :show-folders) (-> args :to))
-    (helper/log "show to-folders")
-    (show-folders (-> args :to-instance)))
+    (when (and (-> args :show-boards) (or (-> args :from) from-to-not-set))
+      (helper/log "show from-dashboards")
+      (show-dashboards (-> args :from-instance)))
+    (when (and (-> args :show-boards) (or (-> args :to) from-to-not-set))
+      (helper/log "show to-dashboards")
+      (show-dashboards (-> args :to-instance)))
 
-  (when (and (-> args :show-panels) (-> args :from))
-    (helper/log "show from-panels")
-    (show-library-panels (-> args :from-instance)))
-  (when (and (-> args :show-panels) (-> args :to))
-    (helper/log "show to-panels")
-    (show-library-panels (-> args :to-instance)))
+    (when (and (-> args :show-folders) (or (-> args :from) from-to-not-set))
+      (helper/log "show from-folders")
+      (show-folders (-> args :from-instance)))
+    (when (and (-> args :show-folders) (or (-> args :to) from-to-not-set))
+      (helper/log "show to-folders")
+      (show-folders (-> args :to-instance)))
 
-  (when (and (-> args :show-board-rules) (-> args :from))
-    (helper/log "show from-dashboard related rules")
-    (show-dashboard-rules (-> args :from-instance)
-                          (-> args :board-uid)))
-  (when (and (-> args :show-board-rules) (-> args :to))
-    (helper/log "show to-dashboard related rules")
-    (show-dashboard-rules (-> args :to-instance)
-                          (-> args :board-uid)))
+    (when (and (-> args :show-panels) (or (-> args :from) from-to-not-set))
+      (helper/log "show from-panels")
+      (show-library-panels (-> args :from-instance)))
+    (when (and (-> args :show-panels) (or (-> args :to) from-to-not-set))
+      (helper/log "show to-panels")
+      (show-library-panels (-> args :to-instance)))
 
-  (when (and (-> args :show-board-panels) (-> args :from))
-    (helper/log "show from-dashboard related library panels")
-    (show-dashboard-panels (-> args :from-instance)
-                           (-> args :board-uid)))
-  (when (and (-> args :show-board-panels) (-> args :to))
-    (helper/log "show to-dashboard related library panels")
-    (show-dashboard-panels (-> args :to-instance)
-                           (-> args :board-uid))))
+    (when (and (-> args :show-board-rules) (or (-> args :from) from-to-not-set))
+      (helper/log "show from-dashboard related rules")
+      (show-dashboard-rules (-> args :from-instance)
+                            (-> args :board-uid)))
+    (when (and (-> args :show-board-rules) (or (-> args :to) from-to-not-set))
+      (helper/log "show to-dashboard related rules")
+      (show-dashboard-rules (-> args :to-instance)
+                            (-> args :board-uid)))
+
+    (when (and (-> args :show-board-panels) (or (-> args :from) from-to-not-set))
+      (helper/log "show from-dashboard related library panels")
+      (show-dashboard-panels (-> args :from-instance)
+                             (-> args :board-uid)))
+    (when (and (-> args :show-board-panels) (or (-> args :to) from-to-not-set))
+      (helper/log "show to-dashboard related library panels")
+      (show-dashboard-panels (-> args :to-instance)
+                             (-> args :board-uid)))))
 
 (defn adjust-show
   ^{:doc "Show for a given grafana-instance the name, uid and folder-uid of the
