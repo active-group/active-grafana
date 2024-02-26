@@ -347,11 +347,20 @@
   (assert (contains? (get reference-target "datasource") "uid")
           (str "reference-target does not have the expected structure { datasource { \"uid\" ... }}\n"
                "current reference-target:\n"
-               (println reference-target)))
+               reference-target))
   (assert (contains? reference-target "refId")
           (str "target does not have the expected structure { refId ... }\n"
                "current reference-target:\n"
-               (println reference-target)))
+               reference-target))
+  (assert (not= [""] datasource-uids)
+          (str "datasource-uids are empty:\n"
+               datasource-uids
+               "\nThis would destroy the structure of your current library panel."
+               "\nPlease provide at least one datasource-uid."))
+  (assert (apply distinct? datasource-uids)
+          (str "datasource-uids are not distinct:\n"
+               datasource-uids
+               "\nPlease provide only distinct datasource-uids."))
 
   (map (fn [uid]
          (assoc (assoc-in reference-target ["datasource" "uid"] uid)
