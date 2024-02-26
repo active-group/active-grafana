@@ -8,7 +8,7 @@
 (defn error-logic
   []
   (if (System/getenv "BABASHKA_POD")
-    (throw (ex-info "grafana-active: pod equivalent to System exit -1" {}))
+    (throw (ex-info (str "Something went wrong. That's what happened before:\n" *out*) {}))
     (System/exit -1)))
 
 ;; LOG/DEBUG
