@@ -34,7 +34,7 @@
    [nil "--panels-folder-uid PANELS_FOLDER_UID" "The folder-uid to copy the panels to."]])
 
 (defn print-usage [opts-map]
-  (println "Options:")
+  (println "\nOptions:")
   (println (:summary opts-map))
 
   (println "\nExamples:")
@@ -49,6 +49,11 @@
     (cond
       (:errors opts-map)
       (do (doall (map println (:errors opts-map)))
+          (print-usage opts-map)
+          (helper/error-logic))
+
+      (not (empty? (:arguments opts-map)))
+      (do (println "Unknown arguments: " (:arguments opts-map))
           (print-usage opts-map)
           (helper/error-logic))
 

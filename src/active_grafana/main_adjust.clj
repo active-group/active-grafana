@@ -17,7 +17,7 @@
    [nil "--datasource-uids DATASOURCE_UIDS" "Datasource uids used within the target-template as comma separated string."]])
 
 (defn print-usage [opts-map]
-  (println "Options:")
+  (println "\nOptions:")
   (println (:summary opts-map))
 
   (println "\nExamples:")
@@ -30,6 +30,11 @@
     (cond
       (:errors opts-map)
       (do (doall (map println (:errors opts-map)))
+          (print-usage opts-map)
+          (helper/error-logic))
+
+      (not (empty? (:arguments opts-map)))
+      (do (println "Unknown arguments: " (:arguments opts-map))
           (print-usage opts-map)
           (helper/error-logic))
 
