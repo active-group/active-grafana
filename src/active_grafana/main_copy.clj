@@ -14,9 +14,8 @@
    [nil  "--show-folders" "Show the first 1000 folders of a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."]
    [nil  "--show-panels" "Show information on the first 100 library panels of the grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."]
 
-
-   [nil  "--show-dashboard-alerts" "Show alerts related to a dashboard (BOARD_UID) within a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]
-   [nil  "--show-dashboard-panels" "Show library-panels related to a dashboard (BOARD_UID) within a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from."]
+   [nil  "--show-dashboard-alerts" "Show alert-rules related to a dashboard (BOARD_UID) within a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."]
+   [nil  "--show-dashboard-panels" "Show library-panels related to a dashboard (BOARD_UID) within a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."]
 
    ["-b" nil "Copy a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to another (TO_URL, TO_TOKEN). Optional provide a MESSAGE and BOARD_FOLDER_UID." :id :board]
    ["-r" nil "Copy alert-rules associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to the folder (RULES_FOLDER_UID) on another (TO_URL, TO_TOKEN)." :id :rules]
