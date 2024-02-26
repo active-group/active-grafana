@@ -74,14 +74,14 @@
                               (get "__dashboardUid__" ))))
             alert-rules)))
 
-(defn show-dashboard-rules
+(defn show-dashboard-alerts
   ^{:doc "Show alert-rules related to a specific dashboard.
 
           grafana-instance: url and token as GrafanaInstance record.
           dashboard-uid:    to search for in the alert-rules."}
   [grafana-instance board-uid]
   (let [alert-rules (find-dashboard-related-alert-rules grafana-instance board-uid)]
-    (println (str "Alert rule-uids related to dashboard: " board-uid))
+    (println (str "Alert alert-uids related to dashboard: " board-uid))
     (pprint/print-table ["uid" "title" ] alert-rules)))
 
 ;; FIXME: Is there any better way to find dashboard related library panels
@@ -153,14 +153,14 @@
       (helper/log "show to-panels")
       (show-library-panels (-> args :to-instance)))
 
-    (when (and (-> args :show-board-rules) (or (-> args :from) from-to-not-set))
-      (helper/log "show from-dashboard related rules")
-      (show-dashboard-rules (-> args :from-instance)
-                            (-> args :board-uid)))
-    (when (and (-> args :show-board-rules) (or (-> args :to) from-to-not-set))
-      (helper/log "show to-dashboard related rules")
-      (show-dashboard-rules (-> args :to-instance)
-                            (-> args :board-uid)))
+    (when (and (-> args :show-board-alerts) (or (-> args :from) from-to-not-set))
+      (helper/log "show from-dashboard related alerts")
+      (show-dashboard-alerts (-> args :from-instance)
+                             (-> args :board-uid)))
+    (when (and (-> args :show-board-alerts) (or (-> args :to) from-to-not-set))
+      (helper/log "show to-dashboard related alerts")
+      (show-dashboard-alerts (-> args :to-instance)
+                             (-> args :board-uid)))
 
     (when (and (-> args :show-board-panels) (or (-> args :from) from-to-not-set))
       (helper/log "show from-dashboard related library panels")
@@ -216,26 +216,27 @@
                                                     ;; folder must exist, otherwise it throws an exception
                                                     "folderUid" folder-uid}))))
 
-(defn copy-rule
+(defn copy-alert
   ^{:doc "Copy (create/update) a rule to a given folder.
 
           instance:     url and token as GrafanaInstance record.
           rule-to-copy: the rule to copy.
           folder-uid:   the folder-uid where the rule should be copied to."}
-  ;; Note: inefficient to run the available-rules within copy-rule for every
-  ;; rule within copy-rules
+  ;; Note: inefficient to run the available-alerts within copy-alert for every
+  ;; rule within copy-alerts
+  ;; However, if the alert-rules-list contains duplicates, we can handle it.
   [instance folder-uid rule-to-copy-with-id]
-  (let [available-rules (helper/json->clj
-                         (api/get-all-alert-rules (-> instance :url  )
-                                                  (-> instance :token)))
+  (let [available-alerts (helper/json->clj
+                          (api/get-all-alert-rules (-> instance :url  )
+                                                   (-> instance :token)))
         ;; the id within a grafana-instance needs to be unique
         ;; if the rule-to-copy contains an already existing "id" the copy fails
         ;; be aware: we have id, uid, title as some identifiers
         rule-to-copy (dissoc rule-to-copy-with-id "id")]
-    (if (some (fn [available-rule]
-                (= (get available-rule "uid")
+    (if (some (fn [available-alert]
+                (= (get available-alert "uid")
                    (get rule-to-copy   "uid")))
-                available-rules)
+                available-alerts)
       (api/update-alert-rule (-> instance :url  )
                              (-> instance :token)
                              (get rule-to-copy "uid")
@@ -246,7 +247,7 @@
                              (helper/clj->json
                               (assoc rule-to-copy "folderuid" folder-uid))))))
 
-(defn copy-rules
+(defn copy-alerts
   ^{:doc "Copy (create/update) all alert-rules associated with a dashboard.
 
           from-instance: url and token as GrafanaInstance record.
@@ -262,7 +263,7 @@
       (api/get-folder-by-folder-uid (-> to-instance :url  )
                                     (-> to-instance :token)
                                     folder-uid)
-      (run! (fn [rule] (copy-rule to-instance folder-uid rule)) alert-rules)))
+      (run! (fn [alert] (copy-alert to-instance folder-uid alert)) alert-rules)))
 
 (defn copy-panel
   [grafana-instance panel folder-uid]
@@ -330,12 +331,12 @@
                       (-> args :board-uid       )
                       (-> args :board-folder-uid)
                       (-> args :message         )))
-  (when (-> args :rules)
+  (when (-> args :alerts)
       (helper/log "copy alert-rules")
-      (copy-rules (-> args :from-instance   )
-                  (-> args :to-instance     )
-                  (-> args :board-uid       )
-                  (-> args :rules-folder-uid))))
+      (copy-alerts (-> args :from-instance   )
+                   (-> args :to-instance     )
+                   (-> args :board-uid       )
+                   (-> args :alerts-folder-uid))))
 
 ;; <<< COPY
 

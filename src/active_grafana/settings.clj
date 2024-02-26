@@ -7,11 +7,11 @@
 ;; >>> COPY
 
 (defrecord Copy-Arguments [show-boards show-folders show-panels
-                           show-board-rules show-board-panels
+                           show-board-alerts show-board-panels
                            from to
-                           board rules panels board-uid
+                           board alerts panels board-uid
                            from-instance to-instance message
-                           board-folder-uid rules-folder-uid panels-folder-uid])
+                           board-folder-uid alerts-folder-uid panels-folder-uid])
 
 ;; >>> Env variables or command line
 
@@ -37,9 +37,9 @@
   [opts-map-options]
   (or (:board-folder-uid opts-map-options) (System/getenv "BOARD_FOLDER_UID")))
 
-(defn rules-folder-uid-arg
+(defn alerts-folder-uid-arg
   [opts-map-options]
-  (or (:rules-folder-uid  opts-map-options) (System/getenv "RULES_FOLDER_UID")))
+  (or (:alerts-folder-uid  opts-map-options) (System/getenv "ALERTS_FOLDER_UID")))
 
 (defn panels-folder-uid-arg
   [opts-map-options]
@@ -57,14 +57,14 @@
                     (:from                  opts-map-options)
                     (:to                    opts-map-options)
                     (:board                 opts-map-options)
-                    (:rules                 opts-map-options)
+                    (:alerts                opts-map-options)
                     (:panels                opts-map-options)
                     (board-uid-arg          opts-map-options)
                     (from-instance-arg      opts-map-options)
                     (to-instance-arg        opts-map-options)
                     (message-arg            opts-map-options)
                     (board-folder-uid-arg   opts-map-options)
-                    (rules-folder-uid-arg   opts-map-options)
+                    (alerts-folder-uid-arg  opts-map-options)
                     (panels-folder-uid-arg  opts-map-options)))
 
 ;; <<< COPY

@@ -18,7 +18,7 @@
    [nil  "--show-dashboard-panels" "Show library-panels related to a dashboard (BOARD_UID) within a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."]
 
    ["-b" nil "Copy a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to another (TO_URL, TO_TOKEN). Optional provide a MESSAGE and BOARD_FOLDER_UID." :id :board]
-   ["-r" nil "Copy alert-rules associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to the folder (RULES_FOLDER_UID) on another (TO_URL, TO_TOKEN)." :id :rules]
+   ["-a" nil "Copy alert-rules associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to the folder (ALERTS_FOLDER_UID) on another (TO_URL, TO_TOKEN)." :id :alerts]
    ["-p" nil "Copy library-panels associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to the folder (PANELS_FOLDER_UID) on another (TO_URL, TO_TOKEN)." :id :panels]
    [nil "--from" "Use the from-grafana-instance for show commands."]
    [nil "--to" "Use the to-grafana-instance for show commands."]
@@ -29,7 +29,7 @@
    [nil "--to-token TO_TOKEN" "The grafana-token of the grafana-instance to copy to."]
    [nil "--message MESSAGE" "Optional: The dashboard change-message when copying a dashboard."]
    [nil "--board-folder-uid BOARD_FOLDER_UID" "The folder-uid to copy the dashboard to. If not provided the General-folder is used."]
-   [nil "--rules-folder-uid RULES_FOLDER_UID" "The folder-uid to copy the rules to."]
+   [nil "--alerts-folder-uid ALERTS_FOLDER_UID" "The folder-uid to copy the alert-rules to."]
    [nil "--panels-folder-uid PANELS_FOLDER_UID" "The folder-uid to copy the panels to."]])
 
 (defn print-usage [opts-map]
@@ -41,7 +41,7 @@
   (println "copy --show-dashboards --from --from-url=<from-grafana-url --from-token=<from-grafana-token>")
   (println "copy --show-folders --to --to-url=<to-grafana-url --to-token=<to-grafana-token>")
   (println "copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--board-folder-uid=<board-folder-uid>] [--message=<message>]")
-  (println "copy -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --rules-folder-uid=<rules-folder-uid>"))
+  (println "copy -a --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --alerts-folder-uid=<alerts-folder-uid>"))
 
 (defn -main [& args]
   (let [opts-map (parse-opts args opts)]
@@ -63,7 +63,7 @@
           (:show-dashboard-alerts (:options opts-map)) (:show-dashboard-panels (:options opts-map)))
       (core/copy-show (settings/create-copy-arguments! (:options opts-map)))
 
-      (or (:board (:options opts-map)) (:rules (:options opts-map)) (:panels (:options opts-map)))
+      (or (:board (:options opts-map)) (:alerts (:options opts-map)) (:panels (:options opts-map)))
       (core/copy (settings/create-copy-arguments! (:options opts-map)))
 
       :else

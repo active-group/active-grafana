@@ -52,9 +52,9 @@ active-grafana $ TO_URL=http://localhost:3001 \
                  TO_TOKEN=glsa_sr9e9M1JI0ARODVP347uVKm7L1wqKvGa_3543afe4 \
                  MESSAGE="Changes to the speed-check-panel." \
                  bb -m active-grafana.main-copy -- \
-                 -b -r --board-uid=b3b41ced-1237-45a1-9f63-08d8b4191c57 \
+                 -b -a --board-uid=b3b41ced-1237-45a1-9f63-08d8b4191c57 \
                  --board-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119 \
-                 --rules-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119
+                 --alerts-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119
 ```
 
 All variables can be found in `active-grafana.settings`.
@@ -101,9 +101,9 @@ active-grafana $ TO_URL=http://localhost:3001 \
                  TO_TOKEN=glsa_sr9e9M1JI0ARODVP347uVKm7L1wqKvGa_3543afe4 \
                  MESSAGE="Changes to the speed-check-panel." \
                  lein run -m active-grafana.main-copy -- \
-                 -b -r --board-uid=b3b41ced-1237-45a1-9f63-08d8b4191c57 \
+                 -b -a --board-uid=b3b41ced-1237-45a1-9f63-08d8b4191c57 \
                  --board-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119 \
-                 --rules-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119
+                 --alerts-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119
 ```
 
 All variables can be found in `active-grafana.settings`.
