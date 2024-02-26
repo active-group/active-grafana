@@ -82,7 +82,7 @@
   [grafana-instance board-uid]
   (let [alert-rules (find-dashboard-related-alert-rules grafana-instance board-uid)]
     (println (str "Alert alert-uids related to dashboard: " board-uid))
-    (pprint/print-table ["uid" "title" ] alert-rules)))
+    (pprint/print-table ["uid" "title" "folderUID"] alert-rules)))
 
 ;; FIXME: Is there any better way to find dashboard related library panels
 
