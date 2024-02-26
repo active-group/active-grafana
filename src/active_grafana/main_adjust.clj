@@ -17,12 +17,13 @@
    [nil "--datasource-uids DATASOURCE_UIDS" "Datasource uids used within the target-template as comma separated string."]])
 
 (defn print-usage [opts-map]
-  (println "Usage Examples:\n")
+  (println "Options:")
+  (println (:summary opts-map))
+
+  (println "\nExamples:")
   (println "adjust --help")
   (println "adjust --show   --url=<grafana-url> --token=<grafana-token>")
-  (println "adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> --datasource-uids=\"<datasource-uid-1>,<datasource-uid-2>,...,<datasource-uid-n>\"")
-  (println "\nOptions:")
-  (println (:summary opts-map)))
+  (println "adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> --datasource-uids=\"<datasource-uid-1>,<datasource-uid-2>,...,<datasource-uid-n>\""))
 
 (defn -main [& args]
   (let [opts-map (parse-opts args opts)]
@@ -42,6 +43,4 @@
       (core/adjust (settings/create-adjust-arguments! (:options opts-map)))
 
       :else
-      (do
-        (println "I don't know what to do.")
-        (print-usage opts-map)))))
+      (print-usage opts-map))))

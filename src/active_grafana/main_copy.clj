@@ -34,14 +34,15 @@
    [nil "--panels-folder-uid PANELS_FOLDER_UID" "The folder-uid to copy the panels to."]])
 
 (defn print-usage [opts-map]
-  (println "Usage Examples:\n")
+  (println "Options:")
+  (println (:summary opts-map))
+
+  (println "\nExamples:")
   (println "copy --help")
   (println "copy --show-dashboards --from --from-url=<from-grafana-url --from-token=<from-grafana-token>")
   (println "copy --show-folders --to --to-url=<to-grafana-url --to-token=<to-grafana-token>")
   (println "copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--board-folder-uid=<board-folder-uid>] [--message=<message>]")
-  (println "copy -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --rules-folder-uid=<rules-folder-uid>")
-  (println "\nOptions:")
-  (println (:summary opts-map)))
+  (println "copy -r --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --rules-folder-uid=<rules-folder-uid>"))
 
 (defn -main [& args]
   (let [opts-map (parse-opts args opts)]
@@ -62,6 +63,4 @@
       (core/copy (settings/create-copy-arguments! (:options opts-map)))
 
       :else
-      (do
-        (println "I don't know what to do.")
-        (print-usage opts-map)))))
+      (print-usage opts-map))))
