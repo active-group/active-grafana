@@ -191,12 +191,12 @@
           to-grafana:    url and token as GrafanaInstance record.
           dashboard-uid: uid of a dashboard in the 'from'-instance,
                          that will be copied to the 'to'-instance.
-          folder-uid:    uid of a folder within the 'to'-instance,
+          to-folder-uid: uid of a folder within the 'to'-instance,
                          where the dashboard will be copied/moved to.
                          If `nil` the General-folder of the
                          'to'-instance will be used.
-          message:       The change-message. "}
-  [from-grafana to-grafana dashboard-uid folder-uid message]
+          to-message:    The change-message. "}
+  [from-grafana to-grafana dashboard-uid to-folder-uid to-message]
   (let [dashboard        (helper/json->clj
                           (api/get-dashboard-by-uid
                            (-> from-grafana :url  )
@@ -210,11 +210,11 @@
     (api/create-update-dashboard (-> to-grafana :url  )
                                  (-> to-grafana :token)
                                  (helper/clj->json {"dashboard" clean-board-data
-                                                    "message"   message
+                                                    "message"   to-message
                                                     ;; alternative: check for changes before overwriting
                                                     "overwrite" true
                                                     ;; folder must exist, otherwise it throws an exception
-                                                    "folderUid" folder-uid}))))
+                                                    "folderUid" to-folder-uid}))))
 
 (defn copy-alert
   ^{:doc "Copy (create/update) a rule to a given folder.
@@ -253,17 +253,17 @@
           from-instance: url and token as GrafanaInstance record.
           to-instance:   url and token as GrafanaInstance record.
           dashboard-uid: uid of a dashboard in the 'from'-instance
-          folder-uid:    uid of a folder in the 'to'-instance, where the
+          to-folder-uid: uid of a folder in the 'to'-instance, where the
                          alert-rules should be copied to."}
-  [from-instance to-instance dashboard-uid folder-uid]
+  [from-instance to-instance dashboard-uid to-folder-uid]
   (let [alert-rules (find-dashboard-related-alert-rules from-instance dashboard-uid)]
       ;; Note: folder must exist (otherwise rule will be added but cannot be
-      ;; seen in the gui) the call will fail with an exception if the folder-uid
+      ;; seen in the gui) the call will fail with an exception if the to-folder-uid
       ;; is not available
       (api/get-folder-by-folder-uid (-> to-instance :url  )
                                     (-> to-instance :token)
-                                    folder-uid)
-      (run! (fn [alert] (copy-alert to-instance folder-uid alert)) alert-rules)))
+                                    to-folder-uid)
+      (run! (fn [alert] (copy-alert to-instance to-folder-uid alert)) alert-rules)))
 
 (defn copy-panel
   [grafana-instance panel folder-uid]
@@ -271,7 +271,7 @@
 
           instance:   url and token as GrafanaInstance record.
           panel:      the panel to copy.
-          folder-uid: uid of a folder in the 'to'-instance, where the
+          folder-uid: uid of a folder in the instance, where the
                       library-panel should be copied to."}
     ;; Note: inefficient to run the available-panels within copy-panel for every
     ;; panel within copy-panels
@@ -305,11 +305,11 @@
           from-instance: url and token as GrafanaInstance record.
           to-instance:   url and token as GrafanaInstance record.
           dashboard-uid: uid of a dashboard in the 'from'-instance
-          folder-uid:    uid of a folder in the 'to'-instance, where the
+          to-folder-uid: uid of a folder in the 'to'-instance, where the
                          library-panels should be copied to."}
-  [from-instance to-instance dashboard-uid folder-uid]
+  [from-instance to-instance dashboard-uid to-folder-uid]
   (let [panels (find-dashboard-related-panels from-instance dashboard-uid)]
-    (run! (fn [panel] (copy-panel to-instance panel folder-uid)) panels)))
+    (run! (fn [panel] (copy-panel to-instance panel to-folder-uid)) panels)))
 
 (defn copy
   ^{:doc "Based on the given arguments, copy a dashboard and/or its
@@ -323,20 +323,20 @@
       (copy-panels (-> args :from-instance)
                    (-> args :to-instance)
                    (-> args :board-uid)
-                   (-> args :panels-folder-uid)))
+                   (-> args :to-panels-folder-uid)))
   (when (-> args :board)
       (helper/log "copy dashboard")
-      (copy-dashboard (-> args :from-instance   )
-                      (-> args :to-instance     )
-                      (-> args :board-uid       )
-                      (-> args :board-folder-uid)
-                      (-> args :message         )))
+      (copy-dashboard (-> args :from-instance      )
+                      (-> args :to-instance        )
+                      (-> args :board-uid          )
+                      (-> args :to-board-folder-uid)
+                      (-> args :to-message         )))
   (when (-> args :alerts)
       (helper/log "copy alert-rules")
       (copy-alerts (-> args :from-instance   )
                    (-> args :to-instance     )
                    (-> args :board-uid       )
-                   (-> args :alerts-folder-uid))))
+                   (-> args :to-alerts-folder-uid))))
 
 ;; <<< COPY
 

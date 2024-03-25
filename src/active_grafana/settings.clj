@@ -10,8 +10,8 @@
                            show-board-alerts show-board-panels
                            from to
                            board alerts panels board-uid
-                           from-instance to-instance message
-                           board-folder-uid alerts-folder-uid panels-folder-uid])
+                           from-instance to-instance to-message
+                           to-board-folder-uid to-alerts-folder-uid to-panels-folder-uid])
 
 ;; >>> Env variables or command line
 
@@ -29,43 +29,43 @@
   (->Grafana-Instance (or (:to-url   opts-map-options) (System/getenv "TO_URL"))
                       (or (:to-token opts-map-options) (System/getenv "TO_TOKEN"))))
 
-(defn message-arg
+(defn to-message-arg
   [opts-map-options]
-  (or (:message opts-map-options) (System/getenv "MESSAGE")))
+  (or (:to-message opts-map-options) (System/getenv "TO_MESSAGE")))
 
-(defn board-folder-uid-arg
+(defn to-board-folder-uid-arg
   [opts-map-options]
-  (or (:board-folder-uid opts-map-options) (System/getenv "BOARD_FOLDER_UID")))
+  (or (:to-board-folder-uid opts-map-options) (System/getenv "TO_BOARD_FOLDER_UID")))
 
-(defn alerts-folder-uid-arg
+(defn to-alerts-folder-uid-arg
   [opts-map-options]
-  (or (:alerts-folder-uid  opts-map-options) (System/getenv "ALERTS_FOLDER_UID")))
+  (or (:to-alerts-folder-uid  opts-map-options) (System/getenv "TO_ALERTS_FOLDER_UID")))
 
-(defn panels-folder-uid-arg
+(defn to-panels-folder-uid-arg
   [opts-map-options]
-  (or (:panels-folder-uid  opts-map-options) (System/getenv "PANELS_FOLDER_UID")))
+  (or (:to-panels-folder-uid  opts-map-options) (System/getenv "TO_PANELS_FOLDER_UID")))
 
 ;; <<< Env variables or command line
 
 (defn create-copy-arguments!
   [opts-map-options]
-  (->Copy-Arguments (:show-dashboards       opts-map-options)
-                    (:show-folders          opts-map-options)
-                    (:show-panels           opts-map-options)
-                    (:show-dashboard-alerts opts-map-options)
-                    (:show-dashboard-panels opts-map-options)
-                    (:from                  opts-map-options)
-                    (:to                    opts-map-options)
-                    (:board                 opts-map-options)
-                    (:alerts                opts-map-options)
-                    (:panels                opts-map-options)
-                    (board-uid-arg          opts-map-options)
-                    (from-instance-arg      opts-map-options)
-                    (to-instance-arg        opts-map-options)
-                    (message-arg            opts-map-options)
-                    (board-folder-uid-arg   opts-map-options)
-                    (alerts-folder-uid-arg  opts-map-options)
-                    (panels-folder-uid-arg  opts-map-options)))
+  (->Copy-Arguments (:show-dashboards         opts-map-options)
+                    (:show-folders            opts-map-options)
+                    (:show-panels             opts-map-options)
+                    (:show-dashboard-alerts   opts-map-options)
+                    (:show-dashboard-panels   opts-map-options)
+                    (:from                    opts-map-options)
+                    (:to                      opts-map-options)
+                    (:board                   opts-map-options)
+                    (:alerts                  opts-map-options)
+                    (:panels                  opts-map-options)
+                    (board-uid-arg            opts-map-options)
+                    (from-instance-arg        opts-map-options)
+                    (to-instance-arg          opts-map-options)
+                    (to-message-arg           opts-map-options)
+                    (to-board-folder-uid-arg  opts-map-options)
+                    (to-alerts-folder-uid-arg opts-map-options)
+                    (to-panels-folder-uid-arg opts-map-options)))
 
 ;; <<< COPY
 

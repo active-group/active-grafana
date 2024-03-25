@@ -42,7 +42,7 @@ active-grafana $ bb -m active-grafana.main-copy -- -h
 active-grafana $ bb -m active-grafana.main-adjust -- -h
 ```
 
-The help shows variables like `URL`, `FROM_URL` or `MESSAGE`, which can
+The help shows variables like `URL`, `FROM_URL` or `TO_MESSAGE`, which can
 alternatively be provided by environment variables. For example:
 
 ```
@@ -50,11 +50,11 @@ $ export FROM_URL=http://localhost:3000
 $ export FROM_TOKEN=glsa_FcOPTbFuJ9ZO0q6AzdTSoKjVLHaxsBw5_4ece1975
 active-grafana $ TO_URL=http://localhost:3001 \
                  TO_TOKEN=glsa_sr9e9M1JI0ARODVP347uVKm7L1wqKvGa_3543afe4 \
-                 MESSAGE="Changes to the speed-check-panel." \
+                 TO_MESSAGE="Changes to the speed-check-panel." \
                  bb -m active-grafana.main-copy -- \
                  -b -a --board-uid=b3b41ced-1237-45a1-9f63-08d8b4191c57 \
-                 --board-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119 \
-                 --alerts-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119
+                 --to-board-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119 \
+                 --to-alerts-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119
 ```
 
 All variables can be found in `active-grafana.settings`.
@@ -91,7 +91,7 @@ or
 active-grafana $ lein with-profile as-adjust run -- -h
 ```
 
-The help shows variables like `URL`, `FROM_URL` or `MESSAGE`, which can
+The help shows variables like `URL`, `FROM_URL` or `TO_MESSAGE`, which can
 alternatively be provided by environment variables. For example:
 
 ```
@@ -99,11 +99,11 @@ $ export FROM_URL=http://localhost:3000
 $ export FROM_TOKEN=glsa_FcOPTbFuJ9ZO0q6AzdTSoKjVLHaxsBw5_4ece1975
 active-grafana $ TO_URL=http://localhost:3001 \
                  TO_TOKEN=glsa_sr9e9M1JI0ARODVP347uVKm7L1wqKvGa_3543afe4 \
-                 MESSAGE="Changes to the speed-check-panel." \
+                 TO_MESSAGE="Changes to the speed-check-panel." \
                  lein run -m active-grafana.main-copy -- \
                  -b -a --board-uid=b3b41ced-1237-45a1-9f63-08d8b4191c57 \
-                 --board-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119 \
-                 --alerts-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119
+                 --to-board-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119 \
+                 --to-alerts-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119
 ```
 
 All variables can be found in `active-grafana.settings`.
