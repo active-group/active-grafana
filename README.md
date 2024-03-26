@@ -8,7 +8,7 @@ A Clojure script/project designed to help dealing with Grafana.
 - Copying alert-rules associated with this grafana dashboard.
 - Copying library-panels associated with this grafana dashboard.
 
-- Adjusting library panels where a specific target structure needs repition
+- Adjusting library-panels where a specific target structure needs repetion
   with different datasources.
 
 ## Usage
