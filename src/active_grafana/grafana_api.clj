@@ -28,6 +28,7 @@
     (client/post api-url {:insecure?    true
                           :oauth-token  token
                           ;; without this header the rule is not editable in the gui
+                          ;; see: https://grafana.com/docs/grafana/v12.3/developer-resources/api-reference/http-api/alerting_provisioning/#edit-resources-in-the-grafana-ui
                           :headers      {"X-Disable-Provenance" "true"}
                           :body         alert-rule
                           :accept       :json
@@ -42,6 +43,8 @@
     (client/put api-url {:insecure?    true
                          :oauth-token  token
                          ;; without this header the rule is not editable in the gui
+                         ;; TODO: only endpoint POST - not PUT - but shouldn't harm
+                         ;; see: https://grafana.com/docs/grafana/v12.3/developer-resources/api-reference/http-api/alerting_provisioning/#edit-resources-in-the-grafana-ui
                          :headers      {"X-Disable-Provenance" "true"}
                          :body         alert-rule-update
                          :accept       :json
