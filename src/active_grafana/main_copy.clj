@@ -2,8 +2,7 @@
   (:require [active-grafana.core     :as core]
             [active-grafana.helper   :as helper]
             [active-grafana.settings :as settings]
-            [clojure.tools.cli       :refer [parse-opts]]
-            )
+            [clojure.tools.cli       :refer [parse-opts]])
   (:gen-class))
 
 (set! *warn-on-reflection* true)

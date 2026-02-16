@@ -95,11 +95,11 @@
 ;; Note the following query-parameter:
 ;; limit – Limit the number of returned results (max is 5000; default is 1000)
 #_(defn get-folders
-  [base-url token]
-  (let [api-url (str base-url "/api/search?type=dash-folder")]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?    true
-                         :oauth-token token})))
+    [base-url token]
+    (let [api-url (str base-url "/api/search?type=dash-folder")]
+      (helper/log (str "Api-url: " api-url))
+      (client/get api-url {:insecure?    true
+                           :oauth-token token})))
 
 ;; GET /api/folders
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-all-folders
@@ -149,11 +149,11 @@
 ;; GET /api/library-elements/:uid/connections
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#get-library-element-connections
 #_(defn get-library-element-connections
-  [base-url token uid]
-  (let [api-url (str base-url "/api/library-elements/" uid "/connections")]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+    [base-url token uid]
+    (let [api-url (str base-url "/api/library-elements/" uid "/connections")]
+      (helper/log (str "Api-url: " api-url))
+      (client/get api-url {:insecure?   true
+                           :oauth-token token})))
 
 ;; POST /api/library-elements
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#create-library-element

@@ -98,6 +98,4 @@
                            "id"      id
                            "status"  ["done" "error"]}]
                 (write reply))
-              (recur))
-
-            ))))))
+              (recur))))))))

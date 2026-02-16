@@ -8,5 +8,5 @@
   (case first-arg
     "copy"   (apply ag/copy rest-args)
     "adjust" (apply ag/adjust rest-args)
-        (do (println "Usage: script.clj copy")
-            (println "       script.clj adjust"))))
+    (do (println "Usage: script.clj copy")
+        (println "       script.clj adjust"))))

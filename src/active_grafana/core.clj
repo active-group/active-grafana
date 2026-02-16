@@ -30,11 +30,10 @@
   [grafana-instance]
   (let [folders (helper/json->clj
                  (api/get-folders
-                  (-> grafana-instance :url  )
+                  (-> grafana-instance :url)
                   (-> grafana-instance :token)))]
     (println "First 1000 folders:")
     (pprint/print-table ["title" "uid"] folders)))
-
 
 (defn show-library-panels
   ^{:doc "Show for a given grafana-instance the name, uid and folder-uid of the
@@ -42,7 +41,7 @@
   [grafana-instance]
   (let [library-panels (helper/json->clj
                         (api/get-library-panels
-                         (-> grafana-instance :url  )
+                         (-> grafana-instance :url)
                          (-> grafana-instance :token)))
         panels (map (fn [panel]
                       {"name"      (get panel "name")
@@ -62,7 +61,7 @@
   [grafana-instance dashboard-uid]
   (let [alert-rules (helper/json->clj
                      (api/get-all-alert-rules
-                      (-> grafana-instance :url  )
+                      (-> grafana-instance :url)
                       (-> grafana-instance :token)))]
     ;; rule-structure:
     ;; { ..., "uid" "my-uid", "annotations" { ..., "__dashboardUid__" "dash-uid", ...}, ...}
@@ -72,7 +71,7 @@
     (filter (fn [rule] (= dashboard-uid
                           (-> rule
                               (get "annotations")
-                              (get "__dashboardUid__" ))))
+                              (get "__dashboardUid__"))))
             alert-rules)))
 
 (defn show-dashboard-alerts
@@ -96,7 +95,7 @@
           dashboard-uid:    to search for in the panels."}
   [grafana-instance dashboard-uid]
   (let [dashboard (helper/json->clj
-                   (api/get-dashboard-by-uid (-> grafana-instance :url  )
+                   (api/get-dashboard-by-uid (-> grafana-instance :url)
                                              (-> grafana-instance :token)
                                              dashboard-uid))
 
@@ -107,7 +106,7 @@
                                      (get-in dashboard ["dashboard" "panels"])))]
     ;; get cannot be nil - since the dashboard points to this library-panel
     (map (fn [panel-uid] (get (helper/json->clj
-                               (api/get-library-element-by-uid (-> grafana-instance :url  )
+                               (api/get-library-element-by-uid (-> grafana-instance :url)
                                                                (-> grafana-instance :token)
                                                                panel-uid))
                               "result"))
@@ -121,7 +120,7 @@
   [grafana-instance board-uid]
   (let [panels (find-dashboard-related-panels grafana-instance board-uid)]
     (println (str "Panels related to dashboard: " board-uid))
-    (pprint/print-table ["uid" "name" ] panels)))
+    (pprint/print-table ["uid" "name"] panels)))
 
 (defn copy-show
   ^{:doc "Based on the given arguments, print information about the first 1000
@@ -200,7 +199,7 @@
   [from-grafana to-grafana dashboard-uid to-folder-uid to-message]
   (let [dashboard        (helper/json->clj
                           (api/get-dashboard-by-uid
-                           (-> from-grafana :url  )
+                           (-> from-grafana :url)
                            (-> from-grafana :token)
                            dashboard-uid))
         clean-board-data (-> dashboard
@@ -208,7 +207,7 @@
                              ;; alternative: check for changes before overwriting
                              (dissoc "version")
                              (dissoc "id"))]
-    (api/create-update-dashboard (-> to-grafana :url  )
+    (api/create-update-dashboard (-> to-grafana :url)
                                  (-> to-grafana :token)
                                  (helper/clj->json {"dashboard" clean-board-data
                                                     "message"   to-message
@@ -228,7 +227,7 @@
   ;; However, if the alert-rules-list contains duplicates, we can handle it.
   [instance folder-uid rule-to-copy-with-id]
   (let [available-alerts (helper/json->clj
-                          (api/get-all-alert-rules (-> instance :url  )
+                          (api/get-all-alert-rules (-> instance :url)
                                                    (-> instance :token)))
         ;; the id within a grafana-instance needs to be unique
         ;; if the rule-to-copy contains an already existing "id" the copy fails
@@ -237,13 +236,13 @@
     (if (some (fn [available-alert]
                 (= (get available-alert "uid")
                    (get rule-to-copy   "uid")))
-                available-alerts)
-      (api/update-alert-rule (-> instance :url  )
+              available-alerts)
+      (api/update-alert-rule (-> instance :url)
                              (-> instance :token)
                              (get rule-to-copy "uid")
                              (helper/clj->json
                               (assoc rule-to-copy "folderuid" folder-uid)))
-      (api/create-alert-rule (-> instance :url  )
+      (api/create-alert-rule (-> instance :url)
                              (-> instance :token)
                              (helper/clj->json
                               (assoc rule-to-copy "folderuid" folder-uid))))))
@@ -261,10 +260,10 @@
       ;; Note: folder must exist (otherwise rule will be added but cannot be
       ;; seen in the gui) the call will fail with an exception if the to-folder-uid
       ;; is not available
-      (api/get-folder-by-folder-uid (-> to-instance :url  )
-                                    (-> to-instance :token)
-                                    to-folder-uid)
-      (run! (fn [alert] (copy-alert to-instance to-folder-uid alert)) alert-rules)))
+    (api/get-folder-by-folder-uid (-> to-instance :url)
+                                  (-> to-instance :token)
+                                  to-folder-uid)
+    (run! (fn [alert] (copy-alert to-instance to-folder-uid alert)) alert-rules)))
 
 (defn copy-panel
   [grafana-instance panel folder-uid]
@@ -279,7 +278,7 @@
     ;; However, if the panels-list contains duplicates, we can handle it.
   (let [available-panel-uids (map (fn [panel] (get panel "uid"))
                                   (get-in (helper/json->clj
-                                           (api/get-library-panels (-> grafana-instance :url  )
+                                           (api/get-library-panels (-> grafana-instance :url)
                                                                    (-> grafana-instance :token)))
                                           ["result" "elements"]))
         panel-uid (get panel "uid")
@@ -288,15 +287,15 @@
       ;; before we can update the panel
       ;; we need to have its most recent version and put this version in the patch
       (let [panel-version (get-in (helper/json->clj
-                                   (api/get-library-element-by-uid (-> grafana-instance :url  )
+                                   (api/get-library-element-by-uid (-> grafana-instance :url)
                                                                    (-> grafana-instance :token)
                                                                    panel-uid))
                                   ["result" "version"])]
-        (api/update-library-element (-> grafana-instance :url  )
+        (api/update-library-element (-> grafana-instance :url)
                                     (-> grafana-instance :token)
                                     (get panel "uid")
                                     (helper/clj->json (assoc adjusted-panel "version" panel-version))))
-      (api/create-library-element (-> grafana-instance :url  )
+      (api/create-library-element (-> grafana-instance :url)
                                   (-> grafana-instance :token)
                                   (helper/clj->json adjusted-panel)))))
 
@@ -320,24 +319,24 @@
   [args]
   ;; if associated panels aren't there, the dashboard copy will fail
   (when (-> args :panels)
-      (helper/log "copy panels")
-      (copy-panels (-> args :from-instance)
-                   (-> args :to-instance)
-                   (-> args :board-uid)
-                   (-> args :to-panels-folder-uid)))
+    (helper/log "copy panels")
+    (copy-panels (-> args :from-instance)
+                 (-> args :to-instance)
+                 (-> args :board-uid)
+                 (-> args :to-panels-folder-uid)))
   (when (-> args :board)
-      (helper/log "copy dashboard")
-      (copy-dashboard (-> args :from-instance      )
-                      (-> args :to-instance        )
-                      (-> args :board-uid          )
-                      (-> args :to-board-folder-uid)
-                      (-> args :to-message         )))
+    (helper/log "copy dashboard")
+    (copy-dashboard (-> args :from-instance)
+                    (-> args :to-instance)
+                    (-> args :board-uid)
+                    (-> args :to-board-folder-uid)
+                    (-> args :to-message)))
   (when (-> args :alerts)
-      (helper/log "copy alert-rules")
-      (copy-alerts (-> args :from-instance   )
-                   (-> args :to-instance     )
-                   (-> args :board-uid       )
-                   (-> args :to-alerts-folder-uid))))
+    (helper/log "copy alert-rules")
+    (copy-alerts (-> args :from-instance)
+                 (-> args :to-instance)
+                 (-> args :board-uid)
+                 (-> args :to-alerts-folder-uid))))
 
 ;; <<< COPY
 
@@ -443,7 +442,7 @@
   args: Provided arguments, as Adjust-Arguments record."}
   [args]
   (adjust-library-panel (-> args :grafana-instance)
-                        (-> args :panel-uid       )
+                        (-> args :panel-uid)
                         (str/split (-> args :datasource-uids) #",")
                         (-> args :expert-data))
   ;; if we are here, adjusting the panel was successful
