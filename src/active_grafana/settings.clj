@@ -73,7 +73,8 @@
 
 (defrecord Adjust-Arguments [grafana-instance
                              panel-uid
-                             datasource-uids])
+                             datasource-uids
+                             expert-data])
 
 ;; >>> Env variables or command line
 
@@ -90,12 +91,17 @@
   [opts-map-options]
   (or (:datasource-uids opts-map-options) (System/getenv "DATASOURCE_UIDS")))
 
+(defn i-am-an-expert-arg
+  [opts-map-options]
+  (or (:i-am-an-expert opts-map-options) (System/getenv "EXPERT_DATA")))
+
 ;; <<< Env variables or command line
 
 (defn create-adjust-arguments!
   [opts-map-options]
   (->Adjust-Arguments (grafana-instance-arg opts-map-options)
-                     (panel-uid-arg        opts-map-options)
-                     (datasource-uids-arg  opts-map-options)))
+                      (panel-uid-arg        opts-map-options)
+                      (datasource-uids-arg  opts-map-options)
+                      (i-am-an-expert-arg   opts-map-options)))
 
 ;; <<< ADJUST PANEL

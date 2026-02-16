@@ -8,11 +8,10 @@ A Clojure script/project designed to help dealing with Grafana.
 - Copying alert-rules associated with this grafana dashboard.
 - Copying library-panels associated with this grafana dashboard.
 
-- Adjusting library-panels where a specific target structure needs repetion
+- Adjusting library-panels where a specific target structure needs repetition
   with different datasources.
 
 ## Usage
-
 ### Babashka
 
 If you check out this repository you can use [babashka](https://book.babashka.org/).
@@ -163,6 +162,53 @@ RUN wget https://github.com/active-group/active-grafana/releases/download/v0.1/a
 
 Check https://github.com/active-group/active-grafana/releases for other releases.
 
+## Adjusting library-panels `--i-am-an-expert`-argument
+
+The standard way of adjusting a library-panel is:
+- get the library-panel with the given `PANEL_UID`
+- take the first `target` as reference target
+- create the new target list by repeating the reference target adjusted for the
+  datasource-uid and the reference-id based on the provided `DATASOURCE-UIDS`.
+- update the library panel with the newly created target list
+
+Sometimes one or more targets need more adjustments than the datasource-uid and
+the reference-id. Use the `--i-am-an-expert` argument to achieve more advanced
+adjustments. Example:
+
+```
+adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> \
+       --datasource-uids="<datasource-uid-1>,<datasource-uid-2>,...,<datasource-uid-n>" \
+       --i-am-an-expert="{:path \"<path-to-f-target->target>\" :data <data>}"
+```
+
+The `i-am-an-expert` argument gets transformed to a map using
+`clojure.edn/read-string`. The `path` is processed with `(load-string (slurp
+path))`. That is, the path should lead to a file containing a function like the
+following:
+
+```
+(defn f-target->target
+  [reference-target uid data]
+  (assoc (assoc-in reference-target ["datasource" "uid"] uid) "refId" (get data uid)))
+```
+The `data` is provided to this loaded function, e.g.:
+
+```
+{"<datasource-uid-1>" "ref-id-1"
+ "<datasource-uid-2>" "ref-id-2"
+ "..."                "..."
+ "<datasource-uid-n>" "ref-id-n"}
+```
+
+The result of this example is, that the target does not use the datasource-uid
+as reference-id, but a reference-id provided as {"uid" "ref-id"}-map via the
+command-line.
+
+Note: make sure to escape strings in the `--i-am-an-expert`
+command-line-argument in the proper way, e.g.:
+```
+adjust --adjust ... --i-am-an-expert="{:path \"file.path\" :data {\"uid-1\" \"my-uid-1-data\"}}"
+```
 
 ## Known Issues and 'good to know'
 
@@ -184,7 +230,7 @@ Check https://github.com/active-group/active-grafana/releases for other releases
 
 ## License
 
-Copyright © 2023-2024 Active Group GmbH
+Copyright © 2023-2026 Active Group GmbH
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at

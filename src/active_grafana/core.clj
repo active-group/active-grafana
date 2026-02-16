@@ -1,6 +1,7 @@
 (ns active-grafana.core
   (:require [active-grafana.grafana-api :as api]
             [active-grafana.helper      :as helper]
+            [clojure.edn                :as edn]
             [clojure.pprint             :as pprint]
             [clojure.string             :as str]))
 
@@ -342,21 +343,44 @@
 
 ;; >>> ADJUST
 
-(defn create-targets
-  ^{:doc "Create targets from a reference-target.
-          Use datasource-uids also as refId."}
-  [reference-target datasource-uids]
-  ;; target { datasource { "uid" <datasource-uid>, ...},
-  ;;          refId <ref-id>,
+(defn standard-target->target
+  ^{:doc "Create target from reference-target.
+ Use datasource-uid also as refId."}
+  [reference-target uid]
+  ;; target { "datasource" { "uid" <datasource-uid>, ...},
+  ;;          "refId" <ref-id>,
   ;;          ...}
   (assert (contains? (get reference-target "datasource") "uid")
-          (str "reference-target does not have the expected structure { datasource { \"uid\" ... }}\n"
-               "current reference-target:\n"
-               reference-target))
+          (str "reference-target does not have the expected structure { \"datasource\" { \"uid\" ... }}. "
+               "Current reference-target: " reference-target))
   (assert (contains? reference-target "refId")
-          (str "target does not have the expected structure { refId ... }\n"
-               "current reference-target:\n"
-               reference-target))
+          (str "reference-target does not have the expected structure { \"refId\" ... }. "
+               "Current reference-target: " reference-target))
+
+  (assoc (assoc-in reference-target ["datasource" "uid"] uid)
+         "refId" uid))
+
+(defn target->target-from-file
+  ^{:doc "Create target from reference-target. Creation of the target is
+  determined by the `expert-string`. The `expert-string` has the form: `\"{:path
+  <path to a function target->target in a file> :data '<some-data>'}\"`The
+  `expert-string` is read with `clojure.edn/read-string`. The function
+  `target->target` is loaded via `(load-string (slurp file-path))`. The function
+  `target->target` is provided with the arguments `reference-target`, `uid` and
+  `data`."}
+  [expert-string reference-target uid]
+  (let [path-data-map (edn/read-string expert-string)
+        f-target->target (load-string (slurp (:path path-data-map)))
+        data (:data path-data-map)]
+    (f-target->target reference-target uid data)))
+
+(defn create-targets
+  ^{:doc "Create targets based on a reference-target and given datasource-uids.
+  By default uses `standard-target->target` to create targets. When an
+  `expert-string` is provided, more advanced targets can be created. See
+  `target->target-from-file` and the README for more information."}
+  [reference-target datasource-uids expert-string]
+
   (assert (not= [""] datasource-uids)
           (str "datasource-uids are empty:\n"
                datasource-uids
@@ -367,16 +391,16 @@
                datasource-uids
                "\nPlease provide only distinct datasource-uids."))
 
-  (map (fn [uid]
-         (assoc (assoc-in reference-target ["datasource" "uid"] uid)
-                "refId" uid)) datasource-uids))
+  (if (nil? expert-string)
+    (map (partial standard-target->target reference-target) datasource-uids)
+    (map (partial target->target-from-file expert-string reference-target) datasource-uids)))
 
 (defn create-patch
   ^{:doc "Creates a patch for a panel, providing the panel version and kind
-          (patch-must-haves)
-          and the adjustd model, where the targets are replaced, based on the
-          first target of the provided panel, and the provided datasource-uids."}
-  [panel datasource-uids]
+  (patch-must-haves) and the adjustd model, where the targets are replaced,
+  based on the first target of the provided panel, the provided datasource-uids
+  and optionally an expert-string."}
+  [panel datasource-uids expert-string]
   ;; panel map:
   ;; {"result": { "version": <version>,
   ;;              "kind": 1,
@@ -390,7 +414,7 @@
         kind              (get-in panel ["result" "kind"]) ;; expected to be 1
         old-model         (get-in panel ["result" "model"])
         ref-target (first (get-in panel ["result" "model" "targets"]))
-        new-targets (create-targets ref-target datasource-uids)
+        new-targets (create-targets ref-target datasource-uids expert-string)
         new-model   (assoc old-model "targets" new-targets)]
     {"model"   new-model
      "version" version
@@ -398,30 +422,30 @@
 
 (defn adjust-library-panel
   ^{:doc "Adjust a given library-panel within a grafana-instance, where the
-          targets of the panel-model are replaced based on the first target
-          of a given library-panel and the provided datasource-uids."}
-  [grafana-instance panel-uid datasource-uids]
+  targets of the panel-model are replaced based on the first target of a given
+  library-panel, the provided datasource-uids and optionally an expert-string."}
+  [grafana-instance panel-uid datasource-uids expert-string]
   (let [panel (helper/json->clj
-                (api/get-library-element-by-uid
-                 (-> grafana-instance :url  )
-                 (-> grafana-instance :token)
-                 panel-uid))
-        patch (create-patch panel datasource-uids)]
-    (api/update-library-element (-> grafana-instance :url  )
+               (api/get-library-element-by-uid
+                (-> grafana-instance :url)
+                (-> grafana-instance :token)
+                panel-uid))
+        patch (create-patch panel datasource-uids expert-string)]
+    (api/update-library-element (-> grafana-instance :url)
                                 (-> grafana-instance :token)
                                 panel-uid
                                 (helper/clj->json patch))))
 
 (defn adjust
   ^{:doc "Adjust a given library-panel within a grafana-instance, where the
-          targets of the panel-model are replaced based on the first target
-          of given library-panel and the provided datasource-uids.
-
-          args: Provided arguments, as Adjust-Arguments record."}
+  targets of the panel-model are replaced based on the first target of given
+  library-panel, the provided datasource-uids and optionally an expert-string.
+  args: Provided arguments, as Adjust-Arguments record."}
   [args]
-   (adjust-library-panel (-> args :grafana-instance)
-                         (-> args :panel-uid       )
-                         (str/split (-> args :datasource-uids) #","))
+  (adjust-library-panel (-> args :grafana-instance)
+                        (-> args :panel-uid       )
+                        (str/split (-> args :datasource-uids) #",")
+                        (-> args :expert-data))
   ;; if we are here, adjusting the panel was successful
   (println "Adjusted."))
 
