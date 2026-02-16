@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code (of tagged code)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
@@ -16,13 +16,13 @@ jobs:
       # It is important to install java before installing clojure tools which needs java
       # exclusions: babashka, clj-kondo and cljstyle
       - name: Setup Java JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '25'
 
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@12.5
+        uses: DeLaGuardo/setup-clojure@13
         with:
           lein: latest
 
@@ -51,4 +51,3 @@ jobs:
           file_glob: true
           overwrite: true
           prerelease: true
-
