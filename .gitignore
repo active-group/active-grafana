@@ -9,3 +9,6 @@ pom.xml.asc
 /.lein-*
 /.nrepl-port
 /.prepl-port
+/.clj-kondo
+/.lsp
+/emacs-restclient/credentials.org
