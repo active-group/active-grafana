@@ -1,7 +1,8 @@
 (ns active-grafana.grafana-api
   (:require [active-grafana.helper :as helper]
             [babashka.http-client  :as http]
-            [clj-http.lite.client  :as client]))
+            [clj-http.lite.client  :as client])
+  (:import [java.net URLEncoder]))
 
 (set! *warn-on-reflection* true)
 
@@ -86,6 +87,15 @@
                           :accept       :json
                           :content-type :json})))
 
+(defn find-dashboards-by-query
+  "Find dashboards using a search [[query]] from grafanas legacy http api.
+   The query matches against the dashboard titles."
+  [base-url token query]
+  (let [api-url (str base-url "/api/search?query=" (URLEncoder/encode query "UTF-8") "&type=dash-db")]
+    (helper/log (str "Api-url: " api-url))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
+
 ;; <<< DASHBOARDS
 
 ;; >>> FOLDERS
@@ -116,6 +126,15 @@
 (defn get-folder-by-folder-uid
   [base-url token folder-uid]
   (let [api-url (str base-url "/api/folders/" folder-uid)]
+    (helper/log (str "Api-url: " api-url))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
+
+(defn find-folders-by-query
+  "Find (dashboard-)folders using a search [[query]] from grafanas legacy http api.
+   The query matches against the (dashboard-)folder titles."
+  [base-url token query]
+  (let [api-url (str base-url "/api/search?query=" (URLEncoder/encode query "UTF-8") "&type=dash-folder")]
     (helper/log (str "Api-url: " api-url))
     (client/get api-url {:insecure?   true
                          :oauth-token token})))
