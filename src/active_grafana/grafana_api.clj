@@ -70,7 +70,7 @@
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#get-dashboard-by-uid
 (defn get-dashboard-by-uid
   [base-url token uid]
-  (let [api-url (str base-url "/api/dashboards/uid/" uid)]
+  (let [api-url (str base-url "/api/dashboards/uid/" (URLEncoder/encode uid "UTF-8"))]
     (helper/log (str "Api-url: " api-url))
     (client/get api-url {:insecure?   true
                          :oauth-token token})))
