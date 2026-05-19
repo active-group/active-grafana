@@ -58,6 +58,12 @@ active-grafana $ TO_URL=http://localhost:3001 \
 
 All variables can be found in `active-grafana.settings`.
 
+To copy a dashboard identified by its title use the following command in the root of this project:
+
+```
+bb copy --convenient="<dashboard-title>" --from-url=<from-grafana-url> --from-token=<from-grafana-token> --to-url=<to-grafana-url> --to-token=<to-grafana-token>
+```
+
 ### Leiningen
 
 If you check out this repository you can use lein.
