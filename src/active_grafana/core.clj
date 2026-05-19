@@ -338,6 +338,127 @@
                  (-> args :board-uid)
                  (-> args :to-alerts-folder-uid))))
 
+(defn- deleted? [m]
+  (get m "isDeleted" false))
+
+(defn- title= [title m]
+  (= title (get m "title")))
+
+(defn choose-dashboard-metadata
+  "TODO: document this fn"
+  [grafana-instance dashboard-title]
+  (let [dashboard-candidates       (->> dashboard-title
+                                        (api/find-dashboards-by-query
+                                         (:url grafana-instance)
+                                         (:token grafana-instance))
+                                        (helper/json->clj)
+                                        (remove deleted?)
+                                        (filter (partial title= dashboard-title)))
+        dashboard-candidates-count (count dashboard-candidates)
+        no-dashboard-candidate?    (zero? dashboard-candidates-count)
+        dashboard-unambiguous?     (= 1 dashboard-candidates-count)
+        dashboard-ambiguous?       (< 1 dashboard-candidates-count)
+        dashboard-metadata         (when dashboard-unambiguous?
+                                     (first dashboard-candidates))]
+    (cond no-dashboard-candidate?
+          (throw (ex-info (str "No dashboard with the following title was found: "
+                               dashboard-title)
+                          {:dashboard-title dashboard-title
+                           :grafana-url     (:url grafana-instance)}))
+
+          dashboard-ambiguous?
+          (do
+            (pprint/print-table ["title" "uid" "url" "description" "folderTitle" "folderUrl"]
+                                dashboard-candidates)
+            (throw (ex-info (str "More than one (" dashboard-candidates-count
+                                 ") dashboard was found using the search query: " dashboard-title)
+                            {:dashboard-title                  dashboard-title
+                             :dashboard-candidates             dashboard-candidates
+                             :grafana-url                      (:url grafana-instance)})))
+
+          dashboard-unambiguous?
+          dashboard-metadata
+
+          :else
+          (throw (ex-info "Unexpected choose-dashboard-meta result!"
+                          {:dashboard-candidates-count       dashboard-candidates-count
+                           :dashboard-candidates             dashboard-candidates})))))
+
+(defn choose-folder-uid
+  "TODO: document this fn"
+  [grafana-instance folder-title]
+  (let [folder-candidates       (->> folder-title
+                                     (api/find-folders-by-query (:url grafana-instance)
+                                                                (:token grafana-instance))
+                                     (helper/json->clj)
+                                     (remove deleted?)
+                                     (filter (partial title= folder-title)))
+        folder-candidates-count (count folder-candidates)
+        no-folder-candidate?    (zero? folder-candidates-count)
+        folder-unambiguous?     (= 1 folder-candidates-count)
+        folder-ambiguous?       (< 1 folder-candidates-count)
+        folder-uid              (when folder-unambiguous?
+                                  (get (first folder-candidates) "uid"))]
+    (cond no-folder-candidate?
+          (throw (ex-info (str "No folder with the following title was found: "
+                               folder-title)
+                          {:folder-title folder-title
+                           :grafana-url  (:url grafana-instance)}))
+
+          folder-ambiguous?
+          (do
+            (pprint/print-table ["title" "uid" "url"]
+                                folder-candidates)
+            (throw (ex-info (str "More than one (" folder-candidates-count
+                                 ") folder was found using the search query: " folder-title)
+                            {:folder-title      folder-title
+                             :folder-candidates folder-candidates
+                             :grafana-url       (:url grafana-instance)})))
+
+          folder-unambiguous?
+          folder-uid
+
+          :else
+          (throw (ex-info "Unexpected choose-folder-uid result!"
+                          {:folder-candidates-count folder-candidates-count
+                           :folder-candidates       folder-candidates})))))
+
+(defn convenient-copy
+  "TODO: document this fn"
+  [from-grafana-instance to-grafana-instance dashboard-title & {:as   _options
+                                                                :keys [to-message
+                                                                       to-board-folder-uid
+                                                                       board-uid]}]
+  (let [dashboard-uid          (or board-uid
+                                   (get (choose-dashboard-metadata from-grafana-instance
+                                                                   dashboard-title)
+                                        "uid"))
+        dashboard-response     (helper/json->clj
+                                (api/get-dashboard-by-uid
+                                 (:url from-grafana-instance)
+                                 (:token from-grafana-instance)
+                                 dashboard-uid))
+        dashboard-folder-title (get-in dashboard-response ["meta" "folderTitle"])
+        dashboard-folder-uid   (or to-board-folder-uid
+                                   (choose-folder-uid to-grafana-instance
+                                                      dashboard-folder-title))
+        clean-board-data       (-> dashboard-response
+                                   (get "dashboard")
+                                   (dissoc "version" "id"))
+        message                (or to-message
+                                   (str "Copy " (:title dashboard-response)
+                                        " (uid: " (:uid dashboard-response) ") "
+                                        "from " (:url from-grafana-instance)
+                                        "to " dashboard-folder-title
+                                        " (uid: " dashboard-folder-uid ") "
+                                        "at " (:url to-grafana-instance) "."))]
+    (api/create-update-dashboard (-> to-grafana-instance :url)
+                                 (-> to-grafana-instance :token)
+                                 (helper/clj->json {"dashboard" clean-board-data
+                                                    "message"   message
+                                                    "overwrite" true
+                                                    "folderUid" dashboard-folder-uid}))))
+
 ;; <<< COPY
 
 ;; >>> ADJUST
