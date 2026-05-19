@@ -16,6 +16,8 @@
    [nil  "--show-dashboard-alerts" "Show alert-rules related to a dashboard (BOARD_UID) within a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."]
    [nil  "--show-dashboard-panels" "Show library-panels related to a dashboard (BOARD_UID) within a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."]
 
+   ["-c" "--convenient TITLE" "Copy a dashboard matched by title from one instance (FROM_URL, FROM_TOKEN) to another (TO_URL, TO_TOKEN) conveniently. Throws Exception if not possible." :id :convenient]
+
    ["-b" nil "Copy a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to another (TO_URL, TO_TOKEN). Optional provide a TO_MESSAGE and TO_BOARD_FOLDER_UID." :id :board]
    ["-a" nil "Copy alert-rules associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to the folder (TO_ALERTS_FOLDER_UID) on another (TO_URL, TO_TOKEN)." :id :alerts]
    ["-p" nil "Copy library-panels associated to a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to the folder (TO_PANELS_FOLDER_UID) on another (TO_URL, TO_TOKEN)." :id :panels]
@@ -37,6 +39,7 @@
 
   (println "\nExamples:")
   (println "copy --help")
+  (println "copy --convenient=\"<dashboard-title>\"  --from-url=<from-grafana-url> --from-token=<from-grafana-token> --to-url=<to-grafana-url> --to-token=<to-grafana-token>")
   (println "copy --show-dashboards --from --from-url=<from-grafana-url> --from-token=<from-grafana-token>")
   (println "copy --show-folders --to --to-url=<to-grafana-url> --to-token=<to-grafana-token>")
   (println "copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url> --from-token=<from-grafana-token> --to-url=<to-grafana-url> --to-token=<to-grafana-token> [--to-board-folder-uid=<to-board-folder-uid>] [--to-message=<to-message>]")
@@ -63,6 +66,13 @@
       (:help options)
       (print-usage opts-map)
 
+      ;; CONVENIENT-COPY
+      (:convenient options)
+      (let [dashboard-title (:convenient options)]
+        (core/convenient-copy (settings/from-instance-arg options)
+                              (settings/to-instance-arg options)
+                              dashboard-title
+                              options))
 
       ;; SHOW
       (or (:show-dashboards options)
