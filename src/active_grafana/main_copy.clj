@@ -37,10 +37,10 @@
 
   (println "\nExamples:")
   (println "copy --help")
-  (println "copy --show-dashboards --from --from-url=<from-grafana-url --from-token=<from-grafana-token>")
-  (println "copy --show-folders --to --to-url=<to-grafana-url --to-token=<to-grafana-token>")
-  (println "copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> [--to-board-folder-uid=<to-board-folder-uid>] [--to-message=<to-message>]")
-  (println "copy -a --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --to-alerts-folder-uid=<to-alerts-folder-uid>"))
+  (println "copy --show-dashboards --from --from-url=<from-grafana-url> --from-token=<from-grafana-token>")
+  (println "copy --show-folders --to --to-url=<to-grafana-url> --to-token=<to-grafana-token>")
+  (println "copy -b --board-uid=<dashboard-uid> --from-url=<from-grafana-url> --from-token=<from-grafana-token> --to-url=<to-grafana-url> --to-token=<to-grafana-token> [--to-board-folder-uid=<to-board-folder-uid>] [--to-message=<to-message>]")
+  (println "copy -a --board-uid=<dashboard-uid> --from-url=<from-grafana-url> --from-token=<from-grafana-token> --to-url=<to-grafana-url> --to-token=<to-grafana-token> --to-alerts-folder-uid=<to-alerts-folder-uid>"))
 
 (defn -main [& args]
   (let [opts-map  (parse-opts args opts)
