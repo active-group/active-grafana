@@ -1,0 +1,22 @@
+services:
+  grafana-a:
+    image: grafana/grafana
+    container_name: grafana-a
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-a-storage:/var/lib/grafana
+
+  grafana-b:
+    image: grafana/grafana
+    container_name: grafana-b
+    restart: unless-stopped
+    ports:
+      - '3001:3000'
+    volumes:
+      - grafana-b-storage:/var/lib/grafana
+
+volumes:
+  grafana-a-storage: {}
+  grafana-b-storage: {}
