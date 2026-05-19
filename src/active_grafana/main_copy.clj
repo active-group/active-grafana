@@ -43,27 +43,40 @@
   (println "copy -a --board-uid=<dashboard-uid> --from-url=<from-grafana-url --from-token=<from-grafana-token> --to-url=<to-grafana-url --to-token=<to-grafana-token> --to-alerts-folder-uid=<to-alerts-folder-uid>"))
 
 (defn -main [& args]
-  (let [opts-map (parse-opts args opts)]
+  (let [opts-map  (parse-opts args opts)
+        options   (:options opts-map)
+        arguments (:arguments opts-map)
+        errors    (:errors opts-map)]
     (cond
-      (:errors opts-map)
-      (do (doall (map println (:errors opts-map)))
+      ;; ERRORS
+      errors
+      (do (doall (map println errors))
           (print-usage opts-map)
           (helper/error-logic))
 
-      (not (empty? (:arguments opts-map)))
-      (do (println "Unknown arguments: " (:arguments opts-map))
+      (not (empty? arguments))
+      (do (println "Unknown arguments: " arguments)
           (print-usage opts-map)
           (helper/error-logic))
 
-      (:help (:options opts-map))
+      ;; HELP
+      (:help options)
       (print-usage opts-map)
 
-      (or (:show-dashboards (:options opts-map)) (:show-folders (:options opts-map)) (:show-panels (:options opts-map))
-          (:show-dashboard-alerts (:options opts-map)) (:show-dashboard-panels (:options opts-map)))
-      (core/copy-show (settings/create-copy-arguments! (:options opts-map)))
 
-      (or (:board (:options opts-map)) (:alerts (:options opts-map)) (:panels (:options opts-map)))
-      (core/copy (settings/create-copy-arguments! (:options opts-map)))
+      ;; SHOW
+      (or (:show-dashboards options)
+          (:show-folders options)
+          (:show-panels options)
+          (:show-dashboard-alerts options)
+          (:show-dashboard-panels options))
+      (core/copy-show (settings/create-copy-arguments! options))
+
+      ;; COPY
+      (or (:board options)
+          (:alerts options)
+          (:panels options))
+      (core/copy (settings/create-copy-arguments! options))
 
       :else
       (print-usage opts-map))))
