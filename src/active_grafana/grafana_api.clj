@@ -138,6 +138,18 @@
     (helper/log (str "Api-url: " api-url))
     (client/get api-url {:insecure?   true
                          :oauth-token token})))
+;; POST /api/folders
+;; https://grafana.com/docs/grafana/latest/developers/http_api/folder/#create-folder
+(defn create-folder
+  "Create a folder named [[title]] using a POST against \"[[base-url]]/api/folders\". "
+  [base-url token title]
+  (let [api-url (str base-url "/api/folders")]
+    (helper/log (str "Api-url: " api-url))
+    (client/post api-url {:insecure?    true
+                          :oauth-token  token
+                          :body         (helper/clj->json {:title title})
+                          :accept       :json
+                          :content-type :json})))
 
 ;; <<< FOLDERS
 
