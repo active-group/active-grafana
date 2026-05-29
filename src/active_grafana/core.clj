@@ -418,10 +418,10 @@
         folder-uid              (when folder-unambiguous?
                                   (get (first folder-candidates) "uid"))]
     (cond no-folder-candidate?
-          (throw (ex-info (str "No folder with the following title was found: "
-                               folder-title)
-                          {:folder-title folder-title
-                           :grafana-url  (:url grafana-instance)}))
+          (do (api/create-folder (:url grafana-instance)
+                                 (:token grafana-instance)
+                                 folder-title)
+              (choose-folder-uid grafana-instance folder-title))
 
           folder-ambiguous?
           (do
