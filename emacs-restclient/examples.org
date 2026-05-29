@@ -20,21 +20,21 @@ GET http://localhost:3000/api/search?query=keycloak&type=dash-db
    #+BEGIN_SRC js
    [
      {
-       "id": 814893559070720,
-       "uid": "keycloak-dashboard",
+       "id": 1061871031304192,
+       "uid": "keycloak-dashboard-old",
        "orgId": 1,
        "title": "Keycloak Metrics Dashboard",
        "uri": "db/keycloak-metrics-dashboard",
-       "url": "/d/keycloak-dashboard/keycloak-metrics-dashboard",
+       "url": "/d/keycloak-dashboard-old/keycloak-metrics-dashboard",
        "slug": "",
        "type": "dash-db",
        "tags": [],
        "isStarred": false,
        "description": "Dashboard of Keycloak metrics exported with Keycloak Metrics SPI\r\n\r\nhttps://github.com/aerogear/keycloak-metrics-spi",
-       "folderId": 913675788136448,
-       "folderUid": "aflxz01n4hk3kd",
-       "folderTitle": "keyclaok",
-       "folderUrl": "/dashboards/f/aflxz01n4hk3kd/keyclaok",
+       "folderId": 1002119528886272,
+       "folderUid": "dflyuco4w6hvkf",
+       "folderTitle": "keycloak",
+       "folderUrl": "/dashboards/f/dflyuco4w6hvkf/keycloak",
        "sortMeta": 0,
        "isDeleted": false
      }
@@ -46,9 +46,9 @@ GET http://localhost:3000/api/search?query=keycloak&type=dash-db
    // X-Content-Type-Options: nosniff
    // X-Frame-Options: deny
    // X-Xss-Protection: 1; mode=block
-   // Date: Mon, 18 May 2026 10:52:42 GMT
-   // Content-Length: 549
-   // Request duration: 0.029823s
+   // Date: Thu, 28 May 2026 13:12:03 GMT
+   // Content-Length: 559
+   // Request duration: 0.058266s
    #+END_SRC
 
 2. Count results and proceed if count=1
@@ -76,6 +76,20 @@ GET http://localhost:3001/api/search?query=keycloak&type=dash-folder
        "isStarred": false,
        "sortMeta": 0,
        "isDeleted": false
+     },
+     {
+       "id": 1052741617410048,
+       "uid": "fflzcanlo45c0b",
+       "orgId": 1,
+       "title": "keycloak-a",
+       "uri": "db/keycloak-a",
+       "url": "/dashboards/f/fflzcanlo45c0b/keycloak-a",
+       "slug": "",
+       "type": "dash-folder",
+       "tags": [],
+       "isStarred": false,
+       "sortMeta": 0,
+       "isDeleted": false
      }
    ]
    // GET http://localhost:3001/api/search?query=keycloak&type=dash-folder
@@ -85,17 +99,20 @@ GET http://localhost:3001/api/search?query=keycloak&type=dash-folder
    // X-Content-Type-Options: nosniff
    // X-Frame-Options: deny
    // X-Xss-Protection: 1; mode=block
-   // Date: Tue, 19 May 2026 08:05:32 GMT
-   // Content-Length: 233
-   // Request duration: 0.037698s
+   // Date: Thu, 28 May 2026 12:33:48 GMT
+   // Content-Length: 471
+   // Request duration: 0.042691s
    #+END_SRC
+
+   #+RESULTS:
+   : undefined
 
 4. Count results and proceed if count=1 
 
 5. Get Dashboard by uid FROM
    #+begin_src restclient :noweb yes
 <<credentials.org:grafana-a()>>
-GET http://localhost:3000/api/dashboards/uid/keycloak-dashboard
+GET http://localhost:3000/api/dashboards/uid/keycloak-dashboard-old
 :headers
    #+end_src
 
@@ -110,20 +127,20 @@ GET http://localhost:3000/api/dashboards/uid/keycloak-dashboard
        "canStar": true,
        "canDelete": true,
        "slug": "keycloak-metrics-dashboard",
-       "url": "/d/keycloak-dashboard/keycloak-metrics-dashboard",
+       "url": "/d/keycloak-dashboard-old/keycloak-metrics-dashboard",
        "expires": "0001-01-01T00:00:00Z",
-       "created": "2026-05-13T06:58:52Z",
-       "updated": "2026-05-18T07:59:35Z",
+       "created": "2026-05-19T12:01:50Z",
+       "updated": "2026-05-19T12:02:13Z",
        "updatedBy": "admin",
        "createdBy": "admin",
        "version": 2,
        "hasAcl": false,
        "isFolder": false,
        "apiVersion": "v0alpha1",
-       "folderId": 913675788136448,
-       "folderUid": "aflxz01n4hk3kd",
-       "folderTitle": "keyclaok",
-       "folderUrl": "/dashboards/f/aflxz01n4hk3kd/keyclaok",
+       "folderId": 1002119528886272,
+       "folderUid": "dflyuco4w6hvkf",
+       "folderTitle": "keycloak",
+       "folderUrl": "/dashboards/f/dflyuco4w6hvkf/keycloak",
        "provisioned": false,
        "provisionedExternalId": "",
        "annotationsPermissions": {
@@ -165,7 +182,7 @@ GET http://localhost:3000/api/dashboards/uid/keycloak-dashboard
        "editable": true,
        "fiscalYearStartMonth": 0,
        "graphTooltip": 1,
-       "id": 814893559070720,
+       "id": 1061871031304192,
        "liveNow": false,
        "panels": [
          {
@@ -2510,20 +2527,20 @@ GET http://localhost:3000/api/dashboards/uid/keycloak-dashboard
          ]
        },
        "title": "Keycloak Metrics Dashboard",
-       "uid": "keycloak-dashboard",
+       "uid": "keycloak-dashboard-old",
        "version": 2
      }
    }
-   // GET http://localhost:3000/api/dashboards/uid/keycloak-dashboard
+   // GET http://localhost:3000/api/dashboards/uid/keycloak-dashboard-old
    // HTTP/1.1 200 OK
    // Cache-Control: no-store
    // Content-Type: application/json
    // X-Content-Type-Options: nosniff
    // X-Frame-Options: deny
    // X-Xss-Protection: 1; mode=block
-   // Date: Mon, 18 May 2026 10:56:06 GMT
+   // Date: Thu, 28 May 2026 12:33:59 GMT
    // Transfer-Encoding: chunked
-   // Request duration: 0.066212s
+   // Request duration: 0.031297s
    #+END_SRC
 
 7. Copy Dashboard using api/create-update-dashboard
@@ -2607,12 +2624,26 @@ GET http://localhost:3000/api/search?type=dash-folder
 #+BEGIN_SRC js
 [
   {
-    "id": 913675788136448,
-    "uid": "aflxz01n4hk3kd",
+    "id": 1002119528886272,
+    "uid": "dflyuco4w6hvkf",
     "orgId": 1,
-    "title": "keyclaok",
-    "uri": "db/keyclaok",
-    "url": "/dashboards/f/aflxz01n4hk3kd/keyclaok",
+    "title": "keycloak",
+    "uri": "db/keycloak",
+    "url": "/dashboards/f/dflyuco4w6hvkf/keycloak",
+    "slug": "",
+    "type": "dash-folder",
+    "tags": [],
+    "isStarred": false,
+    "sortMeta": 0,
+    "isDeleted": false
+  },
+  {
+    "id": 1002250554748928,
+    "uid": "dflyuecbw3cw0f",
+    "orgId": 1,
+    "title": "my-second-folder",
+    "uri": "db/my-second-folder",
+    "url": "/dashboards/f/dflyuecbw3cw0f/my-second-folder",
     "slug": "",
     "type": "dash-folder",
     "tags": [],
@@ -2628,10 +2659,120 @@ GET http://localhost:3000/api/search?type=dash-folder
 // X-Content-Type-Options: nosniff
 // X-Frame-Options: deny
 // X-Xss-Protection: 1; mode=block
-// Date: Mon, 18 May 2026 10:39:27 GMT
-// Content-Length: 232
-// Request duration: 0.018688s
+// Date: Fri, 29 May 2026 09:34:08 GMT
+// Content-Length: 489
+// Request duration: 0.018939s
 #+END_SRC
+*** get folder by uid
+#+begin_src restclient :noweb yes
+<<credentials.org:grafana-a()>>
+GET http://localhost:3000/api/folders/dflyuecbw3cw0f
+:headers
+
+#+end_src
+
+#+RESULTS:
+#+BEGIN_SRC js
+{
+  "id": 1002250554748928,
+  "uid": "dflyuecbw3cw0f",
+  "orgId": 1,
+  "title": "my-second-folder",
+  "url": "/dashboards/f/dflyuecbw3cw0f/my-second-folder",
+  "hasAcl": false,
+  "canSave": true,
+  "canEdit": true,
+  "canAdmin": true,
+  "canDelete": true,
+  "createdBy": "admin",
+  "created": "2026-05-19T08:04:56Z",
+  "updatedBy": "Anonymous",
+  "updated": "2026-05-19T08:04:56Z",
+  "version": 1
+}
+// GET http://localhost:3000/api/folders/dflyuecbw3cw0f
+// HTTP/1.1 200 OK
+// Cache-Control: no-store
+// Content-Type: application/json
+// X-Content-Type-Options: nosniff
+// X-Frame-Options: deny
+// X-Xss-Protection: 1; mode=block
+// Date: Fri, 29 May 2026 09:34:27 GMT
+// Content-Length: 337
+// Request duration: 0.014318s
+#+END_SRC
+
+
+*** Create folder on grafana-b
+#+begin_src restclient :noweb yes
+<<credentials.org:grafana-b()>>
+POST http://localhost:3001/apis/folder.grafana.app/v1/namespaces/default/folders
+:headers
+
+{
+  "metadata": {
+    "generateName": "active_grafana_convenient_copy__"
+  },
+  "spec": {
+    "title": "my-second-folder"
+  }
+}
+#+end_src
+
+#+RESULTS:
+#+BEGIN_SRC js
+{
+  "kind": "Folder",
+  "apiVersion": "folder.grafana.app/v1",
+  "metadata": {
+    "name": "active_grafana_convenient_copy__fh8gx",
+    "namespace": "default",
+    "uid": "d6d9f42f-1209-43f5-b0d4-92eee6fe654f",
+    "resourceVersion": "1780047703225006",
+    "generation": 1,
+    "creationTimestamp": "2026-05-29T09:41:43Z",
+    "labels": {
+      "grafana.app/deprecatedInternalID": "1852991659663360"
+    },
+    "annotations": {
+      "grafana.app/createdBy": "service-account:efm6phkft4c8wb"
+    },
+    "managedFields": [
+      {
+        "manager": "unknown",
+        "operation": "Update",
+        "apiVersion": "folder.grafana.app/v1",
+        "time": "2026-05-29T09:41:43Z",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {
+          "f:metadata": {
+            "f:generateName": {}
+          },
+          "f:spec": {
+            "f:title": {}
+          }
+        }
+      }
+    ]
+  },
+  "spec": {
+    "title": "my-second-folder"
+  }
+}
+
+// POST http://localhost:3001/apis/folder.grafana.app/v1/namespaces/default/folders
+// HTTP/1.1 201 Created
+// Audit-Id: 2a334cf8-dd34-4da9-ab31-b4139637a83d
+// Cache-Control: no-store
+// Content-Type: application/json
+// X-Content-Type-Options: nosniff
+// X-Frame-Options: deny
+// X-Xss-Protection: 1; mode=block
+// Date: Fri, 29 May 2026 09:41:43 GMT
+// Content-Length: 675
+// Request duration: 0.025796s
+#+END_SRC
+
 
 ** dashboards
 *** GET first 1000 dashboards
@@ -2645,21 +2786,39 @@ GET http://localhost:3000/api/search?type=dash-db
 #+BEGIN_SRC js
 [
   {
-    "id": 814893559070720,
-    "uid": "keycloak-dashboard",
+    "id": 1061871031304192,
+    "uid": "keycloak-dashboard-old",
     "orgId": 1,
     "title": "Keycloak Metrics Dashboard",
     "uri": "db/keycloak-metrics-dashboard",
-    "url": "/d/keycloak-dashboard/keycloak-metrics-dashboard",
+    "url": "/d/keycloak-dashboard-old/keycloak-metrics-dashboard",
     "slug": "",
     "type": "dash-db",
     "tags": [],
     "isStarred": false,
     "description": "Dashboard of Keycloak metrics exported with Keycloak Metrics SPI\r\n\r\nhttps://github.com/aerogear/keycloak-metrics-spi",
-    "folderId": 913675788136448,
-    "folderUid": "aflxz01n4hk3kd",
-    "folderTitle": "keyclaok",
-    "folderUrl": "/dashboards/f/aflxz01n4hk3kd/keyclaok",
+    "folderId": 1002119528886272,
+    "folderUid": "dflyuco4w6hvkf",
+    "folderTitle": "keycloak",
+    "folderUrl": "/dashboards/f/dflyuco4w6hvkf/keycloak",
+    "sortMeta": 0,
+    "isDeleted": false
+  },
+  {
+    "id": 1817690896470016,
+    "uid": "adv5c5m",
+    "orgId": 1,
+    "title": "Simple Time Series",
+    "uri": "db/simple-time-series",
+    "url": "/d/adv5c5m/simple-time-series",
+    "slug": "",
+    "type": "dash-db",
+    "tags": [],
+    "isStarred": false,
+    "folderId": 1002250554748928,
+    "folderUid": "dflyuecbw3cw0f",
+    "folderTitle": "my-second-folder",
+    "folderUrl": "/dashboards/f/dflyuecbw3cw0f/my-second-folder",
     "sortMeta": 0,
     "isDeleted": false
   }
@@ -2671,8 +2830,9 @@ GET http://localhost:3000/api/search?type=dash-db
 // X-Content-Type-Options: nosniff
 // X-Frame-Options: deny
 // X-Xss-Protection: 1; mode=block
-// Date: Mon, 18 May 2026 09:06:07 GMT
-// Content-Length: 549
-// Request duration: 0.138225s
+// Date: Thu, 28 May 2026 13:40:11 GMT
+// Content-Length: 942
+// Request duration: 0.020499s
 #+END_SRC
+** library panels
 
