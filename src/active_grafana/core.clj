@@ -373,10 +373,17 @@
         dashboard-metadata         (when dashboard-unambiguous?
                                      (first dashboard-candidates))]
     (cond no-dashboard-candidate?
-          (throw (ex-info (str "No dashboard with the following title was found: "
-                               dashboard-title)
-                          {:dashboard-title dashboard-title
-                           :grafana-url     (:url grafana-instance)}))
+          (let [first-thousand-dashboards
+                (->> (api/get-dashboards
+                      (:url grafana-instance)
+                      (:token grafana-instance))
+                     (helper/json->clj))]
+            (pprint/print-table ["title" "uid" "url" "description" "folderTitle" "folderUrl"]
+                                first-thousand-dashboards)
+            (throw (ex-info (str "No dashboard with the following title was found: "
+                                 dashboard-title)
+                            {:dashboard-title dashboard-title
+                             :grafana-url     (:url grafana-instance)})))
 
           dashboard-ambiguous?
           (do
