@@ -496,16 +496,23 @@
   "Copy a dashboard titled [[dashboard-title]] from [[from-grafana-instance]] to
    [[to-grafana-instance]] conveniently.  Also copy the library panels and
    alerts the dashboard depends on.  The convenience this function provides
-   consists of several simple heuristics: 1. It tries to find a dashboard titled
-   [[dashboard-title]] on the given [[from-grafana-instance]].  2. It tries to
-   identify the folder to copy the dashboard to using the name of the folder the
-   dashboard titled [[dashboard-title]] is located on the
-   [[from-grafana-instance]]. See the fn [[choose-folder-uid]] for details.  3.
-   It creates the folder to copy the dashboard to, if it does not find one on
+   consists of several simple heuristics:
+
+   1. It tries to find a dashboard titled [[dashboard-title]] on the given
+   [[from-grafana-instance]].
+
+   2. It tries to identify the folder to copy the dashboard to using the name of
+   the folder the dashboard titled [[dashboard-title]] is located on the
+   [[from-grafana-instance]]. See the fn [[choose-folder-uid]] for details.
+
+   3. It creates the folder to copy the dashboard to, if it does not find one on
    [[to-grafana-instance]], which has the same title as on the
-   [[from-grafana-instance]].  4. It checks if the library panels and alerts the
-   dashboard depends on are all located in the same folder. See
-   [[choose-panel-folder-tiele]] and [[choose-alert-folder-uid]] for details.
+   [[from-grafana-instance]].
+
+   4. It checks if the library panels and alerts the dashboard depends on are
+   all located in the same folder. See [[choose-panel-folder-tiele]] and
+   [[choose-alert-folder-uid]] for details.
+
    5. If the folders where the library panels and alerts are located in
    [[from-grafana-instance]] do not exist on [[to-grafana-instance]], they are
    created using the title of the folders on [[from-grafana-instance]]. See
