@@ -358,106 +358,114 @@
 ;; Copying to existing folder `...` on ...
 ;; also das logging ausbauen.
 
+(defn ambiguous-candidates [candidates]
+  (let [candidates-count (count candidates)]
+    (cond (zero? candidates-count) :none
+          (= 1 candidates-count) :unambiguous
+          (< 1 candidates-count) :ambiguous)))
+
 (defn choose-dashboard-metadata
   "Searches a dashboard on a given [[grafana-instance]] by using a given
    [[dashboard-title]] as query string returning the dashboard metadata, if the
    search yields an unambiguous result.  If the search yields an ambiguous or no
    result at all, this function throws an Exception."
   [grafana-instance dashboard-title]
-  (let [dashboard-candidates       (->> dashboard-title
-                                        (api/find-dashboards-by-query
-                                         (:url grafana-instance)
-                                         (:token grafana-instance))
-                                        (helper/json->clj)
-                                        (remove deleted?)
-                                        (filter (partial title= dashboard-title)))
-        dashboard-candidates-count (count dashboard-candidates)
-        no-dashboard-candidate?    (zero? dashboard-candidates-count)
-        dashboard-unambiguous?     (= 1 dashboard-candidates-count)
-        dashboard-ambiguous?       (< 1 dashboard-candidates-count)
-        dashboard-metadata         (when dashboard-unambiguous?
-                                     (first dashboard-candidates))]
-    (cond no-dashboard-candidate?
-          (let [first-thousand-dashboards
-                (->> (api/get-dashboards
-                      (:url grafana-instance)
-                      (:token grafana-instance))
-                     (helper/json->clj))]
-            (pprint/print-table ["title" "uid" "url" "description" "folderTitle" "folderUrl"]
-                                first-thousand-dashboards)
-            (throw (ex-info (str "No dashboard with the following title was found: "
-                                 dashboard-title)
-                            {:dashboard-title dashboard-title
-                             :grafana-url     (:url grafana-instance)})))
+  (let [dashboard-candidates (->> dashboard-title
+                                  (api/find-dashboards-by-query
+                                   (:url grafana-instance)
+                                   (:token grafana-instance))
+                                  (helper/json->clj)
+                                  (remove deleted?)
+                                  (filter (partial title= dashboard-title)))]
+    (case (ambiguous-candidates dashboard-candidates)
+      :none
+      (let [first-thousand-dashboards
+            (->> (api/get-dashboards
+                  (:url grafana-instance)
+                  (:token grafana-instance))
+                 (helper/json->clj))]
+        (pprint/print-table ["title" "uid" "url" "description" "folderTitle" "folderUrl"]
+                            first-thousand-dashboards)
+        (throw (ex-info (str "No dashboard with the following title was found: "
+                             dashboard-title)
+                        {:dashboard-title      dashboard-title
+                         :dashboard-candidates dashboard-candidates
+                         :grafana-url          (:url grafana-instance)})))
 
-          dashboard-ambiguous?
-          (do
-            ;; TODO: We need a convenient way to choose the
-            ;; dashboard to copy or to refine the search
-            (pprint/print-table ["title" "uid" "url" "description" "folderTitle" "folderUrl"]
-                                dashboard-candidates)
-            (throw (ex-info (str "More than one (" dashboard-candidates-count
-                                 ") dashboard was found using the search query: " dashboard-title)
-                            {:dashboard-title                  dashboard-title
-                             :dashboard-candidates             dashboard-candidates
-                             :grafana-url                      (:url grafana-instance)})))
+      :ambiguous
+      (do
+        ;; TODO: We need a convenient way to choose the
+        ;; dashboard to copy or to refine the search
+        (pprint/print-table ["title" "uid" "url" "description" "folderTitle" "folderUrl"]
+                            dashboard-candidates)
+        (throw (ex-info (str "More than one dashboard was found using the search query: " dashboard-title)
+                        {:dashboard-title      dashboard-title
+                         :dashboard-candidates dashboard-candidates
+                         :grafana-url          (:url grafana-instance)})))
 
-          dashboard-unambiguous?
-          dashboard-metadata
+      :unambiguous
+      (let [dashboard-metadata (first dashboard-candidates)]
+        (helper/log (str "The dashboard titled \""
+                         (get dashboard-metadata "title")
+                         "\" was found in the folder \""
+                         (get dashboard-metadata "folderTitle")
+                         " on " (:url grafana-instance)
+                         "\"."))
+        dashboard-metadata)
 
-          :else
-          (throw (ex-info "Unexpected choose-dashboard-meta result!"
-                          {:dashboard-candidates-count       dashboard-candidates-count
-                           :dashboard-candidates             dashboard-candidates})))))
+      (throw (ex-info "Unexpected choose-dashboard-meta result!"
+                      {:dashboard-title      dashboard-title
+                       :dashboard-candidates dashboard-candidates
+                       :grafana-url          (:url grafana-instance)})))))
 
 (defn choose-folder-uid
   "Searches a folder on a given [[grafana-instance]] by using a given
   [[folder-title]] as query string returning a folder uid, if the search yields
-  an unambiguous result. If the search yields no result at all this function
-  creates a folder with the title [[folder-title]] and returns its uid. If the
-  search yields an ambiguous result, this function throws an exception."
-  [grafana-instance folder-title]
-  (let [folder-candidates       (->> folder-title
-                                     (api/find-folders-by-query (:url grafana-instance)
-                                                                (:token grafana-instance))
-                                     (helper/json->clj)
-                                     (remove deleted?)
-                                     (filter (partial title= folder-title)))
-        folder-candidates-count (count folder-candidates)
-        no-folder-candidate?    (zero? folder-candidates-count)
-        folder-unambiguous?     (= 1 folder-candidates-count)
-        folder-ambiguous?       (< 1 folder-candidates-count)
-        folder-uid              (when folder-unambiguous?
-                                  (get (first folder-candidates) "uid"))]
-    (cond no-folder-candidate?
-          (do (api/create-folder (:url grafana-instance)
-                                 (:token grafana-instance)
-                                 folder-title)
-              (choose-folder-uid grafana-instance folder-title))
+   an unambiguous result. If the search yields no result at all this function
+   creates a folder with the title [[folder-title]] and returns its uid. If the
+   search yields an ambiguous result, this function throws an exception."
+  [thing-to-copy grafana-instance folder-title]
+  (let [folder-candidates (->> folder-title
+                               (api/find-folders-by-query (:url grafana-instance)
+                                                          (:token grafana-instance))
+                               (helper/json->clj)
+                               (remove deleted?)
+                               (filter (partial title= folder-title)))]
+    (case (ambiguous-candidates folder-candidates)
+      :none
+      (do (api/create-folder (:url grafana-instance)
+                             (:token grafana-instance)
+                             folder-title)
+          (choose-folder-uid thing-to-copy grafana-instance folder-title))
 
-          folder-ambiguous?
-          (do
-            ;; TODO: we need a more convenient way to resolve
-            ;; the ambiguity of the folder-ccandidates
-            ;; the user should be able to choose
-            ;; a folder conveniently
-            (pprint/print-table ["title" "uid" "url"]
-                                folder-candidates)
-            (throw (ex-info (str "More than one (" folder-candidates-count
-                                 ") folder was found using the search query: " folder-title)
-                            {:folder-title      folder-title
-                             :folder-candidates folder-candidates
-                             :grafana-url       (:url grafana-instance)})))
+      :ambiguous
+      (do
+        ;; TODO: we need a more convenient way to resolve
+        ;; the ambiguity of the folder-ccandidates
+        ;; the user should be able to choose
+        ;; a folder conveniently
+        (pprint/print-table ["title" "uid" "url"]
+                            folder-candidates)
+        (throw (ex-info (str "More than one folder was found using the search query: " folder-title)
+                        {:folder-title      folder-title
+                         :folder-candidates folder-candidates
+                         :grafana-url       (:url grafana-instance)})))
 
-          folder-unambiguous?
-          folder-uid
+      :unambiguous
+      (let [folder-uid (get (first folder-candidates) "uid")]
+        (helper/log (str "The following folder was chosen to copy the " thing-to-copy " into."))
+        folder-uid)
 
-          :else
-          (throw (ex-info "Unexpected choose-folder-uid result!"
-                          {:folder-candidates-count folder-candidates-count
-                           :folder-candidates       folder-candidates})))))
+      (throw (ex-info "Unexpected choose-folder-uid result!"
+                      {:folder-title      folder-title
+                       :folder-candidates folder-candidates
+                       :grafana-url       (:url grafana-instance)})))))
 
-(defn choose-panel-folder-title
+(def choose-dashboard-folder-uid (partial choose-folder-uid "dashboard"))
+(def choose-panels-folder-uid (partial choose-folder-uid "library panels"))
+(def choose-alerts-folder-uid (partial choose-folder-uid "alerts"))
+
+(defn check-and-choose-panels-folder-title
   "Returns the title of the folder the given [[panels]] are located in, if all
    the given [[panels]] are located in the same folder.  If the panels are
    located in more then one folder this function throws an exception."
@@ -481,7 +489,7 @@
                       {:panels           panels
                        :panels-by-folder panels-by-folder})))))
 
-(defn choose-alert-folder-uid
+(defn check-and-choose-alert-folder-uid
   "Returns the uid of the folder the given [[alerts]] are located in, if all
    the given [[alerts]] are located in the same folder.  If the alerts are
    located in more then one folder this function throws an exception."
@@ -552,8 +560,8 @@
         ;; uid is the same as the dashboard-folder-uid
         ;; BUT: What to do if the checks fail?
         dashboard-folder-uid   (or to-board-folder-uid
-                                   (choose-folder-uid to-grafana-instance
-                                                      dashboard-folder-title))
+                                   (choose-dashboard-folder-uid to-grafana-instance
+                                                                dashboard-folder-title))
         message                (or to-message
                                    (str "Copy " (get dashboard-response "title")
                                         " (uid: " (get dashboard-response "uid") ") "
@@ -564,13 +572,13 @@
 
         panels                (find-dashboard-related-panels from-grafana-instance dashboard-uid)
         has-dependent-panels? (not-empty panels)
-        panels-folder-title   (when has-dependent-panels? (choose-panel-folder-title panels))
-        panels-folder-uid     (when has-dependent-panels? (choose-folder-uid to-grafana-instance
-                                                                             panels-folder-title))
+        panels-folder-title   (when has-dependent-panels? (check-and-choose-panels-folder-title panels))
+        panels-folder-uid     (when has-dependent-panels? (choose-panels-folder-uid to-grafana-instance
+                                                                                    panels-folder-title))
 
         source-alerts              (find-dashboard-related-alert-rules from-grafana-instance dashboard-uid)
         has-dependent-alerts?      (not-empty source-alerts)
-        source-alerts-folder-uid   (when has-dependent-alerts? (choose-alert-folder-uid source-alerts))
+        source-alerts-folder-uid   (when has-dependent-alerts? (check-and-choose-alert-folder-uid source-alerts))
         source-alerts-folder       (when has-dependent-alerts?
                                      (api/get-folder-by-folder-uid (-> from-grafana-instance :url)
                                                                    (-> from-grafana-instance :token)
@@ -578,19 +586,25 @@
         source-alerts-folder-title (when has-dependent-alerts?
                                      (get (helper/json->clj source-alerts-folder) "title"))
         target-alerts-folder-uid   (when has-dependent-alerts?
-                                     (choose-folder-uid to-grafana-instance
-                                                        source-alerts-folder-title))]
+                                     (choose-alerts-folder-uid to-grafana-instance
+                                                               source-alerts-folder-title))]
     (when has-dependent-panels?
+      (helper/log (str  "The following panels will be copied: "
+                        "TODO: list panels to copy here..."))
       (copy-panels from-grafana-instance
                    to-grafana-instance
                    dashboard-uid
                    panels-folder-uid))
+    (helper/log (str  "The following dashboard will be copied: "
+                      (get dashboard-response "title")))
     (copy-dashboard from-grafana-instance
                     to-grafana-instance
                     dashboard-uid
                     dashboard-folder-uid
                     message)
     (when has-dependent-alerts?
+      (helper/log (str  "The following alerts will be copied: "
+                        "TODO: list alerts to copy here..."))
       (copy-alerts from-grafana-instance
                    to-grafana-instance
                    dashboard-uid
