@@ -3,6 +3,9 @@
         org.clojure/clojure           {:mvn/version "1.11.1"}
         org.clojure/data.json         {:mvn/version "2.4.0"}
         org.clojure/tools.cli         {:mvn/version "1.0.219"}
-        org.babashka/http-client      {:mvn/version "0.3.11"}}
+        org.babashka/http-client      {:mvn/version "0.3.11"}
+        ;; NOTE: bond is used because it is compatible with babashka
+        ;; https://github.com/babashka/babashka/blob/master/doc/projects.md#bond
+        circleci/bond                 {:mvn/version "0.6.0"}}
  :tasks {adjust active-grafana.main-adjust/-main
          copy   active-grafana.main-copy/-main}}
