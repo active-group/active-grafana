@@ -352,6 +352,11 @@
 ;; we need to run the real thing without support
 ;; of a user. Or without the need to be be an
 ;; interactive program.
+;;
+;; TODO: Wenn ein Dashboard existiert, wäre es super, wenn noch mehr human-readable output käme. Also sowas wie:
+;; Found dashboard `Panakeia Core: Overview` in folder `Panakeia` with alerts ... on rt-panakeia....
+;; Copying to existing folder `...` on ...
+;; also das logging ausbauen.
 
 (defn choose-dashboard-metadata
   "Searches a dashboard on a given [[grafana-instance]] by using a given
