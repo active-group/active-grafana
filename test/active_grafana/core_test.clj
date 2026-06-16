@@ -45,3 +45,33 @@
                             #"More than one dashboard was found"
                             (sut/choose-dashboard-metadata examples/grafana-a-instance
                                                            examples/dashboard-title))))))
+
+(deftest choose-folder-uid-test
+  (testing "no folder is found"
+    (with-stub!
+      [[api/find-folders-by-query [(api-stub/find-folders-by-query :none)
+                                   (api-stub/find-folders-by-query :unambiguous)]]
+       [api/create-folder api-stub/create-folder]]
+      (is (= "dflyuecbw3cw0f"
+             (sut/choose-folder-uid "test-thingy"
+                                    examples/grafana-b-instance
+                                    examples/folder-title)))))
+  (testing "1 folder is found"
+    (with-stub!
+      [[api/find-folders-by-query
+        (api-stub/find-folders-by-query :unambiguous)]
+       [api/create-folder api-stub/create-folder]]
+      (is (= "dflyuecbw3cw0f"
+             (sut/choose-folder-uid "test-thingy"
+                                    examples/grafana-b-instance
+                                    examples/folder-title)))))
+  (testing "more than 1 folder is found"
+    (with-stub!
+      [[api/find-folders-by-query
+        (api-stub/find-folders-by-query :ambiguous)]
+       [api/create-folder api-stub/create-folder]]
+      (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                            #"More than one folder was found"
+                            (sut/choose-folder-uid "test-thingy"
+                                                   examples/grafana-b-instance
+                                                   examples/folder-title))))))
