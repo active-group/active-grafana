@@ -88,11 +88,20 @@
     (is (= "my-second-folder"
            (sut/check-and-choose-panels-folder-title (:all-in-same-folder examples/dashboard-related-panels)))))
   (testing "not all panels are located in same folder"
-    (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                          #"The panels are located in different folders"
-                          (sut/check-and-choose-panels-folder-title (:not-all-in-same-folder examples/dashboard-related-panels))))))
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"The panels are located in different folders"
+         (sut/check-and-choose-panels-folder-title (:not-all-in-same-folder examples/dashboard-related-panels))))))
 
-(deftest check-and-choose-alert-folder-uid-test)
+(deftest check-and-choose-alert-folder-uid-test
+  (testing "all alerts are located in same folder"
+    (is (= "dflyuecbw3cw0f"
+           (sut/check-and-choose-alert-folder-uid (:all-in-same-folder examples/dashboard-related-alerts)))))
+  (testing "not all alerts are located in same folder"
+    (is (thrown-with-msg?
+         clojure.lang.ExceptionInfo
+         #"The alerts are located in different folders"
+         (sut/check-and-choose-alert-folder-uid (:not-all-in-same-folder examples/dashboard-related-alerts))))))
 
 (deftest copy-panels-test)
 
