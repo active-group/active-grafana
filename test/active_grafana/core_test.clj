@@ -52,7 +52,7 @@
       [[api/find-folders-by-query [(api-stub/find-folders-by-query :none)
                                    (api-stub/find-folders-by-query :unambiguous)]]
        [api/create-folder api-stub/create-folder]]
-      (is (= "dflyuecbw3cw0f"
+      (is (= examples/folder-uid
              (sut/choose-folder-uid "test-thingy"
                                     examples/grafana-b-instance
                                     examples/folder-title)))))
@@ -61,7 +61,7 @@
       [[api/find-folders-by-query
         (api-stub/find-folders-by-query :unambiguous)]
        [api/create-folder api-stub/create-folder]]
-      (is (= "dflyuecbw3cw0f"
+      (is (= examples/folder-uid
              (sut/choose-folder-uid "test-thingy"
                                     examples/grafana-b-instance
                                     examples/folder-title)))))
@@ -75,3 +75,27 @@
                             (sut/choose-folder-uid "test-thingy"
                                                    examples/grafana-b-instance
                                                    examples/folder-title))))))
+
+(deftest find-dashboard-related-panels-test
+  (with-stub!
+    [[api/get-dashboard-by-uid api-stub/get-dashboard-by-uid]
+     [api/get-library-element-by-uid api-stub/get-library-element-by-uid]]
+    (is (seq? (sut/find-dashboard-related-panels examples/grafana-a-instance
+                                                 examples/dashboard-uid)))))
+
+(deftest check-and-choose-panels-folder-title-test
+  (testing "all panels are located in same folder"
+    (is (= "my-second-folder"
+           (sut/check-and-choose-panels-folder-title (:all-in-same-folder examples/dashboard-related-panels)))))
+  (testing "not all panels are located in same folder"
+    (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                          #"The panels are located in different folders"
+                          (sut/check-and-choose-panels-folder-title (:not-all-in-same-folder examples/dashboard-related-panels))))))
+
+(deftest check-and-choose-alert-folder-uid-test)
+
+(deftest copy-panels-test)
+
+(deftest copy-dashboard-test)
+
+(deftest copy-alerts-test)

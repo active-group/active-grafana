@@ -1,13 +1,305 @@
 (ns active-grafana.examples
   (:require [active-grafana.settings :as settings]))
 
+;; TODO: stuff like the uids and titles need to
+;; be in a specific form to work for our tests
+
 (def grafana-a-instance (settings/->Grafana-Instance "http://irrelevant.url-a" "irrelevant-token-a"))
 
 (def grafana-b-instance (settings/->Grafana-Instance "http://irrelevant.url-b" "irrelevant-token-b"))
 
 (def dashboard-title "Simple Time Series")
 
+(def dashboard-uid "adv5c5m")
+
 (def folder-title "my-second-folder")
+
+(def folder-uid "dflyuecbw3cw0f")
+
+(def dashboard-related-panels
+  {:all-in-same-folder
+   '({"model"
+      {"libraryPanel" {"name" "TimeSeriesPanel", "uid" "efm6vhrzhukg0f"},
+       "fieldConfig"
+       {"defaults"
+        {"color" {"mode" "palette-classic"},
+         "custom"
+         {"drawStyle" "line",
+          "barAlignment" 0,
+          "stacking" {"group" "A", "mode" "none"},
+          "lineWidth" 1,
+          "axisBorderShow" false,
+          "insertNulls" false,
+          "axisColorMode" "text",
+          "gradientMode" "none",
+          "pointSize" 5,
+          "axisCenteredZero" false,
+          "axisLabel" "",
+          "showValues" false,
+          "lineInterpolation" "linear",
+          "axisPlacement" "auto",
+          "fillOpacity" 0,
+          "barWidthFactor" 0.6,
+          "hideFrom" {"legend" false, "tooltip" false, "viz" false},
+          "scaleDistribution" {"type" "linear"},
+          "showPoints" "auto",
+          "spanNulls" false,
+          "thresholdsStyle" {"mode" "off"}},
+         "mappings" [],
+         "thresholds"
+         {"mode" "absolute",
+          "steps" [{"color" "green", "value" nil} {"color" "red", "value" 80}]}},
+        "overrides" []},
+       "pluginVersion" "13.0.1+security-01",
+       "id" 1,
+       "datasource" {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
+       "title" "TimeSeries",
+       "type" "timeseries",
+       "options"
+       {"annotations" {"clustering" -1, "multiLane" false},
+        "legend"
+        {"calcs" [],
+         "displayMode" "list",
+         "placement" "bottom",
+         "showLegend" true},
+        "tooltip" {"hideZeros" false, "mode" "single", "sort" "none"}},
+       "description" ""},
+      "id" 2,
+      "uid" "efm6vhrzhukg0f",
+      "name" "TimeSeriesPanel",
+      "kind" 1,
+      "type" "timeseries",
+      "version" 1,
+      "meta"
+      {"folderName" "my-second-folder",
+       "folderUid" "dflyuecbw3cw0f",
+       "connectedDashboards" 1,
+       "created" "2026-05-28T13:37:46Z",
+       "updated" "2026-05-28T13:37:46Z",
+       "createdBy"
+       {"id" 1,
+        "name" "admin",
+        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"},
+       "updatedBy"
+       {"id" 1,
+        "name" "admin",
+        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"}},
+      "folderUid" "dflyuecbw3cw0f",
+      "folderId" 1002250554748928,
+      "orgId" 1,
+      "description" ""}
+     {"model"
+      {"libraryPanel" {"name" "TimeSeriesPanel", "uid" "efm6vhrzhukg0f"},
+       "fieldConfig"
+       {"defaults"
+        {"color" {"mode" "palette-classic"},
+         "custom"
+         {"drawStyle" "line",
+          "barAlignment" 0,
+          "stacking" {"group" "A", "mode" "none"},
+          "lineWidth" 1,
+          "axisBorderShow" false,
+          "insertNulls" false,
+          "axisColorMode" "text",
+          "gradientMode" "none",
+          "pointSize" 5,
+          "axisCenteredZero" false,
+          "axisLabel" "",
+          "showValues" false,
+          "lineInterpolation" "linear",
+          "axisPlacement" "auto",
+          "fillOpacity" 0,
+          "barWidthFactor" 0.6,
+          "hideFrom" {"legend" false, "tooltip" false, "viz" false},
+          "scaleDistribution" {"type" "linear"},
+          "showPoints" "auto",
+          "spanNulls" false,
+          "thresholdsStyle" {"mode" "off"}},
+         "mappings" [],
+         "thresholds"
+         {"mode" "absolute",
+          "steps" [{"color" "green", "value" nil} {"color" "red", "value" 80}]}},
+        "overrides" []},
+       "pluginVersion" "13.0.1+security-01",
+       "id" 1,
+       "datasource" {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
+       "title" "TimeSeries",
+       "type" "timeseries",
+       "options"
+       {"annotations" {"clustering" -1, "multiLane" false},
+        "legend"
+        {"calcs" [],
+         "displayMode" "list",
+         "placement" "bottom",
+         "showLegend" true},
+        "tooltip" {"hideZeros" false, "mode" "single", "sort" "none"}},
+       "description" ""},
+      "id" 2,
+      "uid" "efm6vhrzhukg0f",
+      "name" "TimeSeriesPanel",
+      "kind" 1,
+      "type" "timeseries",
+      "version" 1,
+      "meta"
+      {"folderName" "my-second-folder",
+       "folderUid" "dflyuecbw3cw0f",
+       "connectedDashboards" 1,
+       "created" "2026-05-28T13:37:46Z",
+       "updated" "2026-05-28T13:37:46Z",
+       "createdBy"
+       {"id" 1,
+        "name" "admin",
+        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"},
+       "updatedBy"
+       {"id" 1,
+        "name" "admin",
+        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"}},
+      "folderUid" "dflyuecbw3cw0f",
+      "folderId" 1002250554748928,
+      "orgId" 1,
+      "description" ""})
+
+   :not-all-in-same-folder
+   '({"model"
+      {"libraryPanel" {"name" "TimeSeriesPanel", "uid" "efm6vhrzhukg0f"},
+       "fieldConfig"
+       {"defaults"
+        {"color" {"mode" "palette-classic"},
+         "custom"
+         {"drawStyle" "line",
+          "barAlignment" 0,
+          "stacking" {"group" "A", "mode" "none"},
+          "lineWidth" 1,
+          "axisBorderShow" false,
+          "insertNulls" false,
+          "axisColorMode" "text",
+          "gradientMode" "none",
+          "pointSize" 5,
+          "axisCenteredZero" false,
+          "axisLabel" "",
+          "showValues" false,
+          "lineInterpolation" "linear",
+          "axisPlacement" "auto",
+          "fillOpacity" 0,
+          "barWidthFactor" 0.6,
+          "hideFrom" {"legend" false, "tooltip" false, "viz" false},
+          "scaleDistribution" {"type" "linear"},
+          "showPoints" "auto",
+          "spanNulls" false,
+          "thresholdsStyle" {"mode" "off"}},
+         "mappings" [],
+         "thresholds"
+         {"mode" "absolute",
+          "steps" [{"color" "green", "value" nil} {"color" "red", "value" 80}]}},
+        "overrides" []},
+       "pluginVersion" "13.0.1+security-01",
+       "id" 1,
+       "datasource" {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
+       "title" "TimeSeries",
+       "type" "timeseries",
+       "options"
+       {"annotations" {"clustering" -1, "multiLane" false},
+        "legend"
+        {"calcs" [],
+         "displayMode" "list",
+         "placement" "bottom",
+         "showLegend" true},
+        "tooltip" {"hideZeros" false, "mode" "single", "sort" "none"}},
+       "description" ""},
+      "id" 2,
+      "uid" "efm6vhrzhukg0f",
+      "name" "TimeSeriesPanel",
+      "kind" 1,
+      "type" "timeseries",
+      "version" 1,
+      "meta"
+      {"folderName" "my-second-folder",
+       "folderUid" "dflyuecbw3cw0f",
+       "connectedDashboards" 1,
+       "created" "2026-05-28T13:37:46Z",
+       "updated" "2026-05-28T13:37:46Z",
+       "createdBy"
+       {"id" 1,
+        "name" "admin",
+        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"},
+       "updatedBy"
+       {"id" 1,
+        "name" "admin",
+        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"}},
+      "folderUid" "dflyuecbw3cw0f",
+      "folderId" 1002250554748928,
+      "orgId" 1,
+      "description" ""}
+     {"model"
+      {"libraryPanel" {"name" "TimeSeriesPanel", "uid" "efm6vhrzhukg0f"},
+       "fieldConfig"
+       {"defaults"
+        {"color" {"mode" "palette-classic"},
+         "custom"
+         {"drawStyle" "line",
+          "barAlignment" 0,
+          "stacking" {"group" "A", "mode" "none"},
+          "lineWidth" 1,
+          "axisBorderShow" false,
+          "insertNulls" false,
+          "axisColorMode" "text",
+          "gradientMode" "none",
+          "pointSize" 5,
+          "axisCenteredZero" false,
+          "axisLabel" "",
+          "showValues" false,
+          "lineInterpolation" "linear",
+          "axisPlacement" "auto",
+          "fillOpacity" 0,
+          "barWidthFactor" 0.6,
+          "hideFrom" {"legend" false, "tooltip" false, "viz" false},
+          "scaleDistribution" {"type" "linear"},
+          "showPoints" "auto",
+          "spanNulls" false,
+          "thresholdsStyle" {"mode" "off"}},
+         "mappings" [],
+         "thresholds"
+         {"mode" "absolute",
+          "steps" [{"color" "green", "value" nil} {"color" "red", "value" 80}]}},
+        "overrides" []},
+       "pluginVersion" "13.0.1+security-01",
+       "id" 1,
+       "datasource" {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
+       "title" "TimeSeries",
+       "type" "timeseries",
+       "options"
+       {"annotations" {"clustering" -1, "multiLane" false},
+        "legend"
+        {"calcs" [],
+         "displayMode" "list",
+         "placement" "bottom",
+         "showLegend" true},
+        "tooltip" {"hideZeros" false, "mode" "single", "sort" "none"}},
+       "description" ""},
+      "id" 2,
+      "uid" "efm6vhrzhukg0f",
+      "name" "TimeSeriesPanel",
+      "kind" 1,
+      "type" "timeseries",
+      "version" 1,
+      "meta"
+      {"folderName" "my-third-folder",
+       "folderUid" "bflyuecbw3cw0g",
+       "connectedDashboards" 1,
+       "created" "2026-05-28T13:37:46Z",
+       "updated" "2026-05-28T13:37:46Z",
+       "createdBy"
+       {"id" 1,
+        "name" "admin",
+        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"},
+       "updatedBy"
+       {"id" 1,
+        "name" "admin",
+        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"}},
+      "folderUid" "dflyuecbw3cw0f",
+      "folderId" 1002250554748928,
+      "orgId" 1,
+      "description" ""})})
 
 (def get-dashboards-response
   {:headers {},
@@ -20,7 +312,7 @@
                  :body    "[]"}
    :unambiguous {:headers {},
                  :status  200,
-                 :body    "[{\"id\":1817690896470016,\"uid\":\"adv5c5m\",\"orgId\":1,\"title\":\"Simple Time Series\",\"uri\":\"db/simple-time-series\",\"url\":\"/d/adv5c5m/simple-time-series\",\"slug\":\"\",\"type\":\"dash-db\",\"tags\":[],\"isStarred\":false,\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"folderTitle\":\"my-second-folder\",\"folderUrl\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"sortMeta\":0,\"isDeleted\":false}]"}
+                 :body    (str "[{\"id\":1817690896470016,\"uid\":\"" dashboard-uid "\",\"orgId\":1,\"title\":\"Simple Time Series\",\"uri\":\"db/simple-time-series\",\"url\":\"/d/adv5c5m/simple-time-series\",\"slug\":\"\",\"type\":\"dash-db\",\"tags\":[],\"isStarred\":false,\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"folderTitle\":\"my-second-folder\",\"folderUrl\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"sortMeta\":0,\"isDeleted\":false}]")}
    :ambiguous   {:headers {},
                  :status  200,
                  :body    "[{\"id\":1817690896470016,\"uid\":\"adv5c5m\",\"orgId\":1,\"title\":\"Simple Time Series\",\"uri\":\"db/simple-time-series\",\"url\":\"/d/adv5c5m/simple-time-series\",\"slug\":\"\",\"type\":\"dash-db\",\"tags\":[],\"isStarred\":false,\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"folderTitle\":\"my-second-folder\",\"folderUrl\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"sortMeta\":0,\"isDeleted\":false},{\"id\":1817690896470017,\"uid\":\"bdv5c5n\",\"orgId\":1,\"title\":\"Simple Time Series\",\"uri\":\"db/simple-time-series\",\"url\":\"/d/adv5c5m/simple-time-series\",\"slug\":\"\",\"type\":\"dash-db\",\"tags\":[],\"isStarred\":false,\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"folderTitle\":\"another-folder\",\"folderUrl\":\"/dashboards/f/dflyuecbw3cw0f/another-folder\",\"sortMeta\":0,\"isDeleted\":false}]"}})
@@ -37,7 +329,7 @@
                  :body    "[]"}
    :unambiguous {:headers {},
                  :status  200,
-                 :body    "[{\"id\":1002250554748928,\"uid\":\"dflyuecbw3cw0f\",\"orgId\":1,\"title\":\"my-second-folder\",\"uri\":\"db/my-second-folder\",\"url\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"slug\":\"\",\"type\":\"dash-folder\",\"tags\":[],\"isStarred\":false,\"sortMeta\":0,\"isDeleted\":false}]"}
+                 :body    (str "[{\"id\":1002250554748928,\"uid\":\"" folder-uid "\",\"orgId\":1,\"title\":\"my-second-folder\",\"uri\":\"db/my-second-folder\",\"url\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"slug\":\"\",\"type\":\"dash-folder\",\"tags\":[],\"isStarred\":false,\"sortMeta\":0,\"isDeleted\":false}]")}
    :ambiguous   {:headers {},
                  :status  200,
                  :body "[{\"id\":1002250554748928,\"uid\":\"dflyuecbw3cw0f\",\"orgId\":1,\"title\":\"my-second-folder\",\"uri\":\"db/my-second-folder\",\"url\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"slug\":\"\",\"type\":\"dash-folder\",\"tags\":[],\"isStarred\":false,\"sortMeta\":0,\"isDeleted\":false}, {\"id\":1002250554748929,\"uid\":\"aflyuecbw3cw0g\",\"orgId\":1,\"title\":\"my-second-folder\",\"uri\":\"db/my-second-folder\",\"url\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"slug\":\"\",\"type\":\"dash-folder\",\"tags\":[],\"isStarred\":false,\"sortMeta\":0,\"isDeleted\":false}]"}})
