@@ -225,6 +225,7 @@
   ;; Note: inefficient to run the available-alerts within copy-alert for every
   ;; rule within copy-alerts
   ;; However, if the alert-rules-list contains duplicates, we can handle it.
+  ;; TODO: make param positions consistent with copy-panel
   [instance folder-uid rule-to-copy-with-id]
   (let [available-alerts (helper/json->clj
                           (api/get-all-alert-rules (-> instance :url)

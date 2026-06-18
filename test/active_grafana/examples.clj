@@ -1,5 +1,7 @@
 (ns active-grafana.examples
-  (:require [active-grafana.settings :as settings]))
+  (:require [active-grafana.settings :as settings]
+            [active-grafana.helper :as helper]
+            [clojure.string :as str]))
 
 ;; TODO: stuff like the uids and titles need to
 ;; be in a specific form to work for our tests
@@ -8,902 +10,546 @@
 
 (def grafana-b-instance (settings/->Grafana-Instance "http://irrelevant.url-b" "irrelevant-token-b"))
 
-(def dashboard-title "Simple Time Series")
+(def dashboard-title "Simple")
 
 (def dashboard-uid "adv5c5m")
 
-(def folder-title "my-second-folder")
+(def folder-title "My folder")
 
 (def folder-uid "dflyuecbw3cw0f")
 
-(def dashboard-related-panels
-  {:all-in-same-folder
-   '({"model"
-      {"libraryPanel" {"name" "TimeSeriesPanel", "uid" "efm6vhrzhukg0f"},
-       "fieldConfig"
-       {"defaults"
-        {"color" {"mode" "palette-classic"},
-         "custom"
-         {"drawStyle" "line",
-          "barAlignment" 0,
-          "stacking" {"group" "A", "mode" "none"},
-          "lineWidth" 1,
-          "axisBorderShow" false,
-          "insertNulls" false,
-          "axisColorMode" "text",
-          "gradientMode" "none",
-          "pointSize" 5,
-          "axisCenteredZero" false,
-          "axisLabel" "",
-          "showValues" false,
-          "lineInterpolation" "linear",
-          "axisPlacement" "auto",
-          "fillOpacity" 0,
-          "barWidthFactor" 0.6,
-          "hideFrom" {"legend" false, "tooltip" false, "viz" false},
-          "scaleDistribution" {"type" "linear"},
-          "showPoints" "auto",
-          "spanNulls" false,
-          "thresholdsStyle" {"mode" "off"}},
-         "mappings" [],
-         "thresholds"
-         {"mode" "absolute",
-          "steps" [{"color" "green", "value" nil} {"color" "red", "value" 80}]}},
-        "overrides" []},
-       "pluginVersion" "13.0.1+security-01",
-       "id" 1,
-       "datasource" {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-       "title" "TimeSeries",
-       "type" "timeseries",
-       "options"
-       {"annotations" {"clustering" -1, "multiLane" false},
-        "legend"
-        {"calcs" [],
-         "displayMode" "list",
-         "placement" "bottom",
-         "showLegend" true},
-        "tooltip" {"hideZeros" false, "mode" "single", "sort" "none"}},
-       "description" ""},
-      "id" 2,
-      "uid" "efm6vhrzhukg0f",
-      "name" "TimeSeriesPanel",
-      "kind" 1,
-      "type" "timeseries",
-      "version" 1,
-      "meta"
-      {"folderName" "my-second-folder",
-       "folderUid" "dflyuecbw3cw0f",
-       "connectedDashboards" 1,
-       "created" "2026-05-28T13:37:46Z",
-       "updated" "2026-05-28T13:37:46Z",
-       "createdBy"
-       {"id" 1,
-        "name" "admin",
-        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"},
-       "updatedBy"
-       {"id" 1,
-        "name" "admin",
-        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"}},
-      "folderUid" "dflyuecbw3cw0f",
-      "folderId" 1002250554748928,
-      "orgId" 1,
-      "description" ""}
-     {"model"
-      {"libraryPanel" {"name" "TimeSeriesPanel", "uid" "efm6vhrzhukg0f"},
-       "fieldConfig"
-       {"defaults"
-        {"color" {"mode" "palette-classic"},
-         "custom"
-         {"drawStyle" "line",
-          "barAlignment" 0,
-          "stacking" {"group" "A", "mode" "none"},
-          "lineWidth" 1,
-          "axisBorderShow" false,
-          "insertNulls" false,
-          "axisColorMode" "text",
-          "gradientMode" "none",
-          "pointSize" 5,
-          "axisCenteredZero" false,
-          "axisLabel" "",
-          "showValues" false,
-          "lineInterpolation" "linear",
-          "axisPlacement" "auto",
-          "fillOpacity" 0,
-          "barWidthFactor" 0.6,
-          "hideFrom" {"legend" false, "tooltip" false, "viz" false},
-          "scaleDistribution" {"type" "linear"},
-          "showPoints" "auto",
-          "spanNulls" false,
-          "thresholdsStyle" {"mode" "off"}},
-         "mappings" [],
-         "thresholds"
-         {"mode" "absolute",
-          "steps" [{"color" "green", "value" nil} {"color" "red", "value" 80}]}},
-        "overrides" []},
-       "pluginVersion" "13.0.1+security-01",
-       "id" 1,
-       "datasource" {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-       "title" "TimeSeries",
-       "type" "timeseries",
-       "options"
-       {"annotations" {"clustering" -1, "multiLane" false},
-        "legend"
-        {"calcs" [],
-         "displayMode" "list",
-         "placement" "bottom",
-         "showLegend" true},
-        "tooltip" {"hideZeros" false, "mode" "single", "sort" "none"}},
-       "description" ""},
-      "id" 2,
-      "uid" "efm6vhrzhukg0f",
-      "name" "TimeSeriesPanel",
-      "kind" 1,
-      "type" "timeseries",
-      "version" 1,
-      "meta"
-      {"folderName" "my-second-folder",
-       "folderUid" "dflyuecbw3cw0f",
-       "connectedDashboards" 1,
-       "created" "2026-05-28T13:37:46Z",
-       "updated" "2026-05-28T13:37:46Z",
-       "createdBy"
-       {"id" 1,
-        "name" "admin",
-        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"},
-       "updatedBy"
-       {"id" 1,
-        "name" "admin",
-        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"}},
-      "folderUid" "dflyuecbw3cw0f",
-      "folderId" 1002250554748928,
-      "orgId" 1,
-      "description" ""})
+(defn slug [s]
+  (-> s
+      (str/trim)
+      (str/lower-case)
+      (str/replace #" +" "-")))
 
-   :not-all-in-same-folder
-   '({"model"
-      {"libraryPanel" {"name" "TimeSeriesPanel", "uid" "efm6vhrzhukg0f"},
-       "fieldConfig"
-       {"defaults"
-        {"color" {"mode" "palette-classic"},
-         "custom"
-         {"drawStyle" "line",
-          "barAlignment" 0,
-          "stacking" {"group" "A", "mode" "none"},
-          "lineWidth" 1,
-          "axisBorderShow" false,
-          "insertNulls" false,
-          "axisColorMode" "text",
-          "gradientMode" "none",
-          "pointSize" 5,
-          "axisCenteredZero" false,
-          "axisLabel" "",
-          "showValues" false,
-          "lineInterpolation" "linear",
-          "axisPlacement" "auto",
-          "fillOpacity" 0,
-          "barWidthFactor" 0.6,
-          "hideFrom" {"legend" false, "tooltip" false, "viz" false},
-          "scaleDistribution" {"type" "linear"},
-          "showPoints" "auto",
-          "spanNulls" false,
-          "thresholdsStyle" {"mode" "off"}},
-         "mappings" [],
-         "thresholds"
-         {"mode" "absolute",
-          "steps" [{"color" "green", "value" nil} {"color" "red", "value" 80}]}},
-        "overrides" []},
-       "pluginVersion" "13.0.1+security-01",
-       "id" 1,
-       "datasource" {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-       "title" "TimeSeries",
-       "type" "timeseries",
-       "options"
-       {"annotations" {"clustering" -1, "multiLane" false},
-        "legend"
-        {"calcs" [],
-         "displayMode" "list",
-         "placement" "bottom",
-         "showLegend" true},
-        "tooltip" {"hideZeros" false, "mode" "single", "sort" "none"}},
-       "description" ""},
-      "id" 2,
-      "uid" "efm6vhrzhukg0f",
-      "name" "TimeSeriesPanel",
-      "kind" 1,
-      "type" "timeseries",
-      "version" 1,
-      "meta"
-      {"folderName" "my-second-folder",
-       "folderUid" "dflyuecbw3cw0f",
-       "connectedDashboards" 1,
-       "created" "2026-05-28T13:37:46Z",
-       "updated" "2026-05-28T13:37:46Z",
-       "createdBy"
-       {"id" 1,
-        "name" "admin",
-        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"},
-       "updatedBy"
-       {"id" 1,
-        "name" "admin",
-        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"}},
-      "folderUid" "dflyuecbw3cw0f",
-      "folderId" 1002250554748928,
-      "orgId" 1,
-      "description" ""}
-     {"model"
-      {"libraryPanel" {"name" "TimeSeriesPanel", "uid" "efm6vhrzhukg0f"},
-       "fieldConfig"
-       {"defaults"
-        {"color" {"mode" "palette-classic"},
-         "custom"
-         {"drawStyle" "line",
-          "barAlignment" 0,
-          "stacking" {"group" "A", "mode" "none"},
-          "lineWidth" 1,
-          "axisBorderShow" false,
-          "insertNulls" false,
-          "axisColorMode" "text",
-          "gradientMode" "none",
-          "pointSize" 5,
-          "axisCenteredZero" false,
-          "axisLabel" "",
-          "showValues" false,
-          "lineInterpolation" "linear",
-          "axisPlacement" "auto",
-          "fillOpacity" 0,
-          "barWidthFactor" 0.6,
-          "hideFrom" {"legend" false, "tooltip" false, "viz" false},
-          "scaleDistribution" {"type" "linear"},
-          "showPoints" "auto",
-          "spanNulls" false,
-          "thresholdsStyle" {"mode" "off"}},
-         "mappings" [],
-         "thresholds"
-         {"mode" "absolute",
-          "steps" [{"color" "green", "value" nil} {"color" "red", "value" 80}]}},
-        "overrides" []},
-       "pluginVersion" "13.0.1+security-01",
-       "id" 1,
-       "datasource" {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-       "title" "TimeSeries",
-       "type" "timeseries",
-       "options"
-       {"annotations" {"clustering" -1, "multiLane" false},
-        "legend"
-        {"calcs" [],
-         "displayMode" "list",
-         "placement" "bottom",
-         "showLegend" true},
-        "tooltip" {"hideZeros" false, "mode" "single", "sort" "none"}},
-       "description" ""},
-      "id" 2,
-      "uid" "efm6vhrzhukg0f",
-      "name" "TimeSeriesPanel",
-      "kind" 1,
-      "type" "timeseries",
-      "version" 1,
-      "meta"
-      {"folderName" "my-third-folder",
-       "folderUid" "bflyuecbw3cw0g",
-       "connectedDashboards" 1,
-       "created" "2026-05-28T13:37:46Z",
-       "updated" "2026-05-28T13:37:46Z",
-       "createdBy"
-       {"id" 1,
-        "name" "admin",
-        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"},
-       "updatedBy"
-       {"id" 1,
-        "name" "admin",
-        "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"}},
-      "folderUid" "dflyuecbw3cw0f",
-      "folderId" 1002250554748928,
-      "orgId" 1,
-      "description" ""})})
+(defn non-neg-int? [i]
+  (or (zero? i) (pos-int? i)))
 
-(def dashboard-related-alerts
-  {:all-in-same-folder
-   '({"record" nil,
-      "folderUID" "dflyuecbw3cw0f",
-      "id" 2,
-      "condition" "C",
-      "for" "1m",
-      "ruleGroup" "EvalGrp1",
-      "uid" "my-new-alert",
-      "keep_firing_for" "0s",
-      "annotations" {"__dashboardUid__" "adv5c5m", "__panelId__" "1"},
-      "title" "TimeSeriesRule",
-      "isPaused" false,
-      "execErrState" "Error",
-      "provenance" "api",
-      "notification_settings" {"receiver" "empty"},
-      "noDataState" "NoData",
-      "updated" "2026-06-15T15:18:38Z",
-      "data"
-      [{"refId" "A",
-        "queryType" "",
-        "relativeTimeRange" {"from" 21600, "to" 0},
-        "datasourceUid" "afm6v7ewratq8f",
-        "model"
-        {"datasource"
-         {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-         "instant" false,
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "range" true,
-         "refId" "A"}}
-       {"refId" "B",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" []},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "A",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "reducer" "last",
-         "refId" "B",
-         "type" "reduce"}}
-       {"refId" "C",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [0], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" ["C"]},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "B",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "refId" "C",
-         "type" "threshold"}}],
-      "orgID" 1}
-     {"record" nil,
-      "folderUID" "dflyuecbw3cw0f",
-      "id" 3,
-      "condition" "C",
-      "for" "1m",
-      "ruleGroup" "EvalGrp1",
-      "uid" "my-new-alert-2",
-      "keep_firing_for" "0s",
-      "annotations" {"__dashboardUid__" "adv5c5m", "__panelId__" "1"},
-      "title" "TimeSeriesRule",
-      "isPaused" false,
-      "execErrState" "Error",
-      "provenance" "api",
-      "notification_settings" {"receiver" "empty"},
-      "noDataState" "NoData",
-      "updated" "2026-06-15T15:57:34Z",
-      "data"
-      [{"refId" "A",
-        "queryType" "",
-        "relativeTimeRange" {"from" 21600, "to" 0},
-        "datasourceUid" "afm6v7ewratq8f",
-        "model"
-        {"datasource"
-         {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-         "instant" false,
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "range" true,
-         "refId" "A"}}
-       {"refId" "B",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" []},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "A",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "reducer" "last",
-         "refId" "B",
-         "type" "reduce"}}
-       {"refId" "C",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [0], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" ["C"]},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "B",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "refId" "C",
-         "type" "threshold"}}],
-      "orgID" 1}
-     {"record" nil,
-      "folderUID" "dflyuecbw3cw0f",
-      "id" 4,
-      "condition" "C",
-      "for" "1m",
-      "ruleGroup" "EvalGrp1",
-      "uid" "2f5d6059-11c6-471b-9f39-d139585d1068",
-      "keep_firing_for" "0s",
-      "annotations" {"__dashboardUid__" "adv5c5m", "__panelId__" "1"},
-      "title" "TimeSeriesRule",
-      "isPaused" false,
-      "execErrState" "Error",
-      "notification_settings" {"receiver" "empty"},
-      "noDataState" "NoData",
-      "updated" "2026-06-15T16:06:39Z",
-      "data"
-      [{"refId" "A",
-        "queryType" "",
-        "relativeTimeRange" {"from" 21600, "to" 0},
-        "datasourceUid" "afm6v7ewratq8f",
-        "model"
-        {"datasource"
-         {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-         "instant" false,
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "range" true,
-         "refId" "A"}}
-       {"refId" "B",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" []},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "A",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "reducer" "last",
-         "refId" "B",
-         "type" "reduce"}}
-       {"refId" "C",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [0], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" ["C"]},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "B",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "refId" "C",
-         "type" "threshold"}}],
-      "orgID" 1}
-     {"record" nil,
-      "folderUID" "dflyuecbw3cw0f",
-      "id" 1,
-      "condition" "C",
-      "for" "1m",
-      "ruleGroup" "EvalGrp1",
-      "uid" "afm6vmkedjjswf",
-      "keep_firing_for" "0s",
-      "annotations" {"__dashboardUid__" "adv5c5m", "__panelId__" "1"},
-      "title" "TimeSeriesRule",
-      "isPaused" false,
-      "execErrState" "Error",
-      "notification_settings" {"receiver" "empty"},
-      "noDataState" "NoData",
-      "updated" "2026-05-28T13:39:15Z",
-      "data"
-      [{"refId" "A",
-        "queryType" "",
-        "relativeTimeRange" {"from" 21600, "to" 0},
-        "datasourceUid" "afm6v7ewratq8f",
-        "model"
-        {"datasource"
-         {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-         "instant" false,
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "range" true,
-         "refId" "A"}}
-       {"refId" "B",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" []},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "A",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "reducer" "last",
-         "refId" "B",
-         "type" "reduce"}}
-       {"refId" "C",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [0], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" ["C"]},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "B",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "refId" "C",
-         "type" "threshold"}}],
-      "orgID" 1})
-   :not-all-in-same-folder
-   '({"record" nil,
-      "folderUID" "dflyuecbw3cw0f",
-      "id" 2,
-      "condition" "C",
-      "for" "1m",
-      "ruleGroup" "EvalGrp1",
-      "uid" "my-new-alert",
-      "keep_firing_for" "0s",
-      "annotations" {"__dashboardUid__" "adv5c5m", "__panelId__" "1"},
-      "title" "TimeSeriesRule",
-      "isPaused" false,
-      "execErrState" "Error",
-      "provenance" "api",
-      "notification_settings" {"receiver" "empty"},
-      "noDataState" "NoData",
-      "updated" "2026-06-15T15:18:38Z",
-      "data"
-      [{"refId" "A",
-        "queryType" "",
-        "relativeTimeRange" {"from" 21600, "to" 0},
-        "datasourceUid" "afm6v7ewratq8f",
-        "model"
-        {"datasource"
-         {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-         "instant" false,
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "range" true,
-         "refId" "A"}}
-       {"refId" "B",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" []},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "A",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "reducer" "last",
-         "refId" "B",
-         "type" "reduce"}}
-       {"refId" "C",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [0], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" ["C"]},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "B",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "refId" "C",
-         "type" "threshold"}}],
-      "orgID" 1}
-     {"record" nil,
-      "folderUID" "dflyuecbw3cw0f",
-      "id" 3,
-      "condition" "C",
-      "for" "1m",
-      "ruleGroup" "EvalGrp1",
-      "uid" "my-new-alert-2",
-      "keep_firing_for" "0s",
-      "annotations" {"__dashboardUid__" "adv5c5m", "__panelId__" "1"},
-      "title" "TimeSeriesRule",
-      "isPaused" false,
-      "execErrState" "Error",
-      "provenance" "api",
-      "notification_settings" {"receiver" "empty"},
-      "noDataState" "NoData",
-      "updated" "2026-06-15T15:57:34Z",
-      "data"
-      [{"refId" "A",
-        "queryType" "",
-        "relativeTimeRange" {"from" 21600, "to" 0},
-        "datasourceUid" "afm6v7ewratq8f",
-        "model"
-        {"datasource"
-         {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-         "instant" false,
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "range" true,
-         "refId" "A"}}
-       {"refId" "B",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" []},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "A",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "reducer" "last",
-         "refId" "B",
-         "type" "reduce"}}
-       {"refId" "C",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [0], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" ["C"]},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "B",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "refId" "C",
-         "type" "threshold"}}],
-      "orgID" 1}
-     {"record" nil,
-      "folderUID" "dflyuecbw3cw0f",
-      "id" 4,
-      "condition" "C",
-      "for" "1m",
-      "ruleGroup" "EvalGrp1",
-      "uid" "2f5d6059-11c6-471b-9f39-d139585d1068",
-      "keep_firing_for" "0s",
-      "annotations" {"__dashboardUid__" "adv5c5m", "__panelId__" "1"},
-      "title" "TimeSeriesRule",
-      "isPaused" false,
-      "execErrState" "Error",
-      "notification_settings" {"receiver" "empty"},
-      "noDataState" "NoData",
-      "updated" "2026-06-15T16:06:39Z",
-      "data"
-      [{"refId" "A",
-        "queryType" "",
-        "relativeTimeRange" {"from" 21600, "to" 0},
-        "datasourceUid" "afm6v7ewratq8f",
-        "model"
-        {"datasource"
-         {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-         "instant" false,
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "range" true,
-         "refId" "A"}}
-       {"refId" "B",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" []},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "A",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "reducer" "last",
-         "refId" "B",
-         "type" "reduce"}}
-       {"refId" "C",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [0], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" ["C"]},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "B",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "refId" "C",
-         "type" "threshold"}}],
-      "orgID" 1}
-     {"record" nil,
-      "folderUID" "bflyuecbw3cw0g",
-      "id" 1,
-      "condition" "C",
-      "for" "1m",
-      "ruleGroup" "EvalGrp1",
-      "uid" "afm6vmkedjjswf",
-      "keep_firing_for" "0s",
-      "annotations" {"__dashboardUid__" "adv5c5m", "__panelId__" "1"},
-      "title" "TimeSeriesRule",
-      "isPaused" false,
-      "execErrState" "Error",
-      "notification_settings" {"receiver" "empty"},
-      "noDataState" "NoData",
-      "updated" "2026-05-28T13:39:15Z",
-      "data"
-      [{"refId" "A",
-        "queryType" "",
-        "relativeTimeRange" {"from" 21600, "to" 0},
-        "datasourceUid" "afm6v7ewratq8f",
-        "model"
-        {"datasource"
-         {"type" "grafana-testdata-datasource", "uid" "afm6v7ewratq8f"},
-         "instant" false,
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "range" true,
-         "refId" "A"}}
-       {"refId" "B",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" []},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "A",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "reducer" "last",
-         "refId" "B",
-         "type" "reduce"}}
-       {"refId" "C",
-        "queryType" "expression",
-        "relativeTimeRange" {"from" 0, "to" 0},
-        "datasourceUid" "__expr__",
-        "model"
-        {"conditions"
-         [{"evaluator" {"params" [0], "type" "gt"},
-           "operator" {"type" "and"},
-           "query" {"params" ["C"]},
-           "reducer" {"params" [], "type" "last"},
-           "type" "query"}],
-         "datasource" {"type" "__expr__", "uid" "__expr__"},
-         "expression" "B",
-         "intervalMs" 1000,
-         "maxDataPoints" 43200,
-         "refId" "C",
-         "type" "threshold"}}],
-      "orgID" 1})})
+(defn random-string
+  ([] (random-string nil))
+  ([prefix]
+   (if (nil? prefix)
+     (random-uuid)
+     (str prefix "-" (random-uuid)))))
+
+(def random-uid (partial random-string "uid"))
+(def random-title (partial random-string "title"))
+(def random-dashboard-uid (partial random-string "uid"))
+(def random-dashboard-title (partial random-string "title"))
+(def random-folder-uid (partial random-string "folder-uid"))
+(def random-folder-title (partial random-string "folder-title"))
+(def random-id (partial rand-int Integer/MAX_VALUE))
+(def random-panel-title (partial random-string "panel-title"))
+(def random-panel-name (partial random-string "panel-name"))
+(def random-panel-uid (partial random-string "panel-uid"))
+(def random-version (partial rand-int 20))
+(def random-alert-uid (partial random-string "alert-uid"))
+(def random-alert-title (partial random-string "alert-title"))
+
+(defn make-compact-dashboard
+  ([] (make-compact-dashboard (random-id)))
+  ([id] (make-compact-dashboard id {}))
+  ([id {:keys [uid
+               title
+               folder-uid
+               folder-id
+               folder-title]
+        :or   {uid          (random-uid)
+               title        (random-title)
+               folder-uid   (random-folder-uid)
+               folder-id    (random-id)
+               folder-title (random-folder-title)}}]
+   {:pre [(non-neg-int? id)
+          (string? uid)
+          (string? title)
+          (string? folder-uid)
+          (non-neg-int? folder-id)
+          (string? folder-title)]}
+   {"isStarred"   false,
+    "folderTitle" folder-title,
+    "url"         (str "/d/" uid "/simple-time-series"),
+    "sortMeta"    0,
+    "uri"         (str "db/" (slug title))
+    "tags"        [],
+    "id"          id,
+    "uid"         uid,
+    "slug"        "",
+    "title"       title,
+    "type"        "dash-db",
+    "isDeleted"   false,
+    "folderUrl"   (str "/dashboards/f/"
+                       folder-uid
+                       "/"
+                       (slug folder-title)),
+    "folderUid"   folder-uid,
+    "folderId"    folder-id,
+    "orgId"       1}))
+
+(defn make-dashboard-query-body [titles]
+  (vec (map-indexed make-compact-dashboard titles)))
 
 (def get-dashboards-response
   {:headers {},
    :status  200,
-   :body    "[{\"id\":1061871031304192,\"uid\":\"keycloak-dashboard-old\",\"orgId\":1,\"title\":\"Keycloak Metrics Dashboard\",\"uri\":\"db/keycloak-metrics-dashboard\",\"url\":\"/d/keycloak-dashboard-old/keycloak-metrics-dashboard\",\"slug\":\"\",\"type\":\"dash-db\",\"tags\":[],\"isStarred\":false,\"description\":\"Dashboard of Keycloak metrics exported with Keycloak Metrics SPI\\r\\n\\r\\nhttps://github.com/aerogear/keycloak-metrics-spi\",\"folderId\":1002119528886272,\"folderUid\":\"dflyuco4w6hvkf\",\"folderTitle\":\"keycloak\",\"folderUrl\":\"/dashboards/f/dflyuco4w6hvkf/keycloak\",\"sortMeta\":0,\"isDeleted\":false},{\"id\":1817690896470016,\"uid\":\"adv5c5m\",\"orgId\":1,\"title\":\"Simple Time Series\",\"uri\":\"db/simple-time-series\",\"url\":\"/d/adv5c5m/simple-time-series\",\"slug\":\"\",\"type\":\"dash-db\",\"tags\":[],\"isStarred\":false,\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"folderTitle\":\"my-second-folder\",\"folderUrl\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"sortMeta\":0,\"isDeleted\":false}]"})
+   :body    (-> [{:title dashboard-title}
+                 {:title "Another Title"}]
+                make-dashboard-query-body
+                helper/clj->json)})
 
 (def find-dashboards-by-query-responses
-  {:none        {:headers {},
-                 :status  200,
-                 :body    "[]"}
-   :unambiguous {:headers {},
-                 :status  200,
-                 :body    (str "[{\"id\":1817690896470016,\"uid\":\"" dashboard-uid "\",\"orgId\":1,\"title\":\"Simple Time Series\",\"uri\":\"db/simple-time-series\",\"url\":\"/d/adv5c5m/simple-time-series\",\"slug\":\"\",\"type\":\"dash-db\",\"tags\":[],\"isStarred\":false,\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"folderTitle\":\"my-second-folder\",\"folderUrl\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"sortMeta\":0,\"isDeleted\":false}]")}
-   :ambiguous   {:headers {},
-                 :status  200,
-                 :body    "[{\"id\":1817690896470016,\"uid\":\"adv5c5m\",\"orgId\":1,\"title\":\"Simple Time Series\",\"uri\":\"db/simple-time-series\",\"url\":\"/d/adv5c5m/simple-time-series\",\"slug\":\"\",\"type\":\"dash-db\",\"tags\":[],\"isStarred\":false,\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"folderTitle\":\"my-second-folder\",\"folderUrl\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"sortMeta\":0,\"isDeleted\":false},{\"id\":1817690896470017,\"uid\":\"bdv5c5n\",\"orgId\":1,\"title\":\"Simple Time Series\",\"uri\":\"db/simple-time-series\",\"url\":\"/d/adv5c5m/simple-time-series\",\"slug\":\"\",\"type\":\"dash-db\",\"tags\":[],\"isStarred\":false,\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"folderTitle\":\"another-folder\",\"folderUrl\":\"/dashboards/f/dflyuecbw3cw0f/another-folder\",\"sortMeta\":0,\"isDeleted\":false}]"}})
+  {:none
+   {:headers {},
+    :status  200,
+    :body    "[]"}
+   :unambiguous
+   {:headers {},
+    :status  200,
+    :body    (-> [{:title dashboard-title}]
+                 make-dashboard-query-body
+                 helper/clj->json)}
+   :ambiguous
+   {:headers {},
+    :status  200,
+    :body    (-> [{:title dashboard-title}
+                  {:title dashboard-title}]
+                 make-dashboard-query-body
+                 helper/clj->json)}})
 
-(def get-dashboard-by-uid-response
+(defn make-full-dashboard-panel
+  ([] (make-full-dashboard-panel (random-id)))
+  ([id] (make-full-dashboard-panel id {}))
+  ([id {:keys [title name uid]
+        :or   {title (random-panel-title)
+               name  (random-panel-name)
+               uid   (random-panel-uid)}}]
+   {:pre [(string? title)
+          (string? name)
+          (string? uid)]}
+   {"gridPos"      {"h" 9, "w" 8, "x" 0, "y" 0},
+    "id"           id,
+    "libraryPanel" {"name" name, "uid" uid},
+    "title"        title}))
+
+(defn make-full-dashboard
+  ([] (make-full-dashboard (random-id)))
+  ([id] (make-full-dashboard id {}))
+  ([id {:keys [uid
+               title
+               folder-uid
+               folder-id
+               folder-title
+               version]
+        :or   {uid          (random-uid)
+               title        (random-title)
+               folder-uid   (random-folder-uid)
+               folder-id    (random-id)
+               folder-title (random-folder-title)
+               version      (random-version)}}]
+   {:pre [(non-neg-int? id)
+          (string? uid)
+          (string? title)
+          (string? folder-uid)
+          (non-neg-int? folder-id)
+          (string? folder-title)
+          (non-neg-int? version)]}
+   {"meta"
+    {"folderTitle"           folder-title,
+     "created"               "2026-05-28T13:37:15Z",
+     "url"                   (str "/d/" uid "/" (slug title)),
+     "updatedBy"             "admin",
+     "hasAcl"                false,
+     "isFolder"              false,
+     "createdBy"             "admin",
+     "slug"                  (slug title),
+     "canDelete"             true,
+     "expires"               "0001-01-01T00:00:00Z",
+     "canAdmin"              true,
+     "canEdit"               true,
+     "provisionedExternalId" "",
+     "type"                  "db",
+     "version"               3,
+     "folderUrl"             (str "/dashboards/f/" folder-uid "/" folder-title),
+     "updated"               "2026-05-28T13:38:06Z",
+     "folderUid"             folder-uid,
+     "folderId"              folder-id,
+     "canSave"               true,
+     "canStar"               true,
+     "provisioned"           false,
+     "apiVersion"            "v0alpha1",
+     "annotationsPermissions"
+     {"dashboard" {"canAdd" true, "canEdit" true, "canDelete" true}}},
+    "dashboard"
+    {"editable"             true,
+     "liveNow"              false,
+     "timezone"             "browser",
+     "panels"
+     [(make-full-dashboard-panel)],
+     "tags"                 [],
+     "templating"           {"list" []},
+     "id"                   id,
+     "uid"                  uid,
+     "refresh"              "",
+     "graphTooltip"         0,
+     "preload"              false,
+     "time"                 {"from" "now-6h", "to" "now"},
+     "links"                [],
+     "annotations"
+     {"list"
+      [{"builtIn"    1,
+        "datasource" {"type" "grafana", "uid" "-- Grafana --"},
+        "enable"     true,
+        "hide"       true,
+        "iconColor"  "rgba(0, 211, 255, 1)",
+        "name"       "Annotations & Alerts",
+        "type"       "dashboard"}]},
+     "title"                title,
+     "version"              version,
+     "fiscalYearStartMonth" 0,
+     "schemaVersion"        42,
+     "timepicker"
+     {"refresh_intervals"
+      ["5s" "10s" "30s" "1m" "5m" "15m" "30m" "1h" "2h" "1d"]}}}))
+
+(defn get-dashboard-by-uid-response [dashboard]
   {:headers {},
    :status 200,
    :body
-   "{\"meta\":{\"type\":\"db\",\"canSave\":true,\"canEdit\":true,\"canAdmin\":true,\"canStar\":true,\"canDelete\":true,\"slug\":\"simple-time-series\",\"url\":\"/d/adv5c5m/simple-time-series\",\"expires\":\"0001-01-01T00:00:00Z\",\"created\":\"2026-05-28T13:37:15Z\",\"updated\":\"2026-05-28T13:38:06Z\",\"updatedBy\":\"admin\",\"createdBy\":\"admin\",\"version\":3,\"hasAcl\":false,\"isFolder\":false,\"apiVersion\":\"v0alpha1\",\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"folderTitle\":\"my-second-folder\",\"folderUrl\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"provisioned\":false,\"provisionedExternalId\":\"\",\"annotationsPermissions\":{\"dashboard\":{\"canAdd\":true,\"canEdit\":true,\"canDelete\":true}}},\"dashboard\":{\"annotations\":{\"list\":[{\"builtIn\":1,\"datasource\":{\"type\":\"grafana\",\"uid\":\"-- Grafana --\"},\"enable\":true,\"hide\":true,\"iconColor\":\"rgba(0, 211, 255, 1)\",\"name\":\"Annotations \\u0026 Alerts\",\"type\":\"dashboard\"}]},\"editable\":true,\"fiscalYearStartMonth\":0,\"graphTooltip\":0,\"id\":1817690896470016,\"liveNow\":false,\"panels\":[{\"gridPos\":{\"h\":9,\"w\":8,\"x\":0,\"y\":0},\"id\":1,\"libraryPanel\":{\"name\":\"TimeSeriesPanel\",\"uid\":\"efm6vhrzhukg0f\"},\"title\":\"TimeSeries\",\"type\":\"library-panel-ref\"}],\"preload\":false,\"refresh\":\"\",\"schemaVersion\":42,\"time\":{\"from\":\"now-6h\",\"to\":\"now\"},\"timepicker\":{\"refresh_intervals\":[\"5s\",\"10s\",\"30s\",\"1m\",\"5m\",\"15m\",\"30m\",\"1h\",\"2h\",\"1d\"]},\"timezone\":\"browser\",\"title\":\"Simple Time Series\",\"uid\":\"adv5c5m\",\"version\":3}}"})
+   (-> (make-full-dashboard 1 dashboard)
+       (helper/clj->json))})
+
+(defn make-compact-folder
+  ([] (make-compact-folder (random-id)))
+  ([id] (make-compact-folder id {}))
+  ([id {:keys [uid title]
+        :or   {uid   (random-folder-uid)
+               title (random-folder-title)}}]
+   {:pre [(non-neg-int? id)
+          (string? uid)
+          (string? title)]}
+   {"isStarred" false,
+    "url"       (str "/dashboards/f/" uid "/" (slug title)),
+    "sortMeta"  0,
+    "uri"       (str "db/" (slug title)),
+    "tags"      [],
+    "id"        id,
+    "uid"       uid,
+    "slug"      "",
+    "title"     title,
+    "type"      "dash-folder",
+    "isDeleted" false,
+    "orgId"     1}))
+
+(defn make-folder-query-body [titles]
+  (map-indexed make-compact-folder titles))
 
 (def find-folders-by-query-responses
-  {:none        {:headers {},
-                 :status  200,
-                 :body    "[]"}
-   :unambiguous {:headers {},
-                 :status  200,
-                 :body    (str "[{\"id\":1002250554748928,\"uid\":\"" folder-uid "\",\"orgId\":1,\"title\":\"my-second-folder\",\"uri\":\"db/my-second-folder\",\"url\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"slug\":\"\",\"type\":\"dash-folder\",\"tags\":[],\"isStarred\":false,\"sortMeta\":0,\"isDeleted\":false}]")}
-   :ambiguous   {:headers {},
-                 :status  200,
-                 :body "[{\"id\":1002250554748928,\"uid\":\"dflyuecbw3cw0f\",\"orgId\":1,\"title\":\"my-second-folder\",\"uri\":\"db/my-second-folder\",\"url\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"slug\":\"\",\"type\":\"dash-folder\",\"tags\":[],\"isStarred\":false,\"sortMeta\":0,\"isDeleted\":false}, {\"id\":1002250554748929,\"uid\":\"aflyuecbw3cw0g\",\"orgId\":1,\"title\":\"my-second-folder\",\"uri\":\"db/my-second-folder\",\"url\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"slug\":\"\",\"type\":\"dash-folder\",\"tags\":[],\"isStarred\":false,\"sortMeta\":0,\"isDeleted\":false}]"}})
+  {:none
+   {:headers {},
+    :status  200,
+    :body    "[]"}
+   :unambiguous
+   {:headers {},
+    :status  200,
+    :body    (-> [{:title folder-title
+                   :uid   folder-uid}]
+                 make-folder-query-body
+                 helper/clj->json)}
+   :ambiguous
+   {:headers {},
+    :status  200,
+    :body    (-> [{:title folder-title}
+                  {:title folder-title}]
+                 make-folder-query-body
+                 helper/clj->json)}})
+
+(defn make-full-folder
+  ([] (make-full-folder (random-id)))
+  ([id] (make-full-folder id {}))
+  ([id {:keys [uid title]
+        :or   {uid   (random-folder-uid)
+               title (random-folder-title)}}]
+   {:pre [(non-neg-int? id)
+          (string? uid)
+          (string? title)]}
+   {"created"   "2026-06-11T09:34:01Z",
+    "url"       (str "/dashboards/f/" uid "/" (slug title)),
+    "updatedBy" "Anonymous",
+    "hasAcl"    false,
+    "id"        id,
+    "createdBy" "Anonymous",
+    "uid"       uid,
+    "canDelete" true,
+    "canAdmin"  true,
+    "canEdit"   true,
+    "title"     title,
+    "version"   1,
+    "updated"   "2026-06-11T09:34:01Z",
+    "canSave"   true,
+    "orgId"     1}))
 
 (def create-folder-response
   {:headers {},
    :status  200,
    :body
-   "{\"id\":1611151674531840,\"uid\":\"cfoqhia6eff28d\",\"orgId\":1,\"title\":\"my-second-folder\",\"url\":\"/dashboards/f/cfoqhia6eff28d/my-second-folder\",\"hasAcl\":false,\"canSave\":true,\"canEdit\":true,\"canAdmin\":true,\"canDelete\":true,\"createdBy\":\"Anonymous\",\"created\":\"2026-06-11T09:34:01Z\",\"updatedBy\":\"Anonymous\",\"updated\":\"2026-06-11T09:34:01Z\",\"version\":1}"})
+   (-> (make-full-folder 1 {:title folder-title})
+       (helper/clj->json))})
 
-(def get-library-panel-by-uid-response
+(defn make-library-element
+  ([] (make-library-element (random-id)))
+  ([id] (make-library-element id {}))
+  ([id {:keys [uid
+               name
+               version
+               folder-id
+               folder-uid
+               folder-name]
+        :or   {uid         (random-panel-uid)
+               name        (random-panel-name)
+               version     (random-version)
+               folder-id   (random-id)
+               folder-uid  (random-folder-uid)
+               folder-name (random-folder-title)}}]
+   {:pre [(non-neg-int? id)
+          (string? uid)
+          (string? name)
+          (non-neg-int? version)
+          (non-neg-int? folder-id)
+          (string? folder-uid)
+          (string? folder-name)]}
+   {"model"
+    {"libraryPanel"  {"name" name, "uid" uid},
+     "fieldConfig"
+     {"defaults"
+      {"color"    {"mode" "palette-classic"},
+       "custom"
+       {"drawStyle"         "line",
+        "barAlignment"      0,
+        "stacking"          {"group" "A", "mode" "none"},
+        "lineWidth"         1,
+        "axisBorderShow"    false,
+        "insertNulls"       false,
+        "axisColorMode"     "text",
+        "gradientMode"      "none",
+        "pointSize"         5,
+        "axisCenteredZero"  false,
+        "axisLabel"         "",
+        "showValues"        false,
+        "lineInterpolation" "linear",
+        "axisPlacement"     "auto",
+        "fillOpacity"       0,
+        "barWidthFactor"    0.6,
+        "hideFrom"          {"legend" false, "tooltip" false, "viz" false},
+        "scaleDistribution" {"type" "linear"},
+        "showPoints"        "auto",
+        "spanNulls"         false,
+        "thresholdsStyle"   {"mode" "off"}},
+       "mappings" [],
+       "thresholds"
+       {"mode"  "absolute",
+        "steps" [{"color" "green", "value" nil} {"color" "red", "value" 80}]}},
+      "overrides" []},
+     "gridPos"       {"h" 8, "w" 12, "x" 0, "y" 0},
+     "pluginVersion" "12.3.2",
+     "id"            1,
+     "datasource"    {"type" "datasource", "uid" "-- Dashboard --"},
+     "targets"
+     [{"datasource" {"type" "datasource", "uid" "-- Dashboard --"},
+       "refId"      "A"}],
+     "title"         "New panel",
+     "type"          "timeseries",
+     "options"
+     {"legend"
+      {"calcs"       [],
+       "displayMode" "list",
+       "placement"   "bottom",
+       "showLegend"  true},
+      "tooltip" {"hideZeros" false, "mode" "single", "sort" "none"}},
+     "description"   ""},
+    "id"          id,
+    "uid"         uid,
+    "name"        name,
+    "kind"        1,
+    "type"        "timeseries",
+    "version"     version,
+    "meta"
+    {"folderName"          folder-name,
+     "folderUid"           folder-uid,
+     "connectedDashboards" 1,
+     "created"             "2026-06-22T15:52:18Z",
+     "updated"             "2026-06-22T15:52:18Z",
+     "createdBy"
+     {"id"        1,
+      "name"      "admin",
+      "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"},
+     "updatedBy"
+     {"id"        1,
+      "name"      "admin",
+      "avatarUrl" "/avatar/46d229b033af06a191ff2267bca9ae56"}},
+    "folderUid"   folder-uid,
+    "folderId"    folder-id,
+    "orgId"       1,
+    "description" ""}))
+
+(defn make-get-library-panel-by-uid-response
+  ([] (make-get-library-panel-by-uid-response 1))
+  ([id] (make-get-library-panel-by-uid-response id {}))
+  ([id panel]
+   {:headers {},
+    :status  200,
+    :body
+    (-> {"result" (make-library-element id panel)}
+        (helper/clj->json))}))
+
+(defn make-alert-rule
+  ([] (make-alert-rule (random-id)))
+  ([id] (make-alert-rule id {}))
+  ([id {:keys [uid title folder-uid]
+        :or   {uid        (random-alert-uid)
+               title      (random-alert-title)
+               folder-uid (random-folder-uid)}}]
+   {:pre [(non-neg-int? id)
+          (string? uid)
+          (string? title)
+          (string? folder-uid)]}
+   {"record"                nil,
+    "folderUID"             folder-uid,
+    "id"                    id,
+    "condition"             "B",
+    "for"                   "1m",
+    "ruleGroup"             "My evaluation group",
+    "uid"                   uid,
+    "keep_firing_for"       "0s",
+    "title"                 title,
+    "isPaused"              false,
+    "execErrState"          "Error",
+    "notification_settings" {"receiver" "grafana-default-email"},
+    "noDataState"           "NoData",
+    "updated"               "2026-06-22T15:56:27Z",
+    "data"
+    [{"refId"             "B",
+      "queryType"         "",
+      "relativeTimeRange" {"from" 0, "to" 0},
+      "datasourceUid"     "__expr__",
+      "model"
+      {"conditions"
+       [{"evaluator" {"params" [2], "type" "gt"},
+         "operator"  {"type" "and"},
+         "query"     {"params" ["B"]},
+         "reducer"   {"params" [], "type" "last"},
+         "type"      "query"}],
+       "datasource"    {"type" "__expr__", "uid" "__expr__"},
+       "expression"    "A",
+       "intervalMs"    1000,
+       "maxDataPoints" 43200,
+       "refId"         "B",
+       "type"          "threshold"}}
+     {"refId"             "A",
+      "queryType"         "",
+      "relativeTimeRange" {"from" 0, "to" 0},
+      "datasourceUid"     "__expr__",
+      "model"
+      {"conditions"
+       [{"evaluator" {"params" [0 0], "type" "gt"},
+         "operator"  {"type" "and"},
+         "query"     {"params" []},
+         "reducer"   {"params" [], "type" "avg"},
+         "type"      "query"}],
+       "datasource"    {"name" "Expression", "type" "__expr__", "uid" "__expr__"},
+       "expression"    "1",
+       "hide"          false,
+       "intervalMs"    1000,
+       "maxDataPoints" 43200,
+       "refId"         "A",
+       "type"          "math"}}],
+    "orgID"                 1}))
+
+(defn get-all-alert-rules-response [alerts]
   {:headers {},
    :status  200,
    :body
-   "{\"result\":{\"id\":2,\"orgId\":1,\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"uid\":\"efm6vhrzhukg0f\",\"name\":\"TimeSeriesPanel\",\"kind\":1,\"type\":\"timeseries\",\"description\":\"\",\"model\":{\"datasource\":{\"type\":\"grafana-testdata-datasource\",\"uid\":\"afm6v7ewratq8f\"},\"description\":\"\",\"fieldConfig\":{\"defaults\":{\"color\":{\"mode\":\"palette-classic\"},\"custom\":{\"axisBorderShow\":false,\"axisCenteredZero\":false,\"axisColorMode\":\"text\",\"axisLabel\":\"\",\"axisPlacement\":\"auto\",\"barAlignment\":0,\"barWidthFactor\":0.6,\"drawStyle\":\"line\",\"fillOpacity\":0,\"gradientMode\":\"none\",\"hideFrom\":{\"legend\":false,\"tooltip\":false,\"viz\":false},\"insertNulls\":false,\"lineInterpolation\":\"linear\",\"lineWidth\":1,\"pointSize\":5,\"scaleDistribution\":{\"type\":\"linear\"},\"showPoints\":\"auto\",\"showValues\":false,\"spanNulls\":false,\"stacking\":{\"group\":\"A\",\"mode\":\"none\"},\"thresholdsStyle\":{\"mode\":\"off\"}},\"mappings\":[],\"thresholds\":{\"mode\":\"absolute\",\"steps\":[{\"color\":\"green\",\"value\":null},{\"color\":\"red\",\"value\":80}]}},\"overrides\":[]},\"id\":1,\"libraryPanel\":{\"name\":\"TimeSeriesPanel\",\"uid\":\"efm6vhrzhukg0f\"},\"options\":{\"annotations\":{\"clustering\":-1,\"multiLane\":false},\"legend\":{\"calcs\":[],\"displayMode\":\"list\",\"placement\":\"bottom\",\"showLegend\":true},\"tooltip\":{\"hideZeros\":false,\"mode\":\"single\",\"sort\":\"none\"}},\"pluginVersion\":\"13.0.1+security-01\",\"title\":\"TimeSeries\",\"type\":\"timeseries\"},\"version\":1,\"meta\":{\"folderName\":\"my-second-folder\",\"folderUid\":\"dflyuecbw3cw0f\",\"connectedDashboards\":1,\"created\":\"2026-05-28T13:37:46Z\",\"updated\":\"2026-05-28T13:37:46Z\",\"createdBy\":{\"id\":1,\"name\":\"admin\",\"avatarUrl\":\"/avatar/46d229b033af06a191ff2267bca9ae56\"},\"updatedBy\":{\"id\":1,\"name\":\"admin\",\"avatarUrl\":\"/avatar/46d229b033af06a191ff2267bca9ae56\"}}}}"})
+   (->> alerts
+        (map-indexed make-alert-rule)
+        (vec)
+        (helper/clj->json))})
 
-(def get-all-alert-rules-response
+(defn make-get-library-panels-response [panels]
   {:headers {},
-   :status 200,
-   :body
-   "[{\"id\":1,\"uid\":\"afm6vmkedjjswf\",\"orgID\":1,\"folderUID\":\"dflyuecbw3cw0f\",\"ruleGroup\":\"EvalGrp1\",\"title\":\"TimeSeriesRule\",\"condition\":\"C\",\"data\":[{\"refId\":\"A\",\"queryType\":\"\",\"relativeTimeRange\":{\"from\":21600,\"to\":0},\"datasourceUid\":\"afm6v7ewratq8f\",\"model\":{\"datasource\":{\"type\":\"grafana-testdata-datasource\",\"uid\":\"afm6v7ewratq8f\"},\"instant\":false,\"intervalMs\":1000,\"maxDataPoints\":43200,\"range\":true,\"refId\":\"A\"}},{\"refId\":\"B\",\"queryType\":\"expression\",\"relativeTimeRange\":{\"from\":0,\"to\":0},\"datasourceUid\":\"__expr__\",\"model\":{\"conditions\":[{\"evaluator\":{\"params\":[],\"type\":\"gt\"},\"operator\":{\"type\":\"and\"},\"query\":{\"params\":[]},\"reducer\":{\"params\":[],\"type\":\"last\"},\"type\":\"query\"}],\"datasource\":{\"type\":\"__expr__\",\"uid\":\"__expr__\"},\"expression\":\"A\",\"intervalMs\":1000,\"maxDataPoints\":43200,\"reducer\":\"last\",\"refId\":\"B\",\"type\":\"reduce\"}},{\"refId\":\"C\",\"queryType\":\"expression\",\"relativeTimeRange\":{\"from\":0,\"to\":0},\"datasourceUid\":\"__expr__\",\"model\":{\"conditions\":[{\"evaluator\":{\"params\":[0],\"type\":\"gt\"},\"operator\":{\"type\":\"and\"},\"query\":{\"params\":[\"C\"]},\"reducer\":{\"params\":[],\"type\":\"last\"},\"type\":\"query\"}],\"datasource\":{\"type\":\"__expr__\",\"uid\":\"__expr__\"},\"expression\":\"B\",\"intervalMs\":1000,\"maxDataPoints\":43200,\"refId\":\"C\",\"type\":\"threshold\"}}],\"updated\":\"2026-05-28T13:39:15Z\",\"noDataState\":\"NoData\",\"execErrState\":\"Error\",\"for\":\"1m\",\"keep_firing_for\":\"0s\",\"annotations\":{\"__dashboardUid__\":\"adv5c5m\",\"__panelId__\":\"1\"},\"isPaused\":false,\"notification_settings\":{\"receiver\":\"empty\"},\"record\":null}]"})
-
-(def get-folder-by-folder-uid-response
-  {:headers {},
-   :status 200,
-   :body
-   "{\"id\":1002250554748928,\"uid\":\"dflyuecbw3cw0f\",\"orgId\":1,\"title\":\"my-second-folder\",\"url\":\"/dashboards/f/dflyuecbw3cw0f/my-second-folder\",\"hasAcl\":false,\"canSave\":true,\"canEdit\":true,\"canAdmin\":true,\"canDelete\":true,\"createdBy\":\"admin\",\"created\":\"2026-05-19T08:04:56Z\",\"updatedBy\":\"Anonymous\",\"updated\":\"2026-05-19T08:04:56Z\",\"version\":1}"})
-
-(def get-library-panels-response
-  {:headers {},
-   :status 200,
-   :body
-   "{\"result\":{\"totalCount\":2,\"elements\":[{\"id\":1,\"orgId\":1,\"folderId\":1002119528886272,\"folderUid\":\"dflyuco4w6hvkf\",\"uid\":\"dfm6to81ybn5sd\",\"name\":\"Current Memory HEAP\",\"kind\":1,\"type\":\"gauge\",\"description\":\"\",\"model\":{\"description\":\"\",\"fieldConfig\":{\"defaults\":{\"mappings\":[],\"max\":100,\"min\":0,\"thresholds\":{\"mode\":\"percentage\",\"steps\":[{\"color\":\"green\",\"value\":null},{\"color\":\"#EAB839\",\"value\":80},{\"color\":\"red\",\"value\":90}]},\"unit\":\"percent\"},\"overrides\":[]},\"gridPos\":{\"h\":7,\"w\":6,\"x\":0,\"y\":0},\"id\":5,\"libraryPanel\":{\"name\":\"Current Memory HEAP\",\"uid\":\"dfm6to81ybn5sd\"},\"options\":{\"barShape\":\"flat\",\"barWidthFactor\":0.5,\"effects\":{\"barGlow\":false,\"centerGlow\":false,\"gradient\":false},\"endpointMarker\":\"point\",\"minVizHeight\":75,\"minVizWidth\":75,\"orientation\":\"auto\",\"reduceOptions\":{\"calcs\":[\"mean\"],\"fields\":\"\",\"values\":false},\"segmentCount\":1,\"segmentSpacing\":0.3,\"shape\":\"gauge\",\"showThresholdLabels\":false,\"showThresholdMarkers\":false,\"sizing\":\"auto\",\"sparkline\":false,\"textMode\":\"auto\"},\"pluginVersion\":\"13.0.1+security-01\",\"targets\":[{\"datasource\":{\"type\":\"\",\"uid\":\"$Datasource\"},\"expr\":\"sum(jvm_memory_bytes_used{kubernetes_pod_name=\\\"$instance\\\", area=\\\"heap\\\"})*100/sum(jvm_memory_bytes_max{kubernetes_pod_name=\\\"$instance\\\", area=\\\"heap\\\"})\",\"interval\":\"\",\"legendFormat\":\"\",\"refId\":\"A\"}],\"title\":\"Current Memory HEAP\",\"type\":\"gauge\"},\"version\":1,\"meta\":{\"folderName\":\"keycloak\",\"folderUid\":\"dflyuco4w6hvkf\",\"connectedDashboards\":1,\"created\":\"2026-05-28T13:17:21Z\",\"updated\":\"2026-05-28T13:17:21Z\",\"createdBy\":{\"id\":1,\"name\":\"admin\",\"avatarUrl\":\"/avatar/46d229b033af06a191ff2267bca9ae56\"},\"updatedBy\":{\"id\":1,\"name\":\"admin\",\"avatarUrl\":\"/avatar/46d229b033af06a191ff2267bca9ae56\"}}},{\"id\":2,\"orgId\":1,\"folderId\":1002250554748928,\"folderUid\":\"dflyuecbw3cw0f\",\"uid\":\"efm6vhrzhukg0f\",\"name\":\"TimeSeriesPanel\",\"kind\":1,\"type\":\"timeseries\",\"description\":\"\",\"model\":{\"datasource\":{\"type\":\"grafana-testdata-datasource\",\"uid\":\"afm6v7ewratq8f\"},\"description\":\"\",\"fieldConfig\":{\"defaults\":{\"color\":{\"mode\":\"palette-classic\"},\"custom\":{\"axisBorderShow\":false,\"axisCenteredZero\":false,\"axisColorMode\":\"text\",\"axisLabel\":\"\",\"axisPlacement\":\"auto\",\"barAlignment\":0,\"barWidthFactor\":0.6,\"drawStyle\":\"line\",\"fillOpacity\":0,\"gradientMode\":\"none\",\"hideFrom\":{\"legend\":false,\"tooltip\":false,\"viz\":false},\"insertNulls\":false,\"lineInterpolation\":\"linear\",\"lineWidth\":1,\"pointSize\":5,\"scaleDistribution\":{\"type\":\"linear\"},\"showPoints\":\"auto\",\"showValues\":false,\"spanNulls\":false,\"stacking\":{\"group\":\"A\",\"mode\":\"none\"},\"thresholdsStyle\":{\"mode\":\"off\"}},\"mappings\":[],\"thresholds\":{\"mode\":\"absolute\",\"steps\":[{\"color\":\"green\",\"value\":null},{\"color\":\"red\",\"value\":80}]}},\"overrides\":[]},\"id\":1,\"libraryPanel\":{\"name\":\"TimeSeriesPanel\",\"uid\":\"efm6vhrzhukg0f\"},\"options\":{\"annotations\":{\"clustering\":-1,\"multiLane\":false},\"legend\":{\"calcs\":[],\"displayMode\":\"list\",\"placement\":\"bottom\",\"showLegend\":true},\"tooltip\":{\"hideZeros\":false,\"mode\":\"single\",\"sort\":\"none\"}},\"pluginVersion\":\"13.0.1+security-01\",\"title\":\"TimeSeries\",\"type\":\"timeseries\"},\"version\":1,\"meta\":{\"folderName\":\"my-second-folder\",\"folderUid\":\"dflyuecbw3cw0f\",\"connectedDashboards\":1,\"created\":\"2026-05-28T13:37:46Z\",\"updated\":\"2026-05-28T13:37:46Z\",\"createdBy\":{\"id\":1,\"name\":\"admin\",\"avatarUrl\":\"/avatar/46d229b033af06a191ff2267bca9ae56\"},\"updatedBy\":{\"id\":1,\"name\":\"admin\",\"avatarUrl\":\"/avatar/46d229b033af06a191ff2267bca9ae56\"}}}],\"page\":1,\"perPage\":100}}"})
-
-(def get-library-element-by-uuid-response
-  {:headers {},
-   :status 200,
-   :body
-   "{\"result\":{\"id\":1,\"orgId\":1,\"folderId\":1002119528886272,\"folderUid\":\"dflyuco4w6hvkf\",\"uid\":\"dfm6to81ybn5sd\",\"name\":\"Current Memory HEAP\",\"kind\":1,\"type\":\"gauge\",\"description\":\"\",\"model\":{\"description\":\"\",\"fieldConfig\":{\"defaults\":{\"mappings\":[],\"max\":100,\"min\":0,\"thresholds\":{\"mode\":\"percentage\",\"steps\":[{\"color\":\"green\",\"value\":null},{\"color\":\"#EAB839\",\"value\":80},{\"color\":\"red\",\"value\":90}]},\"unit\":\"percent\"},\"overrides\":[]},\"gridPos\":{\"h\":7,\"w\":6,\"x\":0,\"y\":0},\"id\":5,\"libraryPanel\":{\"name\":\"Current Memory HEAP\",\"uid\":\"dfm6to81ybn5sd\"},\"options\":{\"barShape\":\"flat\",\"barWidthFactor\":0.5,\"effects\":{\"barGlow\":false,\"centerGlow\":false,\"gradient\":false},\"endpointMarker\":\"point\",\"minVizHeight\":75,\"minVizWidth\":75,\"orientation\":\"auto\",\"reduceOptions\":{\"calcs\":[\"mean\"],\"fields\":\"\",\"values\":false},\"segmentCount\":1,\"segmentSpacing\":0.3,\"shape\":\"gauge\",\"showThresholdLabels\":false,\"showThresholdMarkers\":false,\"sizing\":\"auto\",\"sparkline\":false,\"textMode\":\"auto\"},\"pluginVersion\":\"13.0.1+security-01\",\"targets\":[{\"datasource\":{\"type\":\"\",\"uid\":\"$Datasource\"},\"expr\":\"sum(jvm_memory_bytes_used{kubernetes_pod_name=\\\"$instance\\\", area=\\\"heap\\\"})*100/sum(jvm_memory_bytes_max{kubernetes_pod_name=\\\"$instance\\\", area=\\\"heap\\\"})\",\"interval\":\"\",\"legendFormat\":\"\",\"refId\":\"A\"}],\"title\":\"Current Memory HEAP\",\"type\":\"gauge\"},\"version\":1,\"meta\":{\"folderName\":\"keycloak\",\"folderUid\":\"dflyuco4w6hvkf\",\"connectedDashboards\":1,\"created\":\"2026-05-28T13:17:21Z\",\"updated\":\"2026-05-28T13:17:21Z\",\"createdBy\":{\"id\":1,\"name\":\"admin\",\"avatarUrl\":\"/avatar/46d229b033af06a191ff2267bca9ae56\"},\"updatedBy\":{\"id\":1,\"name\":\"admin\",\"avatarUrl\":\"/avatar/46d229b033af06a191ff2267bca9ae56\"}}}}"})
+   :status  200,
+   :body    (-> {"result"
+                 {"totalCount" (count panels),
+                  "elements"
+                  (vec (map-indexed make-library-element panels))
+                  "page"       1,
+                  "perPage"    100}}
+                (helper/clj->json))})
 
 (def create-alert-rule-response
   {:headers {},
-   :status 200,
-   :body
-   "{\"ruleGroup\":\"EvalGrp1\",\"notification_settings\":{\"receiver\":\"empty\"},\"updated\":\"2026-06-15T15:25:36.320853069Z\",\"uid\":\"my-new-alert-2\",\"title\":\"TimeSeriesRule\",\"for\":\"1m\",\"id\":3,\"condition\":\"C\",\"keep_firing_for\":\"0s\",\"record\":null,\"orgID\":1,\"provenance\":\"api\",\"annotations\":{\"__dashboardUid__\":\"adv5c5m\",\"__panelId__\":\"1\"},\"folderUID\":\"dflyuecbw3cw0f\",\"isPaused\":false,\"execErrState\":\"Error\",\"noDataState\":\"NoData\",\"data\":[{\"refId\":\"A\",\"queryType\":\"\",\"relativeTimeRange\":{\"from\":21600,\"to\":0},\"datasourceUid\":\"afm6v7ewratq8f\",\"model\":{\"datasource\":{\"type\":\"grafana-testdata-datasource\",\"uid\":\"afm6v7ewratq8f\"},\"instant\":false,\"intervalMs\":1000,\"maxDataPoints\":43200,\"range\":true,\"refId\":\"A\"}},{\"refId\":\"B\",\"queryType\":\"expression\",\"relativeTimeRange\":{\"from\":0,\"to\":0},\"datasourceUid\":\"__expr__\",\"model\":{\"conditions\":[{\"evaluator\":{\"params\":[],\"type\":\"gt\"},\"operator\":{\"type\":\"and\"},\"query\":{\"params\":[]},\"reducer\":{\"params\":[],\"type\":\"last\"},\"type\":\"query\"}],\"datasource\":{\"type\":\"__expr__\",\"uid\":\"__expr__\"},\"expression\":\"A\",\"intervalMs\":1000,\"maxDataPoints\":43200,\"reducer\":\"last\",\"refId\":\"B\",\"type\":\"reduce\"}},{\"refId\":\"C\",\"queryType\":\"expression\",\"relativeTimeRange\":{\"from\":0,\"to\":0},\"datasourceUid\":\"__expr__\",\"model\":{\"conditions\":[{\"evaluator\":{\"params\":[0],\"type\":\"gt\"},\"operator\":{\"type\":\"and\"},\"query\":{\"params\":[\"C\"]},\"reducer\":{\"params\":[],\"type\":\"last\"},\"type\":\"query\"}],\"datasource\":{\"type\":\"__expr__\",\"uid\":\"__expr__\"},\"expression\":\"B\",\"intervalMs\":1000,\"maxDataPoints\":43200,\"refId\":\"C\",\"type\":\"threshold\"}}]}"})
+   :status  200,
+   :body    (->> {:title   "My simple alert rule"
+                  :version 1}
+                 (make-alert-rule 1)
+                 (helper/clj->json))})
 
 (def update-alert-rule-response
   {:headers {},
-   :status 200,
-   :body
-   "{\"ruleGroup\":\"EvalGrp1\",\"notification_settings\":{\"receiver\":\"empty\"},\"updated\":\"2026-06-15T15:57:34.327312544Z\",\"uid\":\"my-new-alert-2\",\"title\":\"TimeSeriesRule\",\"for\":\"1m\",\"id\":3,\"condition\":\"C\",\"keep_firing_for\":\"0s\",\"record\":null,\"orgID\":1,\"provenance\":\"api\",\"annotations\":{\"__dashboardUid__\":\"adv5c5m\",\"__panelId__\":\"1\"},\"folderUID\":\"dflyuecbw3cw0f\",\"isPaused\":false,\"execErrState\":\"Error\",\"noDataState\":\"NoData\",\"data\":[{\"refId\":\"A\",\"queryType\":\"\",\"relativeTimeRange\":{\"from\":21600,\"to\":0},\"datasourceUid\":\"afm6v7ewratq8f\",\"model\":{\"datasource\":{\"type\":\"grafana-testdata-datasource\",\"uid\":\"afm6v7ewratq8f\"},\"instant\":false,\"intervalMs\":1000,\"maxDataPoints\":43200,\"range\":true,\"refId\":\"A\"}},{\"refId\":\"B\",\"queryType\":\"expression\",\"relativeTimeRange\":{\"from\":0,\"to\":0},\"datasourceUid\":\"__expr__\",\"model\":{\"conditions\":[{\"evaluator\":{\"params\":[],\"type\":\"gt\"},\"operator\":{\"type\":\"and\"},\"query\":{\"params\":[]},\"reducer\":{\"params\":[],\"type\":\"last\"},\"type\":\"query\"}],\"datasource\":{\"type\":\"__expr__\",\"uid\":\"__expr__\"},\"expression\":\"A\",\"intervalMs\":1000,\"maxDataPoints\":43200,\"reducer\":\"last\",\"refId\":\"B\",\"type\":\"reduce\"}},{\"refId\":\"C\",\"queryType\":\"expression\",\"relativeTimeRange\":{\"from\":0,\"to\":0},\"datasourceUid\":\"__expr__\",\"model\":{\"conditions\":[{\"evaluator\":{\"params\":[0],\"type\":\"gt\"},\"operator\":{\"type\":\"and\"},\"query\":{\"params\":[\"C\"]},\"reducer\":{\"params\":[],\"type\":\"last\"},\"type\":\"query\"}],\"datasource\":{\"type\":\"__expr__\",\"uid\":\"__expr__\"},\"expression\":\"B\",\"intervalMs\":1000,\"maxDataPoints\":43200,\"refId\":\"C\",\"type\":\"threshold\"}}]}"})
+   :status  200,
+   :body    (->> {:title   "My simple alert rule"
+                  :version 2}
+                 (make-alert-rule 1)
+                 (helper/clj->json))})
 
-(def create-update-dashboard-response
+(def create-library-element-response
+  {:headers {},
+   :status  200,
+   :body (-> {"result" (make-library-element 3 {:name "My simple panel"})}
+             (helper/clj->json))})
+
+(def update-library-element-response
   {:headers {},
    :status 200,
-   :body
-   "{\"folderUid\":\"dfou8iuiewd1cb\",\"id\":1865546023223296,\"slug\":\"simple-time-series\",\"status\":\"success\",\"uid\":\"adv5c5m\",\"url\":\"/d/adv5c5m/simple-time-series\",\"version\":2}"})
+   :body (-> {"result" (make-library-element 3 {:name "My updated simple panel"})}
+             (helper/clj->json))})
+
+(defn make-create-update-dashboard
+  ([] (make-create-update-dashboard (random-id)))
+  ([id] (make-create-update-dashboard id {}))
+  ([id {:keys [uid
+               title
+               folder-uid
+               version]
+        :or   {uid        (random-dashboard-uid)
+               title      (random-dashboard-title)
+               folder-uid (random-folder-uid)
+               version    (random-version)}}]
+   {:pre [(non-neg-int? id)
+          (string? uid)
+          (string? title)
+          (string? folder-uid)
+          (non-neg-int? version)]}
+   {"folderUid" folder-uid,
+    "id"        id,
+    "slug"      (slug title),
+    "status"    "success",
+    "uid"       uid,
+    "url"       (str "/d/" uid "/" (slug title)),
+    "version"   version}))
+
+(defn create-update-dashboard-response [dashboard]
+  {:headers {},
+   :status 200,
+   :body (->> dashboard
+              (make-create-update-dashboard 1)
+              (helper/clj->json))})
+
+(defn make-dashboard-related-alerts [alerts]
+  (->> alerts
+       (map-indexed make-alert-rule)
+       (vec)))
+
+(defn make-dashboard-related-panels [dashboards]
+  (->> dashboards
+       (map-indexed make-library-element)
+       (vec)))
