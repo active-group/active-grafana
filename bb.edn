@@ -10,6 +10,13 @@
  :tasks {adjust active-grafana.main-adjust/-main
          copy   active-grafana.main-copy/-main
 
+         dev {:requires    ([babashka.nrepl.server :as srv])
+              :extra-paths ["dev" "test"]
+              :task        (do (srv/start-server!
+                                {:host "localhost"
+                                 :port 0})
+                               (deref (promise)))}
+
          ;; NOTE: See https://blog.michielborkent.nl/babashka-test-runner.html
          test:bb {:extra-paths ["test"]
                   :extra-deps {io.github.cognitect-labs/test-runner
