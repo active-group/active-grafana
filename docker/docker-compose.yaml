@@ -1,6 +1,16 @@
+# TODO: document how the grafana docker image used in this file is built
+# on panakeia stable:
+# 0. build a docker image named grafana using the following steps....
+# 1. nix develop
+# 2. poetry install
+# 3. ./panakeia create-composition --env test
+# 4. poetry env activate | source
+# 5. ./panakeia create-composition --env test
+# 6. docker buildx bake --file docker/nickel_output/bake-test.hcl grafana
+
 services:
   grafana-a:
-    image: grafana/grafana
+    image: grafana
     container_name: grafana-a
     restart: unless-stopped
     ports:
@@ -9,7 +19,7 @@ services:
       - grafana-a-storage:/var/lib/grafana
 
   grafana-b:
-    image: grafana/grafana
+    image: grafana
     container_name: grafana-b
     restart: unless-stopped
     ports:
