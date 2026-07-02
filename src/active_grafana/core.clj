@@ -353,11 +353,6 @@
 ;; we need to run the real thing without support
 ;; of a user. Or without the need to be be an
 ;; interactive program.
-;;
-;; TODO: Wenn ein Dashboard existiert, wäre es super, wenn noch mehr human-readable output käme. Also sowas wie:
-;; Found dashboard `Panakeia Core: Overview` in folder `Panakeia` with alerts ... on rt-panakeia....
-;; Copying to existing folder `...` on ...
-;; also das logging ausbauen.
 
 (defn ambiguous-candidates [candidates]
   (let [candidates-count (count candidates)]
@@ -406,12 +401,6 @@
 
       :unambiguous
       (let [dashboard-metadata (first dashboard-candidates)]
-        (helper/log (str "The dashboard titled \""
-                         (get dashboard-metadata "title")
-                         "\" was found in the folder \""
-                         (get dashboard-metadata "folderTitle")
-                         " on " (:url grafana-instance)
-                         "\"."))
         dashboard-metadata)
 
       (throw (ex-info "Unexpected choose-dashboard-meta result!"
@@ -454,7 +443,6 @@
 
       :unambiguous
       (let [folder-uid (get (first folder-candidates) "uid")]
-        (helper/log (str "The following folder was chosen to copy the " thing-to-copy " into."))
         folder-uid)
 
       (throw (ex-info "Unexpected choose-folder-uid result!"
@@ -513,6 +501,57 @@
                       {:alerts           alerts
                        :alerts-by-folder alerts-by-folder})))))
 
+;; TODO: Wenn ein Dashboard existiert, wäre es super, wenn noch mehr human-readable output käme. Also sowas wie:
+;; Found dashboard `Panakeia Core: Overview` in folder `Panakeia` with alerts ... on rt-panakeia....
+;; Copying to existing folder `...` on ...
+;; also das logging ausbauen.
+
+(defn surround-quotes [s]
+  (str "`" s "`"))
+
+(defn stringify-names [names]
+  (->> names
+       (map surround-quotes)
+       (interpose ", ")
+       (apply str)))
+
+(defn convenient-copy-summary
+  [from-grafana
+   dashboard-title
+   from-folder-title
+   related-panels-titles
+   related-alerts-titles
+   to-grafana
+   to-folder-title]
+  (str "\n"
+       "#########################################################################"
+       "#########################################################################"
+       "\n\n"
+       "CONVENIENT COPY SUMMARY: "
+       "\n\n"
+       "Found dashboard "
+       (surround-quotes dashboard-title)
+       (when (not-empty related-panels-titles)
+         (str " with related library panels "
+              (stringify-names related-panels-titles)))
+       (when (not-empty related-alerts-titles)
+         (str " and related alerts "
+              (stringify-names related-alerts-titles)))
+       " in folder "
+       (surround-quotes from-folder-title)
+       " on "
+       (surround-quotes from-grafana)
+       "."
+       "\n"
+       "Copying to folder "
+       (surround-quotes to-folder-title)
+       " on "
+       (surround-quotes to-grafana)
+       "."
+       "\n\n"
+       "#########################################################################"
+       "#########################################################################"))
+
 (defn convenient-copy
   "Copy a dashboard titled [[dashboard-title]] from [[from-grafana-instance]] to
    [[to-grafana-instance]] conveniently.  Also copy the library panels and
@@ -563,6 +602,11 @@
         dashboard-folder-uid   (or to-board-folder-uid
                                    (choose-dashboard-folder-uid to-grafana-instance
                                                                 dashboard-folder-title))
+        to-folder              (-> (api/get-folder-by-folder-uid (:url to-grafana-instance)
+                                                                 (:token to-grafana-instance)
+                                                                 dashboard-folder-uid)
+                                   (helper/json->clj))
+        to-folder-title        (get to-folder "title")
         message                (or to-message
                                    (str "Copy " (get dashboard-response "title")
                                         " (uid: " (get dashboard-response "uid") ") "
@@ -572,17 +616,19 @@
                                         "at " (:url to-grafana-instance) "."))
 
         panels                (find-dashboard-related-panels from-grafana-instance dashboard-uid)
+        related-panels-titles (map #(get % "name") panels)
         has-dependent-panels? (not-empty panels)
         panels-folder-title   (when has-dependent-panels? (check-and-choose-panels-folder-title panels))
         panels-folder-uid     (when has-dependent-panels? (choose-panels-folder-uid to-grafana-instance
                                                                                     panels-folder-title))
 
         source-alerts              (find-dashboard-related-alert-rules from-grafana-instance dashboard-uid)
+        related-alerts-titles      (map #(get % "title") source-alerts)
         has-dependent-alerts?      (not-empty source-alerts)
         source-alerts-folder-uid   (when has-dependent-alerts? (check-and-choose-alert-folder-uid source-alerts))
         source-alerts-folder       (when has-dependent-alerts?
-                                     (api/get-folder-by-folder-uid (-> from-grafana-instance :url)
-                                                                   (-> from-grafana-instance :token)
+                                     (api/get-folder-by-folder-uid (:url from-grafana-instance)
+                                                                   (:token from-grafana-instance)
                                                                    source-alerts-folder-uid))
         source-alerts-folder-title (when has-dependent-alerts?
                                      (get (helper/json->clj source-alerts-folder) "title"))
@@ -590,26 +636,28 @@
                                      (choose-alerts-folder-uid to-grafana-instance
                                                                source-alerts-folder-title))]
     (when has-dependent-panels?
-      (helper/log (str  "The following panels will be copied: "
-                        "TODO: list panels to copy here..."))
       (copy-panels from-grafana-instance
                    to-grafana-instance
                    dashboard-uid
                    panels-folder-uid))
-    (helper/log (str  "The following dashboard will be copied: "
-                      (get dashboard-response "title")))
     (copy-dashboard from-grafana-instance
                     to-grafana-instance
                     dashboard-uid
                     dashboard-folder-uid
                     message)
     (when has-dependent-alerts?
-      (helper/log (str  "The following alerts will be copied: "
-                        "TODO: list alerts to copy here..."))
       (copy-alerts from-grafana-instance
                    to-grafana-instance
                    dashboard-uid
-                   target-alerts-folder-uid))))
+                   target-alerts-folder-uid))
+    (helper/log
+     (convenient-copy-summary (:url from-grafana-instance)
+                         dashboard-title
+                         dashboard-folder-title
+                         related-panels-titles
+                         related-alerts-titles
+                         (:url to-grafana-instance)
+                         to-folder-title))))
 
 ;; <<< COPY
 
