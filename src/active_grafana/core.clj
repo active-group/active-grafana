@@ -501,11 +501,6 @@
                       {:alerts           alerts
                        :alerts-by-folder alerts-by-folder})))))
 
-;; TODO: Wenn ein Dashboard existiert, wäre es super, wenn noch mehr human-readable output käme. Also sowas wie:
-;; Found dashboard `Overview` in folder `Folder` with alerts ... on grafana-instance-a....
-;; Copying to existing folder `...` on ...
-;; also das logging ausbauen.
-
 (defn surround-quotes [s]
   (str "`" s "`"))
 
