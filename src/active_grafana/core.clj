@@ -501,11 +501,6 @@
                       {:alerts           alerts
                        :alerts-by-folder alerts-by-folder})))))
 
-;; TODO: Wenn ein Dashboard existiert, wäre es super, wenn noch mehr human-readable output käme. Also sowas wie:
-;; Found dashboard `Panakeia Core: Overview` in folder `Panakeia` with alerts ... on rt-panakeia....
-;; Copying to existing folder `...` on ...
-;; also das logging ausbauen.
-
 (defn surround-quotes [s]
   (str "`" s "`"))
 
@@ -652,12 +647,12 @@
                    target-alerts-folder-uid))
     (helper/log
      (convenient-copy-summary (:url from-grafana-instance)
-                         dashboard-title
-                         dashboard-folder-title
-                         related-panels-titles
-                         related-alerts-titles
-                         (:url to-grafana-instance)
-                         to-folder-title))))
+                              dashboard-title
+                              dashboard-folder-title
+                              related-panels-titles
+                              related-alerts-titles
+                              (:url to-grafana-instance)
+                              to-folder-title))))
 
 ;; <<< COPY
 
