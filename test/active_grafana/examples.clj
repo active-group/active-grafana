@@ -459,33 +459,22 @@
                   "perPage"    100}}
                 (helper/clj->json))})
 
-(def create-alert-rule-response
+(defn create-alert-rule-response [alert-rule]
   {:headers {},
    :status  200,
-   :body    (->> {:title   "My simple alert rule"
-                  :version 1}
+   :body    (->> alert-rule
                  (make-alert-rule 1)
                  (helper/clj->json))})
 
-(def update-alert-rule-response
+(def update-alert-rule-response create-alert-rule-response)
+
+(defn create-library-element-response [library-element]
   {:headers {},
    :status  200,
-   :body    (->> {:title   "My simple alert rule"
-                  :version 2}
-                 (make-alert-rule 1)
-                 (helper/clj->json))})
-
-(def create-library-element-response
-  {:headers {},
-   :status  200,
-   :body (-> {"result" (make-library-element 3 {:name "My simple panel"})}
+   :body (-> {"result" (make-library-element 3 library-element)}
              (helper/clj->json))})
 
-(def update-library-element-response
-  {:headers {},
-   :status 200,
-   :body (-> {"result" (make-library-element 3 {:name "My updated simple panel"})}
-             (helper/clj->json))})
+(def update-library-element-response create-library-element-response)
 
 (defn make-create-update-dashboard
   ([] (make-create-update-dashboard (random-id)))
