@@ -147,12 +147,14 @@
       (with-stub!
         [[api/get-library-panels (api-stub/get-library-panels existing-panels)]
          [api/get-library-element-by-uid (api-stub/get-library-element-by-uid 1 panel-description)]
-         [api/update-library-element (api-stub/update-library-element panel-description)]]
+         [api/update-library-element (api-stub/update-library-element panel-description)]
+         [api/create-library-element]]
         (is (-> examples/grafana-b-instance
                 (sut/copy-panel panel-to-copy
                                 folder-uid)
                 (helper/json->clj)
                 (contains? "result")))
+        (is (not-called? api/create-library-element))
         (is (called-once? api/update-library-element)))))
   (testing "panel is created if it doesn't exist yet"
     (let [folder-uid        "my-folder"
@@ -166,12 +168,14 @@
       (with-stub!
         [[api/get-library-panels (api-stub/get-library-panels existing-panels)]
          [api/get-library-element-by-uid (api-stub/get-library-element-by-uid 1 panel-description)]
-         [api/create-library-element (api-stub/create-library-element panel-description)]]
+         [api/create-library-element (api-stub/create-library-element panel-description)]
+         [api/update-library-element]]
         (is (-> examples/grafana-b-instance
                 (sut/copy-panel panel-to-copy
                                 folder-uid)
                 (helper/json->clj)
                 (contains? "result")))
+        (is (not-called? api/update-library-element))
         (is (called-once? api/create-library-element))))))
 
 (deftest copy-alert-test
@@ -188,12 +192,14 @@
                              {:title "My second Alert"}]]
       (with-stub!
         [[api/get-all-alert-rules (api-stub/get-all-alert-rules existing-alerts)]
-         [api/update-alert-rule (api-stub/update-alert-rule alert-description)]]
+         [api/update-alert-rule (api-stub/update-alert-rule alert-description)]
+         [api/create-alert-rule]]
         (is (-> examples/grafana-b-instance
                 (sut/copy-alert folder-uid
                                 alert-to-copy)
                 (helper/json->clj)
                 (contains? "data")))
+        (is (not-called? api/create-alert-rule))
         (is (called-once? api/update-alert-rule)))))
   (testing "alert is created if it doesn't exist yet"
     (let [folder-uid        "my-folder"
@@ -207,12 +213,14 @@
           existing-alerts   []]
       (with-stub!
         [[api/get-all-alert-rules (api-stub/get-all-alert-rules existing-alerts)]
-         [api/create-alert-rule (api-stub/create-alert-rule alert-description)]]
+         [api/create-alert-rule (api-stub/create-alert-rule alert-description)]
+         [api/update-alert-rule]]
         (is (-> examples/grafana-b-instance
                 (sut/copy-alert folder-uid
                                 alert-to-copy)
                 (helper/json->clj)
                 (contains? "data")))
+        (is (not-called? api/update-alert-rule))
         (is (called-once? api/create-alert-rule))))))
 
 (deftest copy-dashboard-test
