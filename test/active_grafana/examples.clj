@@ -90,11 +90,10 @@
 (defn make-dashboard-query-body [titles]
   (vec (map-indexed make-compact-dashboard titles)))
 
-(def get-dashboards-response
+(defn get-dashboards-response [dashboards]
   {:headers {},
    :status  200,
-   :body    (-> [{:title dashboard-title}
-                 {:title "Another Title"}]
+   :body    (-> dashboards
                 make-dashboard-query-body
                 helper/clj->json)})
 

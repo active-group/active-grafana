@@ -1,7 +1,8 @@
 (ns active-grafana.grafana-api-stub
   (:require [active-grafana.examples :as examples]))
 
-(def get-dashboards (constantly examples/get-dashboards-response))
+(defn get-dashboards [dashboards]
+  (constantly (examples/get-dashboards-response dashboards)))
 
 (defn find-dashboards-by-query [dashboards]
   (constantly (examples/find-dashboards-by-query-response dashboards)))
