@@ -10,8 +10,8 @@
 (defn calls-count= [n f]
   (= n (-> f calls count)))
 
-(defn not-called? [f]
-  (calls-count= 0 f))
+(def not-called? (partial calls-count= 0))
+(def called-once? (partial calls-count= 1))
 
 (deftest ambiguous-candidates
   (testing "no candidates"
@@ -38,7 +38,7 @@
                               #"No dashboard with the following title was found"
                               (sut/choose-dashboard-metadata examples/grafana-a-instance
                                                              dashboard-title)))
-        (is (calls-count= 1 api/get-dashboards))))
+        (is (called-once? api/get-dashboards))))
     (testing "1 dashboard is found"
       (with-stub!
         [[api/find-dashboards-by-query
@@ -155,7 +155,7 @@
                                 folder-uid)
                 (helper/json->clj)
                 (contains? "result")))
-        (is (calls-count= 1 api/update-library-element)))))
+        (is (called-once? api/update-library-element)))))
   (testing "panel is created if it doesn't exist yet"
     (let [folder-uid        "my-folder"
           panel-description {:uid        "my-panel"
@@ -174,7 +174,7 @@
                                 folder-uid)
                 (helper/json->clj)
                 (contains? "result")))
-        (is (calls-count= 1 api/create-library-element))))))
+        (is (called-once? api/create-library-element))))))
 
 (deftest copy-alert-test
   (testing "existing alert is updated"
@@ -195,7 +195,7 @@
                                 alert-to-copy)
                 (helper/json->clj)
                 (contains? "data")))
-        (is (calls-count= 1 api/update-alert-rule)))))
+        (is (called-once? api/update-alert-rule)))))
   (testing "alert is created if it doesn't exist yet"
     (let [folder-uid        "my-folder"
           alert-description {:uid        "my-alert"
@@ -213,7 +213,7 @@
                                 alert-to-copy)
                 (helper/json->clj)
                 (contains? "data")))
-        (is (calls-count= 1 api/create-alert-rule))))))
+        (is (called-once? api/create-alert-rule))))))
 
 (deftest copy-dashboard-test
   (testing "dashboard is copied"
