@@ -66,7 +66,7 @@
           [(api-stub/find-folders-by-query [])
            (api-stub/find-folders-by-query [{:title folder-title
                                              :uid   folder-uid}])]]
-         [api/create-folder api-stub/create-folder]]
+         [api/create-folder (api-stub/create-folder {:title folder-title})]]
         (is (= folder-uid
                (sut/choose-folder-uid examples/grafana-b-instance
                                       folder-title)))))
@@ -74,8 +74,7 @@
       (with-stub!
         [[api/find-folders-by-query
           (api-stub/find-folders-by-query [{:title folder-title
-                                            :uid   folder-uid}])]
-         [api/create-folder api-stub/create-folder]]
+                                            :uid   folder-uid}])]]
         (is (= folder-uid
                (sut/choose-folder-uid examples/grafana-b-instance
                                       folder-title)))))
@@ -85,8 +84,7 @@
           (api-stub/find-folders-by-query [{:title folder-title
                                             :uid   folder-uid}
                                            {:title folder-title
-                                            :uid   folder-uid}])]
-         [api/create-folder api-stub/create-folder]]
+                                            :uid   folder-uid}])]]
         (is (thrown-with-msg? clojure.lang.ExceptionInfo
                               #"More than one folder was found"
                               (sut/choose-folder-uid examples/grafana-b-instance
