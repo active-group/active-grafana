@@ -53,31 +53,39 @@
                                                              dashboard-title)))))))
 
 (deftest choose-folder-uid-test
-  (testing "no folder is found"
-    (with-stub!
-      [[api/find-folders-by-query [(api-stub/find-folders-by-query :none)
-                                   (api-stub/find-folders-by-query :unambiguous)]]
-       [api/create-folder api-stub/create-folder]]
-      (is (= examples/folder-uid
-             (sut/choose-folder-uid examples/grafana-b-instance
-                                    examples/folder-title)))))
-  (testing "1 folder is found"
-    (with-stub!
-      [[api/find-folders-by-query
-        (api-stub/find-folders-by-query :unambiguous)]
-       [api/create-folder api-stub/create-folder]]
-      (is (= examples/folder-uid
-             (sut/choose-folder-uid examples/grafana-b-instance
-                                    examples/folder-title)))))
-  (testing "more than 1 folder is found"
-    (with-stub!
-      [[api/find-folders-by-query
-        (api-stub/find-folders-by-query :ambiguous)]
-       [api/create-folder api-stub/create-folder]]
-      (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                            #"More than one folder was found"
-                            (sut/choose-folder-uid examples/grafana-b-instance
-                                                   examples/folder-title))))))
+  (let [folder-title "My folder"
+        folder-uid   "my-folder-uid"]
+    (testing "no folder is found"
+      (with-stub!
+        [[api/find-folders-by-query
+          [(api-stub/find-folders-by-query [])
+           (api-stub/find-folders-by-query [{:title folder-title
+                                             :uid   folder-uid}])]]
+         [api/create-folder api-stub/create-folder]]
+        (is (= folder-uid
+               (sut/choose-folder-uid examples/grafana-b-instance
+                                      folder-title)))))
+    (testing "1 folder is found"
+      (with-stub!
+        [[api/find-folders-by-query
+          (api-stub/find-folders-by-query [{:title folder-title
+                                            :uid   folder-uid}])]
+         [api/create-folder api-stub/create-folder]]
+        (is (= folder-uid
+               (sut/choose-folder-uid examples/grafana-b-instance
+                                      folder-title)))))
+    (testing "more than 1 folder is found"
+      (with-stub!
+        [[api/find-folders-by-query
+          (api-stub/find-folders-by-query [{:title folder-title
+                                            :uid   folder-uid}
+                                           {:title folder-title
+                                            :uid   folder-uid}])]
+         [api/create-folder api-stub/create-folder]]
+        (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                              #"More than one folder was found"
+                              (sut/choose-folder-uid examples/grafana-b-instance
+                                                     folder-title)))))))
 
 (deftest find-dashboard-related-panels-test
   (with-stub!

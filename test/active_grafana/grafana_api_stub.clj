@@ -9,8 +9,8 @@
 (defn get-dashboard-by-uid [dashboard]
   (constantly (examples/get-dashboard-by-uid-response dashboard)))
 
-(defn find-folders-by-query [case-accessor]
-  (constantly (get examples/find-folders-by-query-responses case-accessor)))
+(defn find-folders-by-query [folders]
+  (constantly (examples/find-folders-by-query-response folders)))
 
 (def create-folder (constantly examples/create-folder-response))
 

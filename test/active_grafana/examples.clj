@@ -232,25 +232,12 @@
 (defn make-folder-query-body [titles]
   (map-indexed make-compact-folder titles))
 
-(def find-folders-by-query-responses
-  {:none
-   {:headers {},
-    :status  200,
-    :body    "[]"}
-   :unambiguous
-   {:headers {},
-    :status  200,
-    :body    (-> [{:title folder-title
-                   :uid   folder-uid}]
-                 make-folder-query-body
-                 helper/clj->json)}
-   :ambiguous
-   {:headers {},
-    :status  200,
-    :body    (-> [{:title folder-title}
-                  {:title folder-title}]
-                 make-folder-query-body
-                 helper/clj->json)}})
+(defn find-folders-by-query-response [folders]
+  {:headers {},
+   :status  200,
+   :body    (-> folders
+                make-folder-query-body
+                helper/clj->json)})
 
 (defn make-full-folder
   ([] (make-full-folder (random-id)))
