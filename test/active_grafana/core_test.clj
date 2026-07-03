@@ -25,21 +25,24 @@
       (is (= :ambiguous (sut/ambiguous-candidates example))))))
 
 (deftest choose-dashboard-metadata-test
-  (let [dashboard-title "Simple dashboard"]
+  (let [dashboard-title         "Simple dashboard"
+        another-dashboard-title "Another Title"
+        all-dashboards          [{:title dashboard-title}
+                                 {:title another-dashboard-title}]]
     (testing "no dashboard is found"
       (with-stub!
         [[api/find-dashboards-by-query
           (api-stub/find-dashboards-by-query [])]
-         [api/get-dashboards api-stub/get-dashboards]]
+         [api/get-dashboards (api-stub/get-dashboards all-dashboards)]]
         (is (thrown-with-msg? clojure.lang.ExceptionInfo
                               #"No dashboard with the following title was found"
                               (sut/choose-dashboard-metadata examples/grafana-a-instance
-                                                             dashboard-title)))))
+                                                             dashboard-title)))
+        (is (calls-count= 1 api/get-dashboards))))
     (testing "1 dashboard is found"
       (with-stub!
         [[api/find-dashboards-by-query
-          (api-stub/find-dashboards-by-query [{:title dashboard-title}])]
-         [api/get-dashboards api-stub/get-dashboards]]
+          (api-stub/find-dashboards-by-query [{:title dashboard-title}])]]
         (is (= dashboard-title
                (get (sut/choose-dashboard-metadata examples/grafana-a-instance
                                                    dashboard-title)
@@ -48,8 +51,7 @@
       (with-stub!
         [[api/find-dashboards-by-query
           (api-stub/find-dashboards-by-query [{:title dashboard-title}
-                                              {:title dashboard-title}])]
-         [api/get-dashboards api-stub/get-dashboards]]
+                                              {:title dashboard-title}])]]
         (is (thrown-with-msg? clojure.lang.ExceptionInfo
                               #"More than one dashboard was found"
                               (sut/choose-dashboard-metadata examples/grafana-a-instance
