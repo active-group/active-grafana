@@ -13,7 +13,8 @@
 (defn find-folders-by-query [folders]
   (constantly (examples/find-folders-by-query-response folders)))
 
-(def create-folder (constantly examples/create-folder-response))
+(defn create-folder [folder]
+  (constantly (examples/create-folder-response folder)))
 
 (defn get-library-element-by-uid [id panel]
   (constantly (examples/get-library-panel-by-uid-response id panel)))

@@ -263,11 +263,11 @@
     "canSave"   true,
     "orgId"     1}))
 
-(def create-folder-response
+(defn create-folder-response [folder]
   {:headers {},
    :status  200,
    :body
-   (-> (make-full-folder 1 {:title folder-title})
+   (-> (make-full-folder 1 folder)
        (helper/clj->json))})
 
 (defn make-library-element
