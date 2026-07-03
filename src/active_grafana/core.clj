@@ -414,7 +414,7 @@
    an unambiguous result. If the search yields no result at all this function
    creates a folder with the title [[folder-title]] and returns its uid. If the
    search yields an ambiguous result, this function throws an exception."
-  [thing-to-copy grafana-instance folder-title]
+  [grafana-instance folder-title]
   (let [folder-candidates (->> folder-title
                                (api/find-folders-by-query (:url grafana-instance)
                                                           (:token grafana-instance))
@@ -426,7 +426,7 @@
       (do (api/create-folder (:url grafana-instance)
                              (:token grafana-instance)
                              folder-title)
-          (choose-folder-uid thing-to-copy grafana-instance folder-title))
+          (choose-folder-uid grafana-instance folder-title))
 
       :ambiguous
       (do
@@ -449,10 +449,6 @@
                       {:folder-title      folder-title
                        :folder-candidates folder-candidates
                        :grafana-url       (:url grafana-instance)})))))
-
-(def choose-dashboard-folder-uid (partial choose-folder-uid "dashboard"))
-(def choose-panels-folder-uid (partial choose-folder-uid "library panels"))
-(def choose-alerts-folder-uid (partial choose-folder-uid "alerts"))
 
 (defn check-and-choose-panels-folder-title
   "Returns the title of the folder the given [[panels]] are located in, if all
@@ -595,8 +591,8 @@
         ;; uid is the same as the dashboard-folder-uid
         ;; BUT: What to do if the checks fail?
         dashboard-folder-uid   (or to-board-folder-uid
-                                   (choose-dashboard-folder-uid to-grafana-instance
-                                                                dashboard-folder-title))
+                                   (choose-folder-uid to-grafana-instance
+                                                      dashboard-folder-title))
         to-folder              (-> (api/get-folder-by-folder-uid (:url to-grafana-instance)
                                                                  (:token to-grafana-instance)
                                                                  dashboard-folder-uid)
@@ -614,8 +610,8 @@
         related-panels-titles (map #(get % "name") panels)
         has-dependent-panels? (not-empty panels)
         panels-folder-title   (when has-dependent-panels? (check-and-choose-panels-folder-title panels))
-        panels-folder-uid     (when has-dependent-panels? (choose-panels-folder-uid to-grafana-instance
-                                                                                    panels-folder-title))
+        panels-folder-uid     (when has-dependent-panels? (choose-folder-uid to-grafana-instance
+                                                                             panels-folder-title))
 
         source-alerts              (find-dashboard-related-alert-rules from-grafana-instance dashboard-uid)
         related-alerts-titles      (map #(get % "title") source-alerts)
@@ -628,8 +624,8 @@
         source-alerts-folder-title (when has-dependent-alerts?
                                      (get (helper/json->clj source-alerts-folder) "title"))
         target-alerts-folder-uid   (when has-dependent-alerts?
-                                     (choose-alerts-folder-uid to-grafana-instance
-                                                               source-alerts-folder-title))]
+                                     (choose-folder-uid to-grafana-instance
+                                                        source-alerts-folder-title))]
     (when has-dependent-panels?
       (copy-panels from-grafana-instance
                    to-grafana-instance
