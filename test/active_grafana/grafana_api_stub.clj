@@ -15,13 +15,13 @@
 (def create-folder (constantly examples/create-folder-response))
 
 (defn get-library-element-by-uid [id panel]
-  (constantly (examples/make-get-library-panel-by-uid-response id panel)))
+  (constantly (examples/get-library-panel-by-uid-response id panel)))
 
 (defn get-all-alert-rules [alerts]
   (constantly (examples/get-all-alert-rules-response alerts)))
 
 (defn get-library-panels [panels]
-  (constantly (examples/make-get-library-panels-response panels)))
+  (constantly (examples/get-library-panels-response panels)))
 
 (def create-alert-rule (constantly examples/create-alert-rule-response))
 

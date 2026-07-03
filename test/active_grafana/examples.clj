@@ -367,9 +367,9 @@
     "orgId"       1,
     "description" ""}))
 
-(defn make-get-library-panel-by-uid-response
-  ([] (make-get-library-panel-by-uid-response 1))
-  ([id] (make-get-library-panel-by-uid-response id {}))
+(defn get-library-panel-by-uid-response
+  ([] (get-library-panel-by-uid-response 1))
+  ([id] (get-library-panel-by-uid-response id {}))
   ([id panel]
    {:headers {},
     :status  200,
@@ -449,7 +449,7 @@
         (vec)
         (helper/clj->json))})
 
-(defn make-get-library-panels-response [panels]
+(defn get-library-panels-response [panels]
   {:headers {},
    :status  200,
    :body    (-> {"result"
