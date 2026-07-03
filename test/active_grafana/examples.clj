@@ -98,24 +98,12 @@
                 make-dashboard-query-body
                 helper/clj->json)})
 
-(def find-dashboards-by-query-responses
-  {:none
-   {:headers {},
-    :status  200,
-    :body    "[]"}
-   :unambiguous
-   {:headers {},
-    :status  200,
-    :body    (-> [{:title dashboard-title}]
-                 make-dashboard-query-body
-                 helper/clj->json)}
-   :ambiguous
-   {:headers {},
-    :status  200,
-    :body    (-> [{:title dashboard-title}
-                  {:title dashboard-title}]
-                 make-dashboard-query-body
-                 helper/clj->json)}})
+(defn find-dashboards-by-query-response [dashboards]
+  {:headers {},
+   :status  200,
+   :body    (-> dashboards
+                make-dashboard-query-body
+                helper/clj->json)})
 
 (defn make-full-dashboard-panel
   ([] (make-full-dashboard-panel (random-id)))

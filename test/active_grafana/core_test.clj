@@ -22,33 +22,35 @@
       (is (= :ambiguous (sut/ambiguous-candidates example))))))
 
 (deftest choose-dashboard-metadata-test
-  (testing "no dashboard is found"
-    (with-stub!
-      [[api/find-dashboards-by-query
-        (api-stub/find-dashboards-by-query :none)]
-       [api/get-dashboards api-stub/get-dashboards]]
-      (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                            #"No dashboard with the following title was found"
-                            (sut/choose-dashboard-metadata examples/grafana-a-instance
-                                                           examples/dashboard-title)))))
-  (testing "1 dashboard is found"
-    (with-stub!
-      [[api/find-dashboards-by-query
-        (api-stub/find-dashboards-by-query :unambiguous)]
-       [api/get-dashboards api-stub/get-dashboards]]
-      (is (= examples/dashboard-title
-             (get (sut/choose-dashboard-metadata examples/grafana-a-instance
-                                                 examples/dashboard-title)
-                  "title")))))
-  (testing "more than 1 dashboard is found"
-    (with-stub!
-      [[api/find-dashboards-by-query
-        (api-stub/find-dashboards-by-query :ambiguous)]
-       [api/get-dashboards api-stub/get-dashboards]]
-      (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                            #"More than one dashboard was found"
-                            (sut/choose-dashboard-metadata examples/grafana-a-instance
-                                                           examples/dashboard-title))))))
+  (let [dashboard-title "Simple dashboard"]
+    (testing "no dashboard is found"
+      (with-stub!
+        [[api/find-dashboards-by-query
+          (api-stub/find-dashboards-by-query [])]
+         [api/get-dashboards api-stub/get-dashboards]]
+        (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                              #"No dashboard with the following title was found"
+                              (sut/choose-dashboard-metadata examples/grafana-a-instance
+                                                             dashboard-title)))))
+    (testing "1 dashboard is found"
+      (with-stub!
+        [[api/find-dashboards-by-query
+          (api-stub/find-dashboards-by-query [{:title dashboard-title}])]
+         [api/get-dashboards api-stub/get-dashboards]]
+        (is (= dashboard-title
+               (get (sut/choose-dashboard-metadata examples/grafana-a-instance
+                                                   dashboard-title)
+                    "title")))))
+    (testing "more than 1 dashboard is found"
+      (with-stub!
+        [[api/find-dashboards-by-query
+          (api-stub/find-dashboards-by-query [{:title dashboard-title}
+                                              {:title dashboard-title}])]
+         [api/get-dashboards api-stub/get-dashboards]]
+        (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                              #"More than one dashboard was found"
+                              (sut/choose-dashboard-metadata examples/grafana-a-instance
+                                                             dashboard-title)))))))
 
 (deftest choose-folder-uid-test
   (testing "no folder is found"

@@ -3,8 +3,8 @@
 
 (def get-dashboards (constantly examples/get-dashboards-response))
 
-(defn find-dashboards-by-query [case-accessor]
-  (constantly (get examples/find-dashboards-by-query-responses case-accessor)))
+(defn find-dashboards-by-query [dashboards]
+  (constantly (examples/find-dashboards-by-query-response dashboards)))
 
 (defn get-dashboard-by-uid [dashboard]
   (constantly (examples/get-dashboard-by-uid-response dashboard)))
