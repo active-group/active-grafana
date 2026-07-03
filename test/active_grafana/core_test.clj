@@ -147,7 +147,7 @@
       (with-stub!
         [[api/get-library-panels (api-stub/get-library-panels existing-panels)]
          [api/get-library-element-by-uid (api-stub/get-library-element-by-uid 1 panel-description)]
-         [api/update-library-element api-stub/update-library-element]]
+         [api/update-library-element (api-stub/update-library-element panel-description)]]
         (is (-> examples/grafana-b-instance
                 (sut/copy-panel panel-to-copy
                                 folder-uid)
@@ -166,7 +166,7 @@
       (with-stub!
         [[api/get-library-panels (api-stub/get-library-panels existing-panels)]
          [api/get-library-element-by-uid (api-stub/get-library-element-by-uid 1 panel-description)]
-         [api/create-library-element api-stub/create-library-element]]
+         [api/create-library-element (api-stub/create-library-element panel-description)]]
         (is (-> examples/grafana-b-instance
                 (sut/copy-panel panel-to-copy
                                 folder-uid)
@@ -179,7 +179,8 @@
     (let [folder-uid        "my-folder"
           alert-description {:uid        "my-alert"
                              :title      "My Alert"
-                             :folder-uid folder-uid}
+                             :folder-uid folder-uid
+                             :version    1}
           alert-to-copy     (examples/make-alert-rule
                              1
                              alert-description)
@@ -187,7 +188,7 @@
                              {:title "My second Alert"}]]
       (with-stub!
         [[api/get-all-alert-rules (api-stub/get-all-alert-rules existing-alerts)]
-         [api/update-alert-rule api-stub/update-alert-rule]]
+         [api/update-alert-rule (api-stub/update-alert-rule alert-description)]]
         (is (-> examples/grafana-b-instance
                 (sut/copy-alert folder-uid
                                 alert-to-copy)
@@ -198,14 +199,15 @@
     (let [folder-uid        "my-folder"
           alert-description {:uid        "my-alert"
                              :title      "My Alert"
-                             :folder-uid folder-uid}
+                             :folder-uid folder-uid
+                             :version    2}
           alert-to-copy     (examples/make-alert-rule
                              1
                              alert-description)
           existing-alerts   []]
       (with-stub!
         [[api/get-all-alert-rules (api-stub/get-all-alert-rules existing-alerts)]
-         [api/create-alert-rule api-stub/create-alert-rule]]
+         [api/create-alert-rule (api-stub/create-alert-rule alert-description)]]
         (is (-> examples/grafana-b-instance
                 (sut/copy-alert folder-uid
                                 alert-to-copy)

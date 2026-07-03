@@ -25,13 +25,17 @@
 (defn get-library-panels [panels]
   (constantly (examples/get-library-panels-response panels)))
 
-(def create-alert-rule (constantly examples/create-alert-rule-response))
+(defn create-alert-rule [alert-rule]
+  (constantly (examples/create-alert-rule-response alert-rule)))
 
-(def update-alert-rule (constantly examples/update-alert-rule-response))
+(defn update-alert-rule [alert-rule]
+  (constantly (examples/update-alert-rule-response alert-rule)))
 
-(def create-library-element (constantly examples/create-library-element-response))
+(defn create-library-element [library-element]
+  (constantly (examples/create-library-element-response library-element)))
 
-(def update-library-element (constantly examples/update-library-element-response))
+(defn update-library-element [library-element]
+  (constantly (examples/update-library-element-response library-element)))
 
 (defn create-update-dashboard [dashboard]
   (constantly (examples/create-update-dashboard-response dashboard)))
