@@ -534,7 +534,9 @@
        (surround-quotes from-grafana)
        "."
        "\n"
-       "Copying to folder "
+       "Copied "
+       (surround-quotes dashboard-title)
+       " and its related library panels and alerts to folder "
        (surround-quotes to-folder-title)
        " on "
        (surround-quotes to-grafana)
