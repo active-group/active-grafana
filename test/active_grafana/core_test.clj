@@ -10,6 +10,9 @@
 (defn calls-count= [n f]
   (= n (-> f calls count)))
 
+(defn not-called? [f]
+  (calls-count= 0 f))
+
 (deftest ambiguous-candidates
   (testing "no candidates"
     (let [example []]
