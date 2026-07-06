@@ -20,6 +20,7 @@ jobs:
           distribution: 'temurin'
           java-version: '25'
 
+      # https://github.com/babashka/babashka#ci
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@13.4
         with:
