@@ -13,3 +13,4 @@ pom.xml.asc
 /.lsp
 /emacs-restclient/credentials.org
 /dev
+.dir-locals.el
