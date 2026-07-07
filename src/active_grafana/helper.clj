@@ -1,5 +1,5 @@
 (ns active-grafana.helper
-  (:require [clojure.data.json :as json]))
+  (:require [cheshire.core :as json]))
 
 (set! *warn-on-reflection* true)
 
@@ -26,9 +26,9 @@
 
 (defn json->clj
   [request]
-  (json/read-str (:body request)))
+  (json/parse-string (:body request)))
 
 ;; json from clojure map
 (defn clj->json
   [body]
-  (json/write-str body))
+  (json/generate-string body))
