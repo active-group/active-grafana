@@ -415,6 +415,10 @@
    creates a folder with the title [[folder-title]] and returns its uid. If the
    search yields an ambiguous result, this function throws an exception."
   [grafana-instance folder-title]
+  ;; FIXME if the folder-title equals "General" (grafanas root folder)
+  ;; this fn steps into the :none case branch
+  ;; this is unexpected behavior...
+  ;; Also test for this case...
   (let [folder-candidates (->> folder-title
                                (api/find-folders-by-query (:url grafana-instance)
                                                           (:token grafana-instance))
