@@ -6,7 +6,7 @@
   :dependencies [[org.babashka/http-client "0.3.11"]
                  [org.clj-commons/clj-http-lite "1.0.13"]
                  [org.clojure/clojure "1.11.1"]
-                 [org.clojure/data.json "2.4.0"]
+                 [cheshire "6.2.0"]
                  [org.clojure/tools.cli "1.0.219"]
                  ; only needed for pod
                  [nrepl/bencode "1.1.0"]
