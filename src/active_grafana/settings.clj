@@ -15,6 +15,16 @@
 
 ;; >>> Env variables or command line
 
+(defn make-source-grafana-instance [{:keys [source-url
+                                            source-token]}]
+  (->Grafana-Instance (or source-url (System/getenv "SOURCE_URL"))
+                      (or source-token (System/getenv "SOURCE_TOKEN"))))
+
+(defn make-target-grafana-instance [{:keys [target-url
+                                            target-token]}]
+  (->Grafana-Instance (or target-url (System/getenv "TARGET_URL"))
+                      (or target-token (System/getenv "TARGET_TOKEN"))))
+
 (defn board-uid-arg
   [opts-map-options]
   (or (:board-uid opts-map-options) (System/getenv "BOARD_UID")))
