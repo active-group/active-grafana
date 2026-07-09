@@ -1,6 +1,10 @@
 {:paths ["src"]
- :deps {org.clj-commons/clj-http-lite {:mvn/version "1.0.13"}
-        ;; NOTE: bond is used because it is compatible with babashka
+        ;; NOTE: only use compatible libraries!
+        ;; See https://github.com/babashka/babashka/blob/master/doc/projects.md
+ :deps {;; NOTE: clj-http-lite is compatible with babashka
+        ;; https://github.com/babashka/babashka/blob/master/doc/projects.md#clj-http-lite
+        org.clj-commons/clj-http-lite {:mvn/version "1.0.13"}
+        ;; NOTE: bond is compatible with babashka
         ;; https://github.com/babashka/babashka/blob/master/doc/projects.md#bond
         circleci/bond                 {:mvn/version "0.6.0"}}
  :tasks {adjust active-grafana.main-adjust/-main
