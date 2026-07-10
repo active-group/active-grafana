@@ -14,12 +14,9 @@
   (let [source-grafana-instance (settings/make-source-grafana-instance opts)
         target-grafana-instance (settings/make-target-grafana-instance opts)
         dashboard-title         (:title opts)]
-    (println (pr-str source-grafana-instance))
-    (println (pr-str target-grafana-instance))
-    (println (pr-str dashboard-title))
-    #_(core/convenient-copy source-grafana-instance
-                            target-grafana-instance
-                            dashboard-title)))
+    (core/convenient-copy source-grafana-instance
+                          target-grafana-instance
+                          dashboard-title)))
 
 (def cli-opts
   {:convenient           {:coerce :boolean
