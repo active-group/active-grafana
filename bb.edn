@@ -6,7 +6,10 @@
         org.clj-commons/clj-http-lite {:mvn/version "1.0.13"}
         ;; NOTE: bond is compatible with babashka
         ;; https://github.com/babashka/babashka/blob/master/doc/projects.md#bond
-        circleci/bond                 {:mvn/version "0.6.0"}}
+        circleci/bond                 {:mvn/version "0.6.0"}
+        ;; NOTE: use the newest version of babashka.cli
+        ;; since the one built-in to babashka does not support the --help features
+        org.babashka/cli              {:mvn/version "0.12.75"}}
  :tasks {adjust active-grafana.main-adjust/-main
          copy   active-grafana.main-copy/-main
 
