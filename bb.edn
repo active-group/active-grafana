@@ -1,3 +1,5 @@
+;; NOTE: See https://book.babashka.org/#_bb_edn
+;; and https://www.braveclojure.com/quests/babooka/
 {:paths ["src"]
         ;; NOTE: only use compatible libraries!
         ;; See https://github.com/babashka/babashka/blob/master/doc/projects.md
