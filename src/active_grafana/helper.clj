@@ -24,6 +24,13 @@
 
 ;; JSON/CLJ
 
+(defn json-string? [x]
+  (boolean
+   (and (string? x)
+        (try (json/parse-string x)
+             (catch clojure.lang.ExceptionInfo _e
+               false)))))
+
 (defn json->clj
   [request]
   (json/parse-string (:body request)))
