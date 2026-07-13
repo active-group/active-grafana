@@ -24,6 +24,7 @@
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/alerting_provisioning/#route-post-alert-rule
 (defn create-alert-rule
   [base-url token alert-rule]
+  {:pre [(helper/json-string? alert-rule)]}
   (let [api-url (str base-url "/api/v1/provisioning/alert-rules")]
     (helper/log (str "Api-url: " api-url))
     (client/post api-url {:insecure?    true
@@ -39,6 +40,8 @@
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/alerting_provisioning/#span-idroute-put-alert-rulespan-update-an-existing-alert-rule-_routeputalertrule_
 (defn update-alert-rule
   [base-url token alert-rule-uid alert-rule-update]
+  {:pre [(string? alert-rule-uid)
+         (helper/json-string? alert-rule-update)]}
   (let [api-url (str base-url "/api/v1/provisioning/alert-rules/" alert-rule-uid)]
     (helper/log (str "Api-url: " api-url))
     (client/put api-url {:insecure?    true
@@ -70,6 +73,7 @@
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#get-dashboard-by-uid
 (defn get-dashboard-by-uid
   [base-url token uid]
+  {:pre [(string? uid)]}
   (let [api-url (str base-url "/api/dashboards/uid/" (URLEncoder/encode uid "UTF-8"))]
     (helper/log (str "Api-url: " api-url))
     (client/get api-url {:insecure?   true
@@ -79,6 +83,7 @@
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#create--update-dashboard
 (defn create-update-dashboard
   [base-url token dashboard]
+  {:pre [(helper/json-string? dashboard)]}
   (let [api-url (str base-url "/api/dashboards/db")]
     (helper/log (str "Api-url: " api-url))
     (client/post api-url {:insecure?    true
@@ -91,6 +96,7 @@
   "Find dashboards using a search [[query]] from grafanas legacy http api.
    The query matches against the dashboard titles."
   [base-url token query]
+  {:pre [(string? query)]}
   (let [api-url (str base-url "/api/search?query=" (URLEncoder/encode query "UTF-8") "&type=dash-db")]
     (helper/log (str "Api-url: " api-url))
     (client/get api-url {:insecure?   true
@@ -125,6 +131,7 @@
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-folder-by-uid
 (defn get-folder-by-folder-uid
   [base-url token folder-uid]
+  {:pre [(string? folder-uid)]}
   (let [api-url (str base-url "/api/folders/" folder-uid)]
     (helper/log (str "Api-url: " api-url))
     (client/get api-url {:insecure?   true
@@ -134,6 +141,7 @@
   "Find (dashboard-)folders using a search [[query]] from grafanas legacy http api.
    The query matches against the (dashboard-)folder titles."
   [base-url token query]
+  {:pre [(string? query)]}
   (let [api-url (str base-url "/api/search?query=" (URLEncoder/encode query "UTF-8") "&type=dash-folder")]
     (helper/log (str "Api-url: " api-url))
     (client/get api-url {:insecure?   true
@@ -143,6 +151,7 @@
 (defn create-folder
   "Create a folder named [[title]] using a POST against \"[[base-url]]/api/folders\". "
   [base-url token title]
+  {:pre [(string? title)]}
   (let [api-url (str base-url "/api/folders")]
     (helper/log (str "Api-url: " api-url))
     (client/post api-url {:insecure?    true
@@ -172,6 +181,7 @@
 ;;  https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#get-library-element-by-uid
 (defn get-library-element-by-uid
   [base-url token uid]
+  {:pre [(string? uid)]}
   (let [api-url (str base-url "/api/library-elements/" uid)]
     (helper/log (str "Api-url: " api-url))
     (client/get api-url {:insecure?   true
@@ -190,6 +200,7 @@
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#create-library-element
 (defn create-library-element
   [base-url token panel]
+  {:pre [(helper/json-string? panel)]}
   (let [api-url (str base-url "/api/library-elements")]
     (helper/log (str "Api-url: " api-url))
     (client/post api-url {:insecure?    true
@@ -202,6 +213,8 @@
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#update-library-element
 (defn update-library-element
   [base-url token uid patch]
+  {:pre [(string? uid)
+         (helper/json-string? patch)]}
   (let [api-url (str base-url "/api/library-elements/" uid)]
     (helper/log (str "Api-url: " api-url))
     (http/patch api-url {:client  (http/client (assoc-in http/default-client-opts [:ssl-context :insecure] true))
