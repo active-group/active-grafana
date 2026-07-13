@@ -347,7 +347,7 @@
 (defn- title= [title m]
   (= title (get m "title")))
 
-;; TODO: An idea to resolve the ambiguity could be
+;; NOTE: An idea to resolve the ambiguity could be
 ;; to do a dry run of the whole thing persisting the
 ;; chosen dashboard and folder uids
 ;; we need to run the real thing without support
