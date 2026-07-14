@@ -574,11 +574,11 @@
    [[from-grafana-instance]] do not exist on [[to-grafana-instance]], they are
    created using the title of the folders on [[from-grafana-instance]]. See
    [[choose-folder-uid]] for details."
-  [from-grafana-instance to-grafana-instance dashboard-title & {:as   _options
-                                                                :keys [to-message
-                                                                       to-board-folder-uid
-                                                                       board-uid]}]
-  (let [dashboard-uid          (or board-uid
+  [from-grafana-instance to-grafana-instance dashboard-title & {:as   _opts
+                                                                :keys [message
+                                                                       target-folder-uid
+                                                                       source-dashboard-uid]}]
+  (let [dashboard-uid          (or source-dashboard-uid
                                    (get (choose-dashboard-metadata from-grafana-instance
                                                                    dashboard-title)
                                         "uid"))
@@ -596,7 +596,7 @@
         ;; title exists on the target grafana instance and if the found folder
         ;; uid is the same as the dashboard-folder-uid
         ;; BUT: What to do if the checks fail?
-        dashboard-folder-uid   (or to-board-folder-uid
+        dashboard-folder-uid   (or target-folder-uid
                                    (choose-folder-uid to-grafana-instance
                                                       dashboard-folder-title))
         to-folder              (-> (api/get-folder-by-folder-uid (:url to-grafana-instance)
@@ -604,7 +604,7 @@
                                                                  dashboard-folder-uid)
                                    (helper/json->clj))
         to-folder-title        (get to-folder "title")
-        message                (or to-message
+        message                (or message
                                    (str "Copy " (get dashboard-response "title")
                                         " (uid: " (get dashboard-response "uid") ") "
                                         "from " (:url from-grafana-instance)
