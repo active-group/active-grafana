@@ -17,16 +17,16 @@ A [babashka](https://book.babashka.org/) script designed to help dealing with [G
 
 ## Usage
 
-This project contains the `active-grafana.main` namespace implementing an
-entrypoint for executing commands. Use `bb src/active_grafana/main.clj --help`
+This project contains the `active-grafana.cli/-main` function implementing an
+entrypoint for executing commands. Use `./grafurious --help`
 to display the documentation of how to use these commands. You can also use
-`--help` on any of the commands or subcommands to display the corresponding
+`--help` or `-h` on any of the commands or subcommands to display the corresponding
 documentation.
 
-The help shows environment variable names like `URL`, `FROM_URL` or `TO_MESSAGE`, which can are used as an alternative to command options.
-alternatively be provided by environment variables.
+Help entries show environment variable names like `URL`, `FROM_URL` or `TO_MESSAGE`,
+use those environment variables alternatively to command options.
 
-All variables can be found in `active-grafana.settings`.
+Find all environment variables names in `active-grafana.settings`.
 
 ### The copy command
 
@@ -34,7 +34,7 @@ To copy a dashboard identified by its title use the following command in the
 root of this project:
 
 ```
-bb src/active_grafana/main.clj copy dashboard "My example Dashboard" --source-url <source-url> --source-token <source-token> --target-url <target-url> --target-token <target-token>
+./grafurious copy dashboard "My example Dashboard" --source-url <source-url> --source-token <source-token> --target-url <target-url> --target-token <target-token>
 ```
 
 ### The legacy commands
@@ -53,7 +53,7 @@ the reference-id. Use the `--i-am-an-expert` argument to achieve more advanced
 adjustments. Example:
 
 ```
-bb src/active_grafana/main.clj adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> \
+./grafurious adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> \
        --datasource-uids="<datasource-uid-1>,<datasource-uid-2>,...,<datasource-uid-n>" \
        --i-am-an-expert="{:path \"<path-to-f-target->target>\" :data <data>}"
 ```
@@ -84,7 +84,7 @@ command-line.
 Note: make sure to escape strings in the `--i-am-an-expert`
 command option in the proper way, e.g.:
 ```
-bb src/active_grafana/main.clj adjust <... other command options ...> --i-am-an-expert="{:path \"file.path\" :data {\"uid-1\" \"my-uid-1-data\"}}"
+./grafurious adjust <... other command options ...> --i-am-an-expert="{:path \"file.path\" :data {\"uid-1\" \"my-uid-1-data\"}}"
 ```
 
 ## Known Issues and 'good to know'
