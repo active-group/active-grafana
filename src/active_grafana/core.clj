@@ -171,14 +171,6 @@
       (show-dashboard-panels (-> args :to-instance)
                              (-> args :board-uid)))))
 
-(defn adjust-show
-  ^{:doc "Show for a given grafana-instance the name, uid and folder-uid of the
-          first 100 library panels
-
-          args: Provided arguments, as Adjust-Arguments record. "}
-  [args]
-  (show-library-panels (-> args :grafana-instance)))
-
 ;; <<< SHOW
 
 ;; >>> COPY
