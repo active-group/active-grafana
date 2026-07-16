@@ -204,8 +204,8 @@
     "isDeleted" false,
     "orgId"     1}))
 
-(defn make-folder-query-body [titles]
-  (map-indexed make-compact-folder titles))
+(defn make-folder-query-body [folders]
+  (map-indexed make-compact-folder folders))
 
 (defn find-folders-by-query-response [folders]
   {:headers {},
@@ -362,65 +362,74 @@
 (defn make-alert-rule
   ([] (make-alert-rule (random-id)))
   ([id] (make-alert-rule id {}))
-  ([id {:keys [uid title folder-uid]
+  ([id {:keys [uid title folder-uid dashboard-uid labels]
         :or   {uid        (random-alert-uid)
                title      (random-alert-title)
-               folder-uid (random-folder-uid)}}]
+               folder-uid (random-folder-uid)
+               labels     {}}}]
    {:pre [(non-neg-int? id)
           (string? uid)
           (string? title)
-          (string? folder-uid)]}
-   {"record"                nil,
-    "folderUID"             folder-uid,
-    "id"                    id,
-    "condition"             "B",
-    "for"                   "1m",
-    "ruleGroup"             "My evaluation group",
-    "uid"                   uid,
-    "keep_firing_for"       "0s",
-    "title"                 title,
-    "isPaused"              false,
-    "execErrState"          "Error",
-    "notification_settings" {"receiver" "grafana-default-email"},
-    "noDataState"           "NoData",
-    "updated"               "2026-06-22T15:56:27Z",
-    "data"
-    [{"refId"             "B",
-      "queryType"         "",
-      "relativeTimeRange" {"from" 0, "to" 0},
-      "datasourceUid"     "__expr__",
-      "model"
-      {"conditions"
-       [{"evaluator" {"params" [2], "type" "gt"},
-         "operator"  {"type" "and"},
-         "query"     {"params" ["B"]},
-         "reducer"   {"params" [], "type" "last"},
-         "type"      "query"}],
-       "datasource"    {"type" "__expr__", "uid" "__expr__"},
-       "expression"    "A",
-       "intervalMs"    1000,
-       "maxDataPoints" 43200,
-       "refId"         "B",
-       "type"          "threshold"}}
-     {"refId"             "A",
-      "queryType"         "",
-      "relativeTimeRange" {"from" 0, "to" 0},
-      "datasourceUid"     "__expr__",
-      "model"
-      {"conditions"
-       [{"evaluator" {"params" [0 0], "type" "gt"},
-         "operator"  {"type" "and"},
-         "query"     {"params" []},
-         "reducer"   {"params" [], "type" "avg"},
-         "type"      "query"}],
-       "datasource"    {"name" "Expression", "type" "__expr__", "uid" "__expr__"},
-       "expression"    "1",
-       "hide"          false,
-       "intervalMs"    1000,
-       "maxDataPoints" 43200,
-       "refId"         "A",
-       "type"          "math"}}],
-    "orgID"                 1}))
+          (string? folder-uid)
+          (or (nil? dashboard-uid) (string? dashboard-uid))
+          (map? labels)
+          (every? string? (keys labels))
+          (every? string? (vals labels))]}
+   (cond-> {"record"                nil,
+            "folderUID"             folder-uid,
+            "id"                    id,
+            "condition"             "B",
+            "for"                   "1m",
+            "ruleGroup"             "My evaluation group",
+            "uid"                   uid,
+            "keep_firing_for"       "0s",
+            "labels"                {"my-custom-label" "my-example"},
+            "annotations"           {"__panelId__" (str id)},
+            "title"                 title,
+            "isPaused"              false,
+            "execErrState"          "Error",
+            "notification_settings" {"receiver" "grafana-default-email"},
+            "noDataState"           "NoData",
+            "updated"               "2026-06-22T15:56:27Z",
+            "data"
+            [{"refId"             "B",
+              "queryType"         "",
+              "relativeTimeRange" {"from" 0, "to" 0},
+              "datasourceUid"     "__expr__",
+              "model"
+              {"conditions"
+               [{"evaluator" {"params" [2], "type" "gt"},
+                 "operator"  {"type" "and"},
+                 "query"     {"params" ["B"]},
+                 "reducer"   {"params" [], "type" "last"},
+                 "type"      "query"}],
+               "datasource"    {"type" "__expr__", "uid" "__expr__"},
+               "expression"    "A",
+               "intervalMs"    1000,
+               "maxDataPoints" 43200,
+               "refId"         "B",
+               "type"          "threshold"}}
+             {"refId"             "A",
+              "queryType"         "",
+              "relativeTimeRange" {"from" 0, "to" 0},
+              "datasourceUid"     "__expr__",
+              "model"
+              {"conditions"
+               [{"evaluator" {"params" [0 0], "type" "gt"},
+                 "operator"  {"type" "and"},
+                 "query"     {"params" []},
+                 "reducer"   {"params" [], "type" "avg"},
+                 "type"      "query"}],
+               "datasource"    {"name" "Expression", "type" "__expr__", "uid" "__expr__"},
+               "expression"    "1",
+               "hide"          false,
+               "intervalMs"    1000,
+               "maxDataPoints" 43200,
+               "refId"         "A",
+               "type"          "math"}}],
+            "orgID"                 1}
+     dashboard-uid (assoc-in ["annotations" "__dashboardUid__"] dashboard-uid)
+     labels        (assoc "labels" labels))))
 
 (defn get-all-alert-rules-response [alerts]
   {:headers {},
@@ -495,7 +504,7 @@
        (map-indexed make-alert-rule)
        (vec)))
 
-(defn make-dashboard-related-panels [dashboards]
-  (->> dashboards
+(defn make-dashboard-related-panels [panels]
+  (->> panels
        (map-indexed make-library-element)
        (vec)))

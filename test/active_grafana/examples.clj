@@ -15,6 +15,9 @@
 (def another-dashboard-uid "XYM3U2L")
 (def dashboard {:uid   dashboard-uid
                 :title dashboard-title})
+(def another-dashboard {:uid   another-dashboard-uid
+                        :title another-dashboard-title})
+(def dashboards [dashboard another-dashboard])
 
 (def folder-title "My folder title")
 (def another-folder-title "Another folder title")
