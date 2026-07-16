@@ -1,3 +1,8 @@
+;; TODO: Read https://github.com/babashka/babashka/issues/1123
+;; and try the steps under "repro"
+;; see is java is needed
+;; also see if it downloads clojure-tools...
+
 ;; NOTE: See https://book.babashka.org/#_bb_edn
 ;; and https://www.braveclojure.com/quests/babooka/
 {:paths ["src"]
@@ -11,7 +16,7 @@
         circleci/bond                 {:mvn/version "0.6.0"}
         ;; NOTE: use the newest version of babashka.cli
         ;; since the one built-in to babashka does not support the --help features
-        org.babashka/cli              {:mvn/version "0.12.75"}}
+        org.babashka/cli              {:mvn/version "0.12.76"}}
  :tasks {dev {:requires    ([babashka.nrepl.server :as srv])
               :extra-paths ["dev" "test"]
               :task        (do (srv/start-server!
