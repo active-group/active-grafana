@@ -1,5 +1,4 @@
-#!/usr/bin/env bb
-(ns active-grafana.main
+(ns active-grafana.cli
   "Resources in how to use the babashka cli:
      - https://blog.michielborkent.nl/babashka-cli-help-and-completions.html
      - https://github.com/babashka/cli
@@ -9,8 +8,7 @@
             ;; NOTE: reload babashka.cli because of
             ;; the version built-in to babashka does not support --help
             ;; see https://github.com/babashka/babashka/issues/1984#issuecomment-4810338306
-            [babashka.cli :as cli] :reload
-            [clojure.string :as str]))
+            [babashka.cli :as cli] :reload))
 
 ;; TODO: look after completions...
 ;; https://blog.michielborkent.nl/babashka-cli-help-and-completions.html#:~:text=for%20more%20information.-,Shell%20completions,-In%20Babashka%20CLI
@@ -143,6 +141,5 @@
    :epilog    "Docs: https://github.com/active-group/active-grafana/blob/main/README.md"})
 
 (defn -main [& args]
-  (cli/dispatch tree args {:prog "bb src/active_grafana/main.clj" :help true}))
-
-(apply -main *command-line-args*)
+  (println "args: " (pr-str args))
+  (cli/dispatch tree args {:prog "./grafana.clj" :help true}))
