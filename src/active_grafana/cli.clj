@@ -71,12 +71,12 @@
     ;; "adjust"
     ;; {:doc "TODO: Implement adjust by implementing a convenient version of the legacy adjust command."}
     "legacy"
-    {:doc       "The legacy active-grafana features copy and show"
+    {:doc       "The legacy active-grafana commands."
      :cmd-order ["show" "copy" "adjust"]
      :cmd
      {"show"
       {:fn   legacy-show
-       :doc  "Show grafana things like dashboards, library-panels or alerts."
+       :doc  "Show things like dashboards or library-panels or alerts (related to a dashboard)."
        :spec {:show-dashboards       {:desc   "Show the first 1000 dashboards of a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."
                                       :coerce :boolean}
               :show-folders          {:desc   "Show the first 1000 folders of a grafana-instance (*_URL, *_TOKEN). Use `--from` and/or `--to` to choose instance to show from (default: --from and --to)."
@@ -101,7 +101,7 @@
                                       :required true}}}
       "copy"
       {:fn   legacy-copy
-       :doc  "Copy grafana things like dashboards, library-panels or alerts."
+       :doc  "Copy grafana dashboards and its related library-panels and alerts."
        :spec {:board                {:desc   "Copy a dashboard (BOARD_UID) from one instance (FROM_URL, FROM_TOKEN) to another (TO_URL, TO_TOKEN). Optional provide a TO_MESSAGE and TO_BOARD_FOLDER_UID."
                                      :coerce :boolean
                                      :alias  :b}
@@ -127,7 +127,7 @@
               :to-panels-folder-uid {:desc     "The folder-uid to copy the panels to."}}}
       "adjust"
       {:fn   legacy-adjust
-       :doc  "Copy grafana things like dashboards, library-panels or alerts."
+       :doc  " grafana things like dashboards, library-panels or alerts."
        :spec {:panel-uid       {:desc     "The panel uid. (env var: PANEL_UID)"
                                 :required true}
               :url             {:desc     "The grafana-url. (env var: GRAFANA_URL)"
