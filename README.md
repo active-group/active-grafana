@@ -1,174 +1,45 @@
+TODO: fine tune the readme and test the examples.
+
 # active-grafana
 
-A Clojure script/project designed to help dealing with Grafana.
+A [babashka](https://book.babashka.org/) script designed to help dealing with [Grafana](https://grafana.com/).
 
 ## Features
 
 - Copying a grafana dashboard from one instance to another instance.
-- Copying alert-rules associated with this grafana dashboard.
-- Copying library-panels associated with this grafana dashboard.
+  - Copying alert-rules associated with this grafana dashboard.
+  - Copying library-panels associated with this grafana dashboard.
+
+- Showing folders, dashboard, library panels and alert rules of a given grafana instance.
 
 - Adjusting library-panels where a specific target structure needs repetition
   with different datasources.
 
 ## Usage
-### Babashka
 
-If you check out this repository you can use [babashka](https://book.babashka.org/).
+This project contains the `active-grafana.main` namespace implementing an
+entrypoint for executing commands. Use `bb src/active_grafana/main.clj --help`
+to display the documentation of how to use these commands. You can also use
+`--help` on any of the commands or subcommands to display the corresponding
+documentation.
 
-This project contains two main-functions:
-
-```
-active-grafana.main-copy
-active-grafana.main-adjust
-```
-
-With babaskha-tasks (see `bb.edn` or https://book.babashka.org/#tasks) you can start at the root of the project with:
-
-```
-active-grafana $ bb copy -h
-```
-or
-
-```
-active-grafana $ bb adjust -h
-```
-
-If this does not work try:
-
-```
-active-grafana $ bb -m active-grafana.main-copy -- -h
-active-grafana $ bb -m active-grafana.main-adjust -- -h
-```
-
-The help shows variables like `URL`, `FROM_URL` or `TO_MESSAGE`, which can
-alternatively be provided by environment variables. For example:
-
-```
-$ export FROM_URL=http://localhost:3000
-$ export FROM_TOKEN=glsa_FcOPTbFuJ9ZO0q6AzdTSoKjVLHaxsBw5_4ece1975
-active-grafana $ TO_URL=http://localhost:3001 \
-                 TO_TOKEN=glsa_sr9e9M1JI0ARODVP347uVKm7L1wqKvGa_3543afe4 \
-                 TO_MESSAGE="Changes to the speed-check-panel." \
-                 bb -m active-grafana.main-copy -- \
-                 -b -a --board-uid=b3b41ced-1237-45a1-9f63-08d8b4191c57 \
-                 --to-board-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119 \
-                 --to-alerts-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119
-```
+The help shows environment variable names like `URL`, `FROM_URL` or `TO_MESSAGE`, which can are used as an alternative to command options.
+alternatively be provided by environment variables.
 
 All variables can be found in `active-grafana.settings`.
 
-To copy a dashboard identified by its title use the following command in the root of this project:
+### The copy command
+
+To copy a dashboard identified by its title use the following command in the
+root of this project:
 
 ```
-bb copy --convenient="<dashboard-title>" --from-url=<from-grafana-url> --from-token=<from-grafana-token> --to-url=<to-grafana-url> --to-token=<to-grafana-token>
+bb src/active_grafana/main.clj copy dashboard "My example Dashboard" --source-url <source-url> --source-token <source-token> --target-url <target-url> --target-token <target-token>
 ```
 
-### Leiningen
+### The legacy commands
 
-If you check out this repository you can use lein.
-
-This project contains two main-functions:
-
-```
-active-grafana.main-copy
-active-grafana.main-adjust
-```
-
-To start, type at the root of the repository:
-
-For main-copy:
-```
-active-grafana $ lein run -m active-grafana.main-copy -- -h
-```
-or
-```
-active-grafana $ lein with-profile as-copy run -- -h
-```
-
-For main-adjust:
-```
-active-grafana $ lein run -m active-grafana.main-adjust -- -h
-```
-or
-
-```
-active-grafana $ lein with-profile as-adjust run -- -h
-```
-
-The help shows variables like `URL`, `FROM_URL` or `TO_MESSAGE`, which can
-alternatively be provided by environment variables. For example:
-
-```
-$ export FROM_URL=http://localhost:3000
-$ export FROM_TOKEN=glsa_FcOPTbFuJ9ZO0q6AzdTSoKjVLHaxsBw5_4ece1975
-active-grafana $ TO_URL=http://localhost:3001 \
-                 TO_TOKEN=glsa_sr9e9M1JI0ARODVP347uVKm7L1wqKvGa_3543afe4 \
-                 TO_MESSAGE="Changes to the speed-check-panel." \
-                 lein run -m active-grafana.main-copy -- \
-                 -b -a --board-uid=b3b41ced-1237-45a1-9f63-08d8b4191c57 \
-                 --to-board-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119 \
-                 --to-alerts-folder-uid=afb10bf4-f0b1-4e2b-af04-1061844be119
-```
-
-All variables can be found in `active-grafana.settings`.
-
-### Babashka-Pod
-
-This project can also be used as a [babashka-pod](https://github.com/babashka/pods).
-The pod-interface can be found in `active-grafana.pod`.
-
-A usage example with [docker](https://www.docker.com/).
-Check out this repository as `active-grafana`.`
-
-```
-active-grafana $ docker build -t active-grafana -f Dockerfile-pod .
-active-grafana $ docker run active-grafana
-active-grafana $ docker run active-grafana copy --help
-active-grafana $ docker run active-grafana adjust --help
-```
-
-### Standalone Applications
-
-With the help of [GraalVM](https://www.graalvm.org/) we can create a [native
-image](https://www.graalvm.org/latest/reference-manual/native-image/).
-
-A usage example with [docker](https://www.docker.com/).
-Check out this repository as `active-grafana`.`
-
-#### For copy:
-
-```
-active-grafana $ docker build -t active-grafana-copy -f Dockerfile-standalone-copy .
-active-grafana $ docker run -it active-grafana-copy sh
-# ./active-grafana-copy --help
-```
-
-Note: The Dockerfile contains this line:
-
-```
-RUN wget https://github.com/active-group/active-grafana/releases/download/v0.1/active-grafana-copy.jar
-```
-
-Check https://github.com/active-group/active-grafana/releases for other releases.
-
-#### For adjust:
-
-```
-active-grafana $ docker build -t active-grafana-adjust -f Dockerfile-standalone-adjust .
-active-grafana $ docker run -it active-grafana-adjust sh
-# ./active-grafana-adjust --help
-```
-
-Note: The Dockerfile contains this line:
-
-```
-RUN wget https://github.com/active-group/active-grafana/releases/download/v0.1/active-grafana-adjust.jar
-```
-
-Check https://github.com/active-group/active-grafana/releases for other releases.
-
-## Adjusting library-panels `--i-am-an-expert`-argument
+#### Adjusting library-panels using the `--i-am-an-expert` command option
 
 The standard way of adjusting a library-panel is:
 - get the library-panel with the given `PANEL_UID`
@@ -182,12 +53,12 @@ the reference-id. Use the `--i-am-an-expert` argument to achieve more advanced
 adjustments. Example:
 
 ```
-adjust --adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> \
+bb src/active_grafana/main.clj adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> \
        --datasource-uids="<datasource-uid-1>,<datasource-uid-2>,...,<datasource-uid-n>" \
        --i-am-an-expert="{:path \"<path-to-f-target->target>\" :data <data>}"
 ```
 
-The `i-am-an-expert` argument gets transformed to a map using
+The `i-am-an-expert` command option gets transformed to a map using
 `clojure.edn/read-string`. The `path` is processed with `(load-string (slurp
 path))`. That is, the path should lead to a file containing a function like the
 following:
@@ -211,16 +82,12 @@ as reference-id, but a reference-id provided as {"uid" "ref-id"}-map via the
 command-line.
 
 Note: make sure to escape strings in the `--i-am-an-expert`
-command-line-argument in the proper way, e.g.:
+command option in the proper way, e.g.:
 ```
-adjust --adjust ... --i-am-an-expert="{:path \"file.path\" :data {\"uid-1\" \"my-uid-1-data\"}}"
+bb src/active_grafana/main.clj adjust <... other command options ...> --i-am-an-expert="{:path \"file.path\" :data {\"uid-1\" \"my-uid-1-data\"}}"
 ```
 
 ## Known Issues and 'good to know'
-
-- The application uses the environment variable `BABASHKA_POD` (as described
-  [here](https://github.com/babashka/pods?tab=readme-ov-file#environment)) to
-  determine, whether the application should behave as a pod.
 
 - Error handling:
   If something goes wrong, you are immediately provided with the plain
@@ -228,7 +95,7 @@ adjust --adjust ... --i-am-an-expert="{:path \"file.path\" :data {\"uid-1\" \"my
   provided.
 
 - Testing:
-  There is no testing within the project.
+  Only some core functions are tested yet.
 
 - Logging and Debugging:
   The current logging and debugging system is rudimentary and might even be
