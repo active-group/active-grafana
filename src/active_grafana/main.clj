@@ -42,11 +42,11 @@
 
 (def tree
   {:spec      {:verbose {:coerce :boolean :desc "Be verbose" :alias :v}}
-   :cmd-order ["copy" "adjust" "legacy"]
+   :cmd-order ["copy" #_"adjust" "legacy"]
    :cmd
    {"copy"
-    {:doc       ""
-     :cmd-order ["dashboard" "panel" "alert"]
+    {:doc       "Copy a grafana thing from a source instance to a target instance."
+     :cmd-order ["dashboard" #_#_"panel" "alert"]
      :cmd
      {"dashboard"
       {:fn         convenient-copy
@@ -65,12 +65,13 @@
                     :target-token         {:desc    "Token to authenticate against the target grafana instance."
                                            :require true}}
        :args->opts [:title]}
-      "panel"
-      {:doc "TODO: Implement a copy panel command."}
-      "alert"
-      {:doc "TODO: Implement a copy alert command."}}}
-    "adjust"
-    {:doc "TODO: Implement adjust by implementing a convenient version of the legacy adjust command."}
+      ;; "panel"
+      ;; {:doc "TODO: Implement a copy panel command."}
+      ;; "alert"
+      ;; {:doc "TODO: Implement a copy alert command."}
+      }}
+    ;; "adjust"
+    ;; {:doc "TODO: Implement adjust by implementing a convenient version of the legacy adjust command."}
     "legacy"
     {:doc       "The legacy active-grafana features copy and show"
      :cmd-order ["show" "copy" "adjust"]
