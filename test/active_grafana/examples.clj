@@ -2,7 +2,12 @@
   (:require [active-grafana.settings :as settings]))
 
 (def grafana-a-instance (settings/->Grafana-Instance "http://irrelevant.url-a" "irrelevant-token-a"))
+(def source-url (:url grafana-a-instance))
+(def source-token (:token grafana-a-instance))
+
 (def grafana-b-instance (settings/->Grafana-Instance "http://irrelevant.url-b" "irrelevant-token-b"))
+(def target-url (:url grafana-b-instance))
+(def target-token (:token grafana-b-instance))
 
 (def dashboard-title "Simple dashboard title")
 (def another-dashboard-title "Another dashboard title")
