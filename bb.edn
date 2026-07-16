@@ -12,10 +12,7 @@
         ;; NOTE: use the newest version of babashka.cli
         ;; since the one built-in to babashka does not support the --help features
         org.babashka/cli              {:mvn/version "0.12.75"}}
- :tasks {adjust active-grafana.main-adjust/-main
-         copy   active-grafana.main-copy/-main
-
-         dev {:requires    ([babashka.nrepl.server :as srv])
+ :tasks {dev {:requires    ([babashka.nrepl.server :as srv])
               :extra-paths ["dev" "test"]
               :task        (do (srv/start-server!
                                 {:host "localhost"
