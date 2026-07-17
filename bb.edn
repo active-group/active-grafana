@@ -11,9 +11,6 @@
  :deps {;; NOTE: clj-http-lite is compatible with babashka
         ;; https://github.com/babashka/babashka/blob/master/doc/projects.md#clj-http-lite
         org.clj-commons/clj-http-lite {:mvn/version "1.0.13"}
-        ;; NOTE: bond is compatible with babashka
-        ;; https://github.com/babashka/babashka/blob/master/doc/projects.md#bond
-        circleci/bond                 {:mvn/version "0.6.0"}
         ;; NOTE: use the newest version of babashka.cli
         ;; since the one built-in to babashka does not support the --help features
         org.babashka/cli              {:mvn/version "0.12.76"}}
@@ -27,7 +24,11 @@
          ;; NOTE: See https://blog.michielborkent.nl/babashka-test-runner.html
          test:bb {:extra-paths ["test"]
                   :extra-deps {io.github.cognitect-labs/test-runner
-                               {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+                               {:git/tag "v0.5.1" :git/sha "dfb30dd"}
+                               ;; NOTE: bond is compatible with babashka
+                               ;; https://github.com/babashka/babashka/blob/master/doc/projects.md#bond
+                               circleci/bond
+                               {:mvn/version "0.6.0"}}
                   :task (exec 'cognitect.test-runner.api/test)
                   :exec-args {:dirs ["test"]}
                   :org.babashka/cli {:coerce {:nses [:symbol]
