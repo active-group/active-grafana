@@ -48,7 +48,7 @@
      :cmd
      {"dashboard"
       {:fn         convenient-copy
-       :doc        "Copy a dashboard matched by title from a :source to a :target grafana instance. Throws Exception if not possible."
+       :doc        "Copy a dashboard matched by title from a source to a target grafana instance. Throws Exception if not possible."
        :spec       {:title                {:desc    "The title of the dashboard on the source grafana instance."
                                            :require true}
                     :message              {:desc "An optional message to use as commit message for the updated/created dashboard on the target grafana instance."}
