@@ -142,4 +142,4 @@
 
 (defn -main [& args]
   (println "args: " (pr-str args))
-  (cli/dispatch tree args {:prog "./grafana.clj" :help true}))
+  (cli/dispatch tree args {:prog "./grafurious.clj" :help true}))
