@@ -15,6 +15,12 @@
 ;; for completions in fish use:
 ;; ./src/active_grafana/main.clj org.babashka.cli/completions snippet --shell fish | source
 
+(defn deps
+  "This is a no-op command. Its only purpose is to execute the cli ones,
+   so that babashka downloads and installs the necessary dependencies."
+  [_]
+  (println "Dependencies installed!"))
+
 (defn convenient-copy [{:keys [opts]}]
   (let [source-grafana-instance (settings/make-source-grafana-instance opts)
         target-grafana-instance (settings/make-target-grafana-instance opts)
@@ -40,9 +46,12 @@
 
 (def tree
   {:spec      {:verbose {:coerce :boolean :desc "Be verbose" :alias :v}}
-   :cmd-order ["copy" #_"adjust" "legacy"]
+   :cmd-order ["deps" "copy" #_"adjust" "legacy"]
    :cmd
-   {"copy"
+   {"deps"
+    {:doc "Install the dependencies for this script"
+     :fn deps}
+    "copy"
     {:doc       "Copy a grafana thing from a source instance to a target instance."
      :cmd-order ["dashboard" #_#_"panel" "alert"]
      :cmd
