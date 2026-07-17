@@ -46,14 +46,14 @@
 
 (def tree
   {:spec      {:verbose {:coerce :boolean :desc "Be verbose" :alias :v}}
-   :cmd-order ["deps" "copy" #_"adjust" "legacy"]
+   :cmd-order ["deps" "copy" "legacy"]
    :cmd
    {"deps"
     {:doc "Install the dependencies for this script"
      :fn deps}
     "copy"
     {:doc       "Copy a grafana thing from a source instance to a target instance."
-     :cmd-order ["dashboard" #_#_"panel" "alert"]
+     :cmd-order ["dashboard"]
      :cmd
      {"dashboard"
       {:fn         convenient-copy
@@ -71,14 +71,7 @@
                                            :require true}
                     :target-token         {:desc    "Token to authenticate against the target grafana instance."
                                            :require true}}
-       :args->opts [:title]}
-      ;; "panel"
-      ;; {:doc "TODO: Implement a copy panel command."}
-      ;; "alert"
-      ;; {:doc "TODO: Implement a copy alert command."}
-      }}
-    ;; "adjust"
-    ;; {:doc "TODO: Implement adjust by implementing a convenient version of the legacy adjust command."}
+       :args->opts [:title]}}}
     "legacy"
     {:doc       "The legacy active-grafana commands."
      :cmd-order ["show" "copy" "adjust"]
@@ -150,5 +143,4 @@
    :epilog    "Docs: https://github.com/active-group/active-grafana/blob/main/README.md"})
 
 (defn -main [& args]
-  (println "args: " (pr-str args))
   (cli/dispatch tree args {:prog "./grafurious.clj" :help true}))
