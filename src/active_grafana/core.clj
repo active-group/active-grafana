@@ -185,7 +185,7 @@
                          that will be copied to the 'to'-instance.
           to-folder-uid: uid of a folder within the 'to'-instance,
                          where the dashboard will be copied/moved to.
-                         If `nil` the General-folder of the
+                         If \"General\" the General-folder (root) of the
                          'to'-instance will be used.
           to-message:    The change-message. "}
   [from-grafana to-grafana dashboard-uid to-folder-uid to-message]
@@ -198,15 +198,16 @@
                              (get "dashboard")
                              ;; alternative: check for changes before overwriting
                              (dissoc "version")
-                             (dissoc "id"))]
+                             (dissoc "id"))
+        dashboard        (cond-> {"dashboard" clean-board-data
+                                  "message"   to-message
+                                  ;; TODO: should we check for changes before overwriting?
+                                  "overwrite" true}
+                           (not (api/=root-folder-uid? to-folder-uid))
+                           (assoc "folderUid" to-folder-uid))]
     (api/create-update-dashboard (-> to-grafana :url)
                                  (-> to-grafana :token)
-                                 (helper/clj->json {"dashboard" clean-board-data
-                                                    "message"   to-message
-                                                    ;; alternative: check for changes before overwriting
-                                                    "overwrite" true
-                                                    ;; folder must exist, otherwise it throws an exception
-                                                    "folderUid" to-folder-uid}))))
+                                 (helper/clj->json dashboard))))
 
 (defn copy-alert
   ^{:doc "Copy (create/update) a rule to a given folder.
@@ -407,44 +408,42 @@
    creates a folder with the title [[folder-title]] and returns its uid. If the
    search yields an ambiguous result, this function throws an exception."
   [grafana-instance folder-title]
-  ;; FIXME if the folder-title equals "General" (grafanas root folder)
-  ;; this fn steps into the :none case branch
-  ;; this is unexpected behavior...
-  ;; Also test for this case...
-  (let [folder-candidates (->> folder-title
-                               (api/find-folders-by-query (:url grafana-instance)
-                                                          (:token grafana-instance))
-                               (helper/json->clj)
-                               (remove deleted?)
-                               (filter (partial title= folder-title)))]
-    (case (ambiguous-candidates folder-candidates)
-      :none
-      (do (api/create-folder (:url grafana-instance)
-                             (:token grafana-instance)
-                             folder-title)
-          (choose-folder-uid grafana-instance folder-title))
+  (if (api/=root-folder-title? folder-title)
+    api/root-folder-uid
+    (let [folder-candidates (->> folder-title
+                                 (api/find-folders-by-query (:url grafana-instance)
+                                                            (:token grafana-instance))
+                                 (helper/json->clj)
+                                 (remove deleted?)
+                                 (filter (partial title= folder-title)))]
+      (case (ambiguous-candidates folder-candidates)
+        :none
+        (do (api/create-folder (:url grafana-instance)
+                               (:token grafana-instance)
+                               folder-title)
+            (choose-folder-uid grafana-instance folder-title))
 
-      :ambiguous
-      (do
-        ;; TODO: we need a more convenient way to resolve
-        ;; the ambiguity of the folder-ccandidates
-        ;; the user should be able to choose
-        ;; a folder conveniently
-        (pprint/print-table ["title" "uid" "url"]
-                            folder-candidates)
-        (throw (ex-info (str "More than one folder was found using the search query: " folder-title)
+        :ambiguous
+        (do
+          ;; TODO: we need a more convenient way to resolve
+          ;; the ambiguity of the folder-ccandidates
+          ;; the user should be able to choose
+          ;; a folder conveniently
+          (pprint/print-table ["title" "uid" "url"]
+                              folder-candidates)
+          (throw (ex-info (str "More than one folder was found using the search query: " folder-title)
+                          {:folder-title      folder-title
+                           :folder-candidates folder-candidates
+                           :grafana-url       (:url grafana-instance)})))
+
+        :unambiguous
+        (let [folder-uid (get (first folder-candidates) "uid")]
+          folder-uid)
+
+        (throw (ex-info "Unexpected choose-folder-uid result!"
                         {:folder-title      folder-title
                          :folder-candidates folder-candidates
-                         :grafana-url       (:url grafana-instance)})))
-
-      :unambiguous
-      (let [folder-uid (get (first folder-candidates) "uid")]
-        folder-uid)
-
-      (throw (ex-info "Unexpected choose-folder-uid result!"
-                      {:folder-title      folder-title
-                       :folder-candidates folder-candidates
-                       :grafana-url       (:url grafana-instance)})))))
+                         :grafana-url       (:url grafana-instance)}))))))
 
 (defn check-and-choose-panels-folder-title
   "Returns the title of the folder the given [[panels]] are located in, if all
@@ -591,11 +590,12 @@
         dashboard-folder-uid   (or target-folder-uid
                                    (choose-folder-uid to-grafana-instance
                                                       dashboard-folder-title))
-        to-folder              (-> (api/get-folder-by-folder-uid (:url to-grafana-instance)
-                                                                 (:token to-grafana-instance)
-                                                                 dashboard-folder-uid)
-                                   (helper/json->clj))
-        to-folder-title        (get to-folder "title")
+        to-folder              (if (api/=root-folder-uid? dashboard-folder-uid)
+                                 {"title" (str api/root-folder-title " " "(root folder)")}
+                                 (-> (api/get-folder-by-folder-uid (:url to-grafana-instance)
+                                                                   (:token to-grafana-instance)
+                                                                   dashboard-folder-uid)
+                                     (helper/json->clj)))
         message                (or message
                                    (str "Copy " (get dashboard-response "title")
                                         " (uid: " (get dashboard-response "uid") ") "
@@ -623,7 +623,15 @@
                                      (get (helper/json->clj source-alerts-folder) "title"))
         target-alerts-folder-uid   (when has-dependent-alerts?
                                      (choose-folder-uid to-grafana-instance
-                                                        source-alerts-folder-title))]
+                                                        source-alerts-folder-title))
+        to-folder-title            (get to-folder "title")
+        copy-summary-data          [(:url from-grafana-instance)
+                                    dashboard-title
+                                    dashboard-folder-title
+                                    related-panels-titles
+                                    related-alerts-titles
+                                    (:url to-grafana-instance)
+                                    to-folder-title]]
     (when has-dependent-panels?
       (copy-panels from-grafana-instance
                    to-grafana-instance
