@@ -13,22 +13,35 @@
 (def another-dashboard-title "Another dashboard title")
 (def dashboard-uid "adv5c5m")
 (def another-dashboard-uid "XYM3U2L")
+(def dashboard {:uid   dashboard-uid
+                :title dashboard-title})
 
-;; TODO: rename title to name here...
 (def folder-title "My folder title")
 (def another-folder-title "Another folder title")
 (def folder-uid "dflyuecbw3cw0f")
 (def another-folder-uid "abcduecbw00000")
+(def folder {:uid   folder-uid
+             :title folder-title})
 
 (def panel-uid "my-panel")
 (def panel-name "My panel name")
 (def another-panel-uid "another-panel")
 (def another-panel-name "Another panel name")
+(def panel {:uid  panel-uid
+            :name panel-name})
+(def another-panel {:uid  another-panel-uid
+                    :name another-panel-name})
+(def panels [panel another-panel])
 
 (def alert-uid "my-alert")
 (def alert-title "My alert name")
 (def another-alert-uid "another-alert")
 (def another-alert-title "Another alert name")
+(def alert {:uid   alert-uid
+            :title alert-title})
+(def another-alert {:uid   another-alert-uid
+                    :title another-alert-title})
+(def alerts [alert another-alert])
 
 (def change-dashboard-message "I changed the dashboard :)")
 
