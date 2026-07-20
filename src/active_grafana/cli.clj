@@ -41,8 +41,11 @@
     (core/copy-show show-arguments)))
 
 (defn legacy-adjust [{:keys [opts]}]
-  (let [adjust-arguments (settings/create-adjust-arguments! opts)]
-    (core/adjust adjust-arguments)))
+  (let [show?            (:show opts)
+        adjust-arguments (settings/create-adjust-arguments! opts)]
+    (if show?
+      (core/adjust-show adjust-arguments)
+      (core/adjust adjust-arguments))))
 
 (def tree
   {:spec      {:verbose {:coerce :boolean :desc "Be verbose" :alias :v}}
@@ -129,17 +132,17 @@
               :to-panels-folder-uid {:desc     "The folder-uid to copy the panels to."}}}
       "adjust"
       {:fn   legacy-adjust
-       :doc  " grafana things like dashboards, library-panels or alerts."
-       :spec {:panel-uid       {:desc     "The panel uid. (env var: PANEL_UID)"
-                                :required true}
-              :url             {:desc     "The grafana-url. (env var: GRAFANA_URL)"
+       :doc  "Adjust grafana library-panels."
+       :spec {:url             {:desc     "The grafana-url. (env var: GRAFANA_URL)"
                                 :required true}
               :token           {:desc     "The grafana-token. (env var: GRAFANA_TOKEN)"
                                 :required true}
-              :datasource-uids {:desc     "Datasource uids used within the target-template as comma separated string. (env var: DATASOURCE_UIDS)"
-                                :required true}
-              :i-am-an-expert  {:desc     "{:path <path-to-f-target->target> :data <data>}, see Readme for details. (env var: EXPERT_DATA)"
-                                :required true}}}}}}
+              :show            {:desc   "Show information on the first 100 library panels of the grafana-instance (GRAFANA_URL and GRAFANA_TOKEN)."
+                                :alias  :s
+                                :coerce :boolean}
+              :panel-uid       {:desc     "The panel uid. (env var: PANEL_UID)"}
+              :datasource-uids {:desc "Datasource uids used within the target-template as comma separated string. (env var: DATASOURCE_UIDS)"}
+              :i-am-an-expert  {:desc "{:path <path-to-f-target->target> :data <data>}, see Readme for details. (env var: EXPERT_DATA)"}}}}}}
    :epilog    "Docs: https://github.com/active-group/active-grafana/blob/main/README.md"})
 
 (defn -main [& args]
