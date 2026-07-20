@@ -13,11 +13,14 @@
 (defn find-folders-by-query [folders]
   (constantly (api-responses/find-folders-by-query-response folders)))
 
+(defn get-folder-by-folder-uid [folder]
+  (constantly (api-responses/get-folder-by-folder-uid-response folder)))
+
 (defn create-folder [folder]
   (constantly (api-responses/create-folder-response folder)))
 
 (defn get-library-element-by-uid [id panel]
-  (constantly (api-responses/get-library-panel-by-uid-response id panel)))
+  (constantly (api-responses/get-library-element-by-uid-response id panel)))
 
 (defn get-all-alert-rules [alerts]
   (constantly (api-responses/get-all-alert-rules-response alerts)))
