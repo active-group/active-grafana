@@ -32,12 +32,10 @@
 
 (defn legacy-copy [{:keys [opts]}]
   (let [copy-arguments (settings/create-copy-arguments! opts)]
-    (println (pr-str copy-arguments))
     (core/copy copy-arguments)))
 
 (defn legacy-show [{:keys [opts]}]
   (let [show-arguments (settings/create-copy-arguments! opts)]
-    (println (pr-str show-arguments))
     (core/copy-show show-arguments)))
 
 (defn legacy-adjust [{:keys [opts]}]
@@ -53,7 +51,7 @@
    :cmd
    {"deps"
     {:doc "Install the dependencies for this script"
-     :fn deps}
+     :fn  deps}
     "copy"
     {:doc       "Copy a grafana thing from a source instance to a target instance."
      :cmd-order ["dashboard"]
@@ -126,10 +124,10 @@
                                      :required true}
               :to-token             {:desc     "The grafana-token of the grafana-instance to copy to."
                                      :required true}
-              :to-message           {:desc     "Optional: The dashboard change-message when copying a dashboard."}
-              :to-board-folder-uid  {:desc     "The folder-uid to copy the dashboard to. If not provided the General-folder is used."}
-              :to-alerts-folder-uid {:desc     "The folder-uid to copy the alert-rules to."}
-              :to-panels-folder-uid {:desc     "The folder-uid to copy the panels to."}}}
+              :to-message           {:desc "Optional: The dashboard change-message when copying a dashboard."}
+              :to-board-folder-uid  {:desc "The folder-uid to copy the dashboard to. If not provided the General-folder is used."}
+              :to-alerts-folder-uid {:desc "The folder-uid to copy the alert-rules to."}
+              :to-panels-folder-uid {:desc "The folder-uid to copy the panels to."}}}
       "adjust"
       {:fn   legacy-adjust
        :doc  "Adjust grafana library-panels."
