@@ -239,6 +239,13 @@
     "canSave"   true,
     "orgId"     1}))
 
+(defn get-folder-by-folder-uid-response [folder]
+  {:headers {},
+   :status  200,
+   :body
+   (-> (make-full-folder 1 folder)
+       (helper/clj->json))})
+
 (defn create-folder-response [folder]
   {:headers {},
    :status  200,
@@ -342,9 +349,9 @@
     "orgId"       1,
     "description" ""}))
 
-(defn get-library-panel-by-uid-response
-  ([] (get-library-panel-by-uid-response 1))
-  ([id] (get-library-panel-by-uid-response id {}))
+(defn get-library-element-by-uid-response
+  ([] (get-library-element-by-uid-response 1))
+  ([id] (get-library-element-by-uid-response id {}))
   ([id panel]
    {:headers {},
     :status  200,
