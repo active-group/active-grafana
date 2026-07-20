@@ -133,7 +133,7 @@
   [base-url token folder-uid]
   {:pre [(string? folder-uid)]}
   (let [api-url (str base-url "/api/folders/" folder-uid)]
-    (helper/log (str "Api-url: " api-url))
+    (helper/log "get-folder-by-folder-uid: " (str "Api-url: " api-url))
     (client/get api-url {:insecure?   true
                          :oauth-token token})))
 
