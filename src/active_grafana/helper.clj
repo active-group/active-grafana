@@ -14,8 +14,8 @@
 ;; LOG/DEBUG
 
 (defn log
-  [log-str]
-  (println log-str))
+  [& log-strs]
+  (apply println log-strs))
 
 (defn debug
   [deb]
