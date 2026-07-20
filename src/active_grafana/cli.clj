@@ -45,6 +45,12 @@
       (core/adjust-show adjust-arguments)
       (core/adjust adjust-arguments))))
 
+;; FIXME: improve ux by adding :validate keys to all options, see example below
+;; :validate {:pred   (fn [x]
+;;                      (println x)
+;;                      true)
+;;            :ex-msg (fn [x]
+;;                      (str (pr-str x)))}
 (def tree
   {:spec      {:verbose {:coerce :boolean :desc "Be verbose" :alias :v}}
    :cmd-order ["deps" "copy" "legacy"]

@@ -84,7 +84,7 @@
     (println (str "Alert alert-uids related to dashboard: " board-uid))
     (pprint/print-table ["uid" "title" "folderUID"] alert-rules)))
 
-;; FIXME: Is there any better way to find dashboard related library panels
+;; TODO: Is there any better way to find dashboard related library panels
 
 ;; alternative: get all library-panel - for each library-panel, search all connections, check whether connection is dashboard-uid
 ;; note: you only get the first 100 library-panels
