@@ -6,6 +6,16 @@
 
 (set! *warn-on-reflection* true)
 
+(def root-folder-uid "General")
+(defn =root-folder-uid? [& args]
+  (apply = root-folder-uid args))
+
+(def root-folder-title "General")
+(defn =root-folder-title? [& args]
+  (apply = root-folder-title args))
+
+;; >>> SHOW
+
 ;; FIXME: remove clj-http-lite; it doesn't provide 'PATCH'
 ;;        we can use babashka.http-client for all calls
 
