@@ -648,7 +648,7 @@
                    target-grafana-instance
                    dashboard-uid
                    target-alerts-folder-uid))
-    (helper/log (apply convenient-copy-summary copy-summary-data))
+    (helper/log (convenient-copy-summary copy-summary-data))
     copy-summary-data))
 
 ;; <<< COPY
