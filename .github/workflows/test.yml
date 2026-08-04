@@ -24,7 +24,7 @@ jobs:
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@13.4
         with:
-          bb: 1.12.218 # Babashka
+          bb: 1.13.219 # Babashka
 
       - name: Get babashka version
         run: bb --version
