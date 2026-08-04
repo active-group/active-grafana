@@ -270,13 +270,13 @@
          [api/get-all-alert-rules (api-stub/get-all-alert-rules alerts)]
          [api/update-alert-rule (api-stub/update-alert-rule alert)]
          [api/create-alert-rule]]
-        (is (= {:source-url            "http://irrelevant.url-a",
-                :target-url            "http://irrelevant.url-b",
-                :dashboard-title       "Simple dashboard title",
-                :source-folder-title   "My folder title",
-                :target-folder-title   "My folder title",
-                :related-panels-titles '("My panel name"),
-                :related-alerts-titles '("My alert name")}
+        (is (= {:source-url            examples/source-url
+                :target-url            examples/target-url
+                :dashboard-title       examples/dashboard-title
+                :source-folder-title   examples/folder-title
+                :target-folder-title   examples/folder-title
+                :related-panels-titles (list examples/panel-name)
+                :related-alerts-titles (list examples/alert-title)}
                (sut/convenient-copy examples/grafana-a-instance
                                     examples/grafana-b-instance
                                     examples/dashboard-title)))
