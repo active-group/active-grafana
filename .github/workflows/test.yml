@@ -29,5 +29,8 @@ jobs:
       - name: Get babashka version
         run: bb --version
 
+      - name: Prepare dependencies
+        run: bb prepare
+
       - name: Run tests
         run: bb test
