@@ -7,7 +7,7 @@
  :deps {org.clj-commons/clj-http-lite {:mvn/version "1.0.13"}
         ;; NOTE: use the newest version of babashka.cli
         ;; since the one built-in to babashka does not support the --help features
-        org.babashka/cli              {:mvn/version "0.12.76"}}
+        org.babashka/cli              {:mvn/version "0.12.78"}}
  :tasks {dev {:requires    ([babashka.nrepl.server :as srv])
               :extra-deps {circleci/bond
                            {:mvn/version "0.6.0"}}
