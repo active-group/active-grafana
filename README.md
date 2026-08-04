@@ -6,22 +6,18 @@ A [babashka](https://book.babashka.org/) script designed to help dealing with [G
 
 ## Features
 
-- Copying a grafana dashboard from one instance to another instance.
-  - Copying alert-rules associated with this grafana dashboard.
-  - Copying library-panels associated with this grafana dashboard.
+- Copy a dashboard and its associated alerts and library panels from one instance to another.
 
-- Showing folders, dashboard, library panels and alert rules of a given grafana instance.
+- Showing folders, dashboards, library panels and alerts of a given grafana instance.
 
-- Adjusting library-panels where a specific target structure needs repetition
-  with different datasources.
+- Adjusting library panels where a specific target structure needs repetition
+  with different data sources.
 
 ## Usage
 
-This project contains the `active-grafana.cli/-main` function implementing an
-entrypoint for executing commands. Use `./grafurious --help`
-to display the documentation of how to use these commands. You can also use
-`--help` or `-h` on any of the commands or subcommands to display the corresponding
-documentation.
+active-grafana provides commands to ease the execution of recurring tasks on
+running grafana instances.  Use `./grafurious --help` to display a message
+explaining these commands. `--help` or `-h` work on any (sub-)command.
 
 Help entries show environment variable names like `URL`, `FROM_URL` or `TO_MESSAGE`,
 use those environment variables alternatively to command options.
@@ -39,21 +35,21 @@ root of this project:
 
 ### The legacy commands
 
-#### Adjusting library-panels using the `--i-am-an-expert` command option
+#### Adjusting library panels using the `--i-am-an-expert` command option
 
-The standard way of adjusting a library-panel is:
-- get the library-panel with the given `PANEL_UID`
+The standard way of adjusting a library panel is:
+- get the library panel with the given `PANEL_UID`
 - take the first `target` as reference target
 - create the new target list by repeating the reference target adjusted for the
-  datasource-uid and the reference-id based on the provided `DATASOURCE-UIDS`.
+  data source UID and the reference id based on the provided `DATASOURCE-UIDS`.
 - update the library panel with the newly created target list
 
-Sometimes one or more targets need more adjustments than the datasource-uid and
+Sometimes one or more targets need more adjustments than the data source UID and
 the reference-id. Use the `--i-am-an-expert` argument to achieve more advanced
 adjustments. Example:
 
 ```
-./grafurious adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> \
+./grafurious legacy adjust --url=<grafana-url> --token=<grafana-token> --panel-uid=<panel-uid> \
        --datasource-uids="<datasource-uid-1>,<datasource-uid-2>,...,<datasource-uid-n>" \
        --i-am-an-expert="{:path \"<path-to-f-target->target>\" :data <data>}"
 ```
@@ -77,8 +73,8 @@ The `data` is provided to this loaded function, e.g.:
  "<datasource-uid-n>" "ref-id-n"}
 ```
 
-The result of this example is, that the target does not use the datasource-uid
-as reference-id, but a reference-id provided as {"uid" "ref-id"}-map via the
+The result of this example is, that the target does not use the data source UID
+as reference id, but a reference id provided as {"uid" "ref-id"} map via the
 command-line.
 
 Note: make sure to escape strings in the `--i-am-an-expert`
@@ -91,7 +87,7 @@ command option in the proper way, e.g.:
 
 - Error handling:
   If something goes wrong, you are immediately provided with the plain
-  grafana-api-error-messages. Currently, there is no fallback or further help
+  grafana API error messages. Currently, there is no fallback or further help
   provided.
 
 - Testing:
