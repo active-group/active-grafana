@@ -95,7 +95,7 @@
         (is (= folder-uid
                (sut/choose-folder-uid examples/grafana-b-instance
                                       folder-title)))))
-    (testing "1 folder is found"
+    (testing "1 folder is found (perfect match)"
       (with-stub!
         [[api/find-folders-by-query
           (api-stub/find-folders-by-query [{:title folder-title
@@ -103,6 +103,16 @@
         (is (= folder-uid
                (sut/choose-folder-uid examples/grafana-b-instance
                                       folder-title)))))
+    (testing "1 folder is found (fuzzy match)"
+      (let [search-query "   My FOLDER   title "
+            folder-title "  My  folDer  title  "]
+        (with-stub!
+          [[api/find-folders-by-query
+            (api-stub/find-folders-by-query [{:title folder-title
+                                              :uid   folder-uid}])]]
+          (is (= folder-uid
+                 (sut/choose-folder-uid examples/grafana-b-instance
+                                        search-query))))))
     (testing "more than 1 folder is found"
       (with-stub!
         [[api/find-folders-by-query

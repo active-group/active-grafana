@@ -416,26 +416,28 @@
                       exception-data)))))
 
 (defn choose-folder-uid
-  "Searches a folder on a given [[grafana-instance]] by using a given
-  [[folder-title]] as query string returning a folder uid, if the search yields
-   an unambiguous result. If the search yields no result at all this function
-   creates a folder with the title [[folder-title]] and returns its uid. If the
-   search yields an ambiguous result, this function throws an exception."
+  "Searches a folder on a given [[grafana-instance]] by using
+  [[(clean-whitespace folder-title)]] as query string. If the search yields an
+   unambiguous result, the folder uid is returned. If the search yields no result
+   at all this function creates a folder with the title [[(clean-whitespace folder-title)]] and
+   returns its uid. If the search yields an ambiguous result, this function
+   throws an exception."
   [grafana-instance folder-title]
   (if (api/=root-folder-title? folder-title)
     api/root-folder-uid
-    (let [found-folders     (->> folder-title
-                                 (api/find-folders-by-query (:url grafana-instance)
-                                                            (:token grafana-instance))
-                                 (helper/json->clj))
-          folder-candidates (->> found-folders
-                                 (remove deleted?)
-                                 (filter (partial title= folder-title)))]
+    (let [clean-folder-title (clean-whitespace folder-title)
+          found-folders      (->> clean-folder-title
+                                  (api/find-folders-by-query (:url grafana-instance)
+                                                             (:token grafana-instance))
+                                  (helper/json->clj))
+          folder-candidates  (->> found-folders
+                                  (remove deleted?)
+                                  (filter (name-matcher clean-folder-title #(get % "title"))))]
       (case (ambiguous-candidates folder-candidates)
         :none
         (do (api/create-folder (:url grafana-instance)
                                (:token grafana-instance)
-                               folder-title)
+                               clean-folder-title)
             (choose-folder-uid grafana-instance folder-title))
 
         :ambiguous
