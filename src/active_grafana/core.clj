@@ -353,19 +353,38 @@
           (= 1 candidates-count) :unambiguous
           (< 1 candidates-count) :ambiguous)))
 
+(defn clean-whitespace [thing-name]
+  (-> thing-name
+      (str/trim)
+      (str/replace (re-pattern "\\s+")
+                   " ")))
+
+(defn name-pattern [thing-name]
+  (re-pattern (str "(?i)" thing-name)))
+
+(defn name-matcher [thing-name accessor]
+  (fn name-matches? [thing]
+    (boolean (re-find (name-pattern thing-name)
+                      (clean-whitespace (accessor thing))))))
+
 (defn choose-dashboard-metadata
-  "Searches a dashboard on a given [[grafana-instance]] by using a given
-   [[dashboard-title]] as query string returning the dashboard metadata, if the
-   search yields an unambiguous result.  If the search yields an ambiguous or no
-   result at all, this function throws an Exception."
+  "Searches a dashboard on a given [[grafana-instance]] by using
+   [[(clean-whitespace dashboard-title)]] as query string.  If the search
+   yields an unambiguous result, the dashboard metadata is returned.  If the
+   search yields an ambiguous or no result at all, an Exception is thrown."
   [grafana-instance dashboard-title]
-  (let [dashboard-candidates (->> dashboard-title
-                                  (api/find-dashboards-by-query
-                                   (:url grafana-instance)
-                                   (:token grafana-instance))
-                                  (helper/json->clj)
-                                  (remove deleted?)
-                                  (filter (partial title= dashboard-title)))]
+  (let [clean-dashboard-title (clean-whitespace dashboard-title)
+        dashboard-candidates  (->> clean-dashboard-title
+                                   (api/find-dashboards-by-query
+                                    (:url grafana-instance)
+                                    (:token grafana-instance))
+                                   (helper/json->clj)
+                                   (remove deleted?)
+                                   (filter (name-matcher clean-dashboard-title #(get % "title"))))
+        exception-data        {:clean-dashboard-title clean-dashboard-title
+                               :dashboard-title       dashboard-title
+                               :dashboard-candidates  dashboard-candidates
+                               :grafana-url           (:url grafana-instance)}]
     (case (ambiguous-candidates dashboard-candidates)
       :none
       (let [first-thousand-dashboards
@@ -375,11 +394,9 @@
                  (helper/json->clj))]
         (pprint/print-table ["title" "uid" "url" "description" "folderTitle" "folderUrl"]
                             first-thousand-dashboards)
-        (throw (ex-info (str "No dashboard with the following title was found: "
-                             dashboard-title)
-                        {:dashboard-title      dashboard-title
-                         :dashboard-candidates dashboard-candidates
-                         :grafana-url          (:url grafana-instance)})))
+        (throw (ex-info (str "No dashboard was found using the search query: "
+                             clean-dashboard-title)
+                        exception-data)))
 
       :ambiguous
       (do
@@ -387,19 +404,16 @@
         ;; dashboard to copy or to refine the search
         (pprint/print-table ["title" "uid" "url" "description" "folderTitle" "folderUrl"]
                             dashboard-candidates)
-        (throw (ex-info (str "More than one dashboard was found using the search query: " dashboard-title)
-                        {:dashboard-title      dashboard-title
-                         :dashboard-candidates dashboard-candidates
-                         :grafana-url          (:url grafana-instance)})))
+        (throw (ex-info (str "More than one dashboard was found using the search query: "
+                             clean-dashboard-title)
+                        exception-data)))
 
       :unambiguous
       (let [dashboard-metadata (first dashboard-candidates)]
         dashboard-metadata)
 
       (throw (ex-info "Unexpected choose-dashboard-meta result!"
-                      {:dashboard-title      dashboard-title
-                       :dashboard-candidates dashboard-candidates
-                       :grafana-url          (:url grafana-instance)})))))
+                      exception-data)))))
 
 (defn choose-folder-uid
   "Searches a folder on a given [[grafana-instance]] by using a given

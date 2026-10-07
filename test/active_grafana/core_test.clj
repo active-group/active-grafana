@@ -5,6 +5,7 @@
             [active-grafana.examples :as examples]
             [active-grafana.grafana-api-stub :as api-stub]
             [active-grafana.grafana-api-responses :as api-responses]
+            [clojure.string :as str]
             [clojure.test :as t :refer [deftest testing is]]
             [bond.james :refer [with-stub!]]
             [active-grafana.convenient-bond :refer [called-once? not-called?]]))
@@ -20,6 +21,23 @@
     (let [example ["one" "two"]]
       (is (= :ambiguous (sut/ambiguous-candidates example))))))
 
+(deftest clean-whitespace-test
+  (testing "white space between words is reduced to a single SPACE"
+    (let [thing-name "Simple   dashboard    title"]
+      (is (= "Simple dashboard title"
+             (sut/clean-whitespace thing-name)))))
+  (testing "white space before/after the first/last word is trimmed"
+    (let [thing-name "   Simple dashboard title     "]
+      (is (= "Simple dashboard title"
+             (sut/clean-whitespace thing-name))))))
+
+(deftest name-matcher-test
+  (testing "matching is case insensitive"
+    (let [query-string  (sut/clean-whitespace "SIMPLE DASHBOARD TITLE")
+          name-matches? (sut/name-matcher query-string
+                                          #(get % "title"))]
+      (is (name-matches? {"title" "Simple dashboard title"})))))
+
 (deftest choose-dashboard-metadata-test
   (let [dashboard-title         examples/dashboard-title
         another-dashboard-title examples/another-dashboard-title
@@ -31,11 +49,11 @@
           (api-stub/find-dashboards-by-query [])]
          [api/get-dashboards (api-stub/get-dashboards all-dashboards)]]
         (is (thrown-with-msg? clojure.lang.ExceptionInfo
-                              #"No dashboard with the following title was found"
+                              #"No dashboard was found using the search query"
                               (sut/choose-dashboard-metadata examples/grafana-a-instance
                                                              dashboard-title)))
         (is (called-once? api/get-dashboards))))
-    (testing "1 dashboard is found"
+    (testing "1 dashboard is found (perfect match)"
       (with-stub!
         [[api/find-dashboards-by-query
           (api-stub/find-dashboards-by-query [{:title dashboard-title}])]]
@@ -43,6 +61,16 @@
                (get (sut/choose-dashboard-metadata examples/grafana-a-instance
                                                    dashboard-title)
                     "title")))))
+    (testing "1 dashboard is found (fuzzy match)"
+      (let [search-query "   SIMPLE    dashBoard     title "
+            dashboard-title " simple Dashboard   title  "]
+        (with-stub!
+          [[api/find-dashboards-by-query
+            (api-stub/find-dashboards-by-query [{:title dashboard-title}])]]
+          (is (= dashboard-title
+                 (get (sut/choose-dashboard-metadata examples/grafana-a-instance
+                                                     search-query)
+                      "title"))))))
     (testing "more than 1 dashboard is found"
       (with-stub!
         [[api/find-dashboards-by-query
