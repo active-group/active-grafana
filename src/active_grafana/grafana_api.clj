@@ -6,13 +6,14 @@
 
 (set! *warn-on-reflection* true)
 
-(def root-folder-uid "General")
-(defn =root-folder-uid? [& args]
-  (apply = root-folder-uid args))
+(def root-folder-name "General")
+(defn root-folder? [folder-name]
+  (= root-folder-name folder-name))
 
-(def root-folder-title "General")
-(defn =root-folder-title? [& args]
-  (apply = root-folder-title args))
+(def auxiliary-root-folder-title "Dashboards (no folder / root folder)")
+(def auxiliary-root-folder-uid "")
+(defn auxiliary-root-folder-uid? [uid]
+  (= uid auxiliary-root-folder-uid))
 
 ;; >>> SHOW
 
