@@ -267,33 +267,48 @@
           panel:      the panel to copy.
           folder-uid: uid of a folder in the instance, where the
                       library-panel should be copied to."}
-    ;; Note: inefficient to run the available-panels within copy-panel for every
-    ;; panel within copy-panels
-    ;; However, if the panels-list contains duplicates, we can handle it.
-  (let [panel-uid (get panel "uid")
+  ;; Note: inefficient to run the available-panels within copy-panel for every
+  ;; panel within copy-panels
+  ;; However, if the panels-list contains duplicates, we can handle it.
+  (let [panel-uid            (get panel "uid")
         available-panel-uids (map (fn [available-panel] (get available-panel "uid"))
                                   (get-in (helper/json->clj
                                            (api/get-library-panels (-> grafana-instance :url)
                                                                    (-> grafana-instance :token)))
                                           ["result" "elements"]))
-        adjusted-panel (-> panel
-                           (dissoc "id" "folderId" "meta")
-                           (assoc "folderUid" folder-uid))]
+        ;; Remove the values, we do not want to copy
+        clean-panel          (dissoc panel "id" "folderId" "meta")]
     (if (some #(= panel-uid %) available-panel-uids)
       ;; before we can update the panel
       ;; we need to have its most recent version and put this version in the patch
-      (let [panel-version (get-in (helper/json->clj
-                                   (api/get-library-element-by-uid (-> grafana-instance :url)
-                                                                   (-> grafana-instance :token)
-                                                                   panel-uid))
-                                  ["result" "version"])]
+      (let [current-panel (-> (api/get-library-element-by-uid
+                               (-> grafana-instance :url)
+                               (-> grafana-instance :token)
+                               panel-uid)
+                              (helper/json->clj)
+                              (get "result"))
+            updated-panel (-> clean-panel
+                              ;; We want to use the version and folderUid of
+                              ;; the target panel, instead of the values
+                              ;; from the source panel.
+                              (assoc "version" (get current-panel "version"))
+                              (assoc "folderUid" (get current-panel "folderUid")))]
         (api/update-library-element (-> grafana-instance :url)
                                     (-> grafana-instance :token)
                                     panel-uid
-                                    (helper/clj->json (assoc adjusted-panel "version" panel-version))))
-      (api/create-library-element (-> grafana-instance :url)
-                                  (-> grafana-instance :token)
-                                  (helper/clj->json adjusted-panel)))))
+                                    (helper/clj->json updated-panel)))
+      (let [;; FIXME: if (=root-folder-uid? folder-uid)
+            ;; this probably does not work with current
+            ;; grafana versions, since the uid of the root-folder
+            ;; is not "General" anymore.
+            ;; Also see the api namespace stating that the root-folder
+            ;; and root-folder-uid is "General". This assumption
+            ;; does not hold anymore.
+            ;; Find out how to handle the root folder with the current grafana api.
+            panel-to-create (assoc clean-panel "folderUID" folder-uid)]
+        (api/create-library-element (-> grafana-instance :url)
+                                    (-> grafana-instance :token)
+                                    (helper/clj->json panel-to-create))))))
 
 (defn copy-panels
   ^{:doc "Copy (create/update) all library-panels associated with a dashboard.
