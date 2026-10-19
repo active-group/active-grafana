@@ -175,6 +175,25 @@
 
 ;; >>> COPY
 
+(defn source-dashboard->dashboard-request-body
+  "TODO"
+  [from-grafana dashboard-uid to-folder-uid to-message]
+  (let [source-dashboard (helper/json->clj
+                          (api/get-dashboard-by-uid
+                           (-> from-grafana :url)
+                           (-> from-grafana :token)
+                           dashboard-uid))
+        target-dashboard (-> source-dashboard
+                             (get "dashboard")
+                             ;; alternative: check for changes before overwriting
+                             (dissoc "version")
+                             (dissoc "id"))]
+    {"dashboard" target-dashboard
+     "message"   to-message
+     ;; TODO: should we check for changes before overwriting?
+     "overwrite" true
+     "folderUid" to-folder-uid}))
+
 (defn copy-dashboard
   ^{:doc "Copy a dashboard from a grafana instance to another instance.
           Note: an existing dashboard in the 'to'-instance will be overwritten.
@@ -189,24 +208,13 @@
                          'to'-instance will be used.
           to-message:    The change-message. "}
   [from-grafana to-grafana dashboard-uid to-folder-uid to-message]
-  (let [dashboard        (helper/json->clj
-                          (api/get-dashboard-by-uid
-                           (-> from-grafana :url)
-                           (-> from-grafana :token)
-                           dashboard-uid))
-        clean-board-data (-> dashboard
-                             (get "dashboard")
-                             ;; alternative: check for changes before overwriting
-                             (dissoc "version")
-                             (dissoc "id"))
-        dashboard        {"dashboard" clean-board-data
-                          "message"   to-message
-                          ;; TODO: should we check for changes before overwriting?
-                          "overwrite" true
-                          "folderUid" api/auxiliary-root-folder-uid}]
+  (let [dashboard-request-body (source-dashboard->dashboard-request-body from-grafana
+                                                                         dashboard-uid
+                                                                         to-folder-uid
+                                                                         to-message)]
     (api/create-update-dashboard (-> to-grafana :url)
                                  (-> to-grafana :token)
-                                 (helper/clj->json dashboard))))
+                                 (helper/clj->json dashboard-request-body))))
 
 (defn copy-alert
   ^{:doc "Copy (create/update) a rule to a given folder.
@@ -596,86 +604,89 @@
                                                                       :keys [message
                                                                              target-folder-uid
                                                                              source-dashboard-uid]}]
-  (let [dashboard-uid        (or source-dashboard-uid
-                                 (get (choose-dashboard-metadata source-grafana-instance
-                                                                 dashboard-title)
-                                      "uid"))
-        dashboard-response   (helper/json->clj
-                              (api/get-dashboard-by-uid
-                               (:url source-grafana-instance)
-                               (:token source-grafana-instance)
-                               dashboard-uid))
-        source-folder-title  (get-in dashboard-response ["meta" "folderTitle"])
+  (let [source-dashboard-uid          (or source-dashboard-uid
+                                          (get (choose-dashboard-metadata source-grafana-instance
+                                                                          dashboard-title)
+                                               "uid"))
+        source-dashboard-response     (helper/json->clj
+                                       (api/get-dashboard-by-uid
+                                        (:url source-grafana-instance)
+                                        (:token source-grafana-instance)
+                                        source-dashboard-uid))
+        source-dashboard-folder-title (get-in source-dashboard-response ["meta" "folderTitle"])
+
         ;; NOTE: Since the alerts and panels "normally" live in the same folder as the
-        ;; dashboard itself. This is due to access permissions, since access is managed using folders.
+        ;; dashboard itself.
+        ;; 
+        ;; FIXME THE ASSUMPTION ABOVE PROVED WRONG!!!
+        ;;
+        ;;This is due to access permissions, since access is managed using folders.
         ;; So it seems like we can use the dashboard-folder also as the target
         ;; for the panels and alerts.
         ;; Anyways this is not enough, we should check if the folder with the same
         ;; title exists on the target grafana instance and if the found folder
         ;; uid is the same as the dashboard-folder-uid
         ;; BUT: What to do if the checks fail?
-        dashboard-folder-uid (or target-folder-uid
-                                 (choose-folder-uid target-grafana-instance
-                                                    source-folder-title))
-        auxiliary-to-folder  (if (api/auxiliary-root-folder-uid? dashboard-folder-uid)
-                               {"title" api/auxiliary-root-folder-title}
-                               (-> (api/get-folder-by-folder-uid (:url target-grafana-instance)
-                                                                 (:token target-grafana-instance)
-                                                                 dashboard-folder-uid)
-                                   (helper/json->clj)))
+        target-dashboard-folder-uid     (or target-folder-uid
+                                            (choose-folder-uid target-grafana-instance
+                                                               source-dashboard-folder-title))
+        target-dashboard-folder-title   (if (api/auxiliary-root-folder-uid? target-dashboard-folder-uid)
+                                          api/auxiliary-root-folder-title
+                                          (-> (api/get-folder-by-folder-uid (:url target-grafana-instance)
+                                                                            (:token target-grafana-instance)
+                                                                            target-dashboard-folder-uid)
+                                              (helper/json->clj)
+                                              (get "title")))
+        target-dashboard-update-message (or message
+                                            (str "Copy " (get source-dashboard-response "title")
+                                                 " (uid: " (get source-dashboard-response "uid") ") "
+                                                 "from " (:url source-grafana-instance)
+                                                 "to " target-dashboard-folder-title
+                                                 " (uid: " target-dashboard-folder-uid ") "
+                                                 "at " (:url target-grafana-instance) "."))
 
-        auxiliary-target-folder-title (get auxiliary-to-folder "title")
+        source-dashboard-panels         (find-dashboard-related-panels source-grafana-instance source-dashboard-uid)
+        source-dashboard-panels-titles  (map #(get % "name") source-dashboard-panels)
+        dashboard-has-dependent-panels? (not-empty source-dashboard-panels)
+        source-panels-folder-title      (when dashboard-has-dependent-panels? (check-and-choose-panels-folder-title source-dashboard-panels))
+        target-panels-folder-uid        (when dashboard-has-dependent-panels? (choose-folder-uid target-grafana-instance
+                                                                                                 source-panels-folder-title))
 
-        message              (or message
-                                 (str "Copy " (get dashboard-response "title")
-                                      " (uid: " (get dashboard-response "uid") ") "
-                                      "from " (:url source-grafana-instance)
-                                      "to " auxiliary-target-folder-title
-                                      " (uid: " dashboard-folder-uid ") "
-                                      "at " (:url target-grafana-instance) "."))
+        source-dashboard-alerts         (find-dashboard-related-alert-rules source-grafana-instance source-dashboard-uid)
+        source-dashboard-alerts-titles  (map #(get % "title") source-dashboard-alerts)
+        dashboard-has-dependent-alerts? (not-empty source-dashboard-alerts)
+        source-alerts-folder-uid        (when dashboard-has-dependent-alerts? (check-and-choose-alert-folder-uid source-dashboard-alerts))
+        source-alerts-folder            (when dashboard-has-dependent-alerts?
+                                          (api/get-folder-by-folder-uid (:url source-grafana-instance)
+                                                                        (:token source-grafana-instance)
+                                                                        source-alerts-folder-uid))
+        source-alerts-folder-title      (when dashboard-has-dependent-alerts?
+                                          (get (helper/json->clj source-alerts-folder) "title"))
+        target-alerts-folder-uid        (when dashboard-has-dependent-alerts?
+                                          (choose-folder-uid target-grafana-instance
+                                                             source-alerts-folder-title))
 
-        panels                (find-dashboard-related-panels source-grafana-instance dashboard-uid)
-        related-panels-titles (map #(get % "name") panels)
-        has-dependent-panels? (not-empty panels)
-        panels-folder-title   (when has-dependent-panels? (check-and-choose-panels-folder-title panels))
-        panels-folder-uid     (when has-dependent-panels? (choose-folder-uid target-grafana-instance
-                                                                             panels-folder-title))
-
-        source-alerts                 (find-dashboard-related-alert-rules source-grafana-instance dashboard-uid)
-        related-alerts-titles         (map #(get % "title") source-alerts)
-        has-dependent-alerts?         (not-empty source-alerts)
-        source-alerts-folder-uid      (when has-dependent-alerts? (check-and-choose-alert-folder-uid source-alerts))
-        source-alerts-folder          (when has-dependent-alerts?
-                                        (api/get-folder-by-folder-uid (:url source-grafana-instance)
-                                                                      (:token source-grafana-instance)
-                                                                      source-alerts-folder-uid))
-        source-alerts-folder-title    (when has-dependent-alerts?
-                                        (get (helper/json->clj source-alerts-folder) "title"))
-        target-alerts-folder-uid      (when has-dependent-alerts?
-                                        (choose-folder-uid target-grafana-instance
-                                                           source-alerts-folder-title))
-
-        copy-summary-data             {:source-url            (:url source-grafana-instance)
-                                       :target-url            (:url target-grafana-instance)
-                                       :dashboard-title       dashboard-title
-                                       :source-folder-title   source-folder-title
-                                       :target-folder-title   auxiliary-target-folder-title
-                                       :related-panels-titles related-panels-titles
-                                       :related-alerts-titles related-alerts-titles}]
-    (when has-dependent-panels?
+        copy-summary-data {:source-url            (:url source-grafana-instance)
+                           :target-url            (:url target-grafana-instance)
+                           :dashboard-title       dashboard-title
+                           :source-folder-title   source-dashboard-folder-title
+                           :target-folder-title   target-dashboard-folder-title
+                           :related-panels-titles source-dashboard-panels-titles
+                           :related-alerts-titles source-dashboard-alerts-titles}]
+    (when dashboard-has-dependent-panels?
       (copy-panels source-grafana-instance
                    target-grafana-instance
-                   dashboard-uid
-                   panels-folder-uid))
+                   source-dashboard-uid
+                   target-panels-folder-uid))
     (copy-dashboard source-grafana-instance
                     target-grafana-instance
-                    dashboard-uid
-                    dashboard-folder-uid
-                    message)
-    (when has-dependent-alerts?
+                    source-dashboard-uid
+                    target-dashboard-folder-uid
+                    target-dashboard-update-message)
+    (when dashboard-has-dependent-alerts?
       (copy-alerts source-grafana-instance
                    target-grafana-instance
-                   dashboard-uid
+                   source-dashboard-uid
                    target-alerts-folder-uid))
     (helper/log (convenient-copy-summary copy-summary-data))
     copy-summary-data))

@@ -260,23 +260,55 @@
         (is (not-called? api/update-alert-rule))
         (is (called-once? api/create-alert-rule))))))
 
+(deftest source-dashboard->target-dashboard-test
+  (testing "The target-dashboard is constructed correctly."
+    (let [source-dashboard-uid        examples/dashboard-uid
+          source-dashboard-folder-uid "test-folder-uid"
+          target-dashboard-folder-uid "target-folder-uid"
+          source-dashboard            {:uid        source-dashboard-uid
+                                       :folder-uid source-dashboard-folder-uid}
+          message                     examples/change-dashboard-message]
+      (with-stub!
+        [[api/get-dashboard-by-uid (api-stub/get-dashboard-by-uid source-dashboard)]]
+        (let [dashboard-request-body (sut/source-dashboard->dashboard-request-body examples/grafana-a-instance
+                                                                                   source-dashboard-uid
+                                                                                   target-dashboard-folder-uid
+                                                                                   message)
+              new-dashboard          (get dashboard-request-body "dashboard")]
+          (is (contains? dashboard-request-body "dashboard"))
+          (is (true? (get dashboard-request-body "overwrite")))
+          (is (= message
+                 (get dashboard-request-body "message")))
+          (is (= target-dashboard-folder-uid
+                 (get dashboard-request-body "folderUid")))
+          (is (not (nil? new-dashboard)))
+          (is (not (contains? new-dashboard "version")))
+          (is (not (contains? new-dashboard "id")))
+          (is (= source-dashboard-uid
+                 (get new-dashboard "uid"))))))))
+
 (deftest copy-dashboard-test
   (testing "dashboard is copied"
-    (let [dashboard-uid         examples/dashboard-uid
-          dashboard-description {:uid dashboard-uid}
-          folder-uid            examples/folder-uid
-          message               examples/change-dashboard-message]
+    (let [dashboard-uid           examples/dashboard-uid
+          folder-uid              "before-update-folder-uid"
+          dashboard-before-update {:uid        dashboard-uid
+                                   :folder-uid folder-uid}
+          updated-folder-uid      "updated-folder-uid"
+          updated-dashboard       {:uid        dashboard-uid
+                                   :folder-uid updated-folder-uid}
+          message                 examples/change-dashboard-message]
       (with-stub!
-        [[api/get-dashboard-by-uid (api-stub/get-dashboard-by-uid dashboard-description)]
-         [api/create-update-dashboard (api-stub/create-update-dashboard dashboard-description)]]
-        (is (= "success"
-               (-> (sut/copy-dashboard examples/grafana-a-instance
-                                       examples/grafana-b-instance
-                                       dashboard-uid
-                                       folder-uid
-                                       message)
-                   (helper/json->clj)
-                   (get "status"))))))))
+        [[api/get-dashboard-by-uid (api-stub/get-dashboard-by-uid dashboard-before-update)]
+         [api/create-update-dashboard (api-stub/create-update-dashboard updated-dashboard)]]
+        (let [copy-dashboard-response (-> (sut/copy-dashboard examples/grafana-a-instance
+                                                              examples/grafana-b-instance
+                                                              dashboard-uid
+                                                              updated-folder-uid
+                                                              message)
+                                          (helper/json->clj))]
+          (is (= "success" (get copy-dashboard-response "status")))
+          (is (= dashboard-uid (get copy-dashboard-response "uid")))
+          (is (= updated-folder-uid (get copy-dashboard-response "folderUid"))))))))
 
 (deftest convenient-copy-test
   (testing "convenient-copy to a folder that existxs and update the panels and alerts it uses"
