@@ -36,15 +36,43 @@
          [api/get-all-alert-rules (api-stub/get-all-alert-rules alerts)]
          [api/update-alert-rule (api-stub/update-alert-rule alert)]
          [api/create-alert-rule]]
-        (is (= {:source-url            examples/source-url
-                :target-url            examples/target-url
-                :dashboard-title       examples/dashboard-title
-                :source-folder-title   examples/folder-title
-                :target-folder-title   examples/folder-title
-                :related-panels-titles (list examples/panel-name)
-                :related-alerts-titles (list examples/alert-title)}
+        (is (= {:source {:url       examples/source-url
+                         :dashboard {:title        examples/dashboard-title
+                                     :uid          examples/dashboard-uid
+                                     :folder-title examples/folder-title
+                                     :folder-uid   examples/folder-uid}
+                         :panels    {:list         [{:uid  examples/panel-uid
+                                                     :name examples/panel-name}]
+                                     :folder-title examples/folder-title
+                                     :folder-uid   examples/folder-uid}
+                         :alerts    {:list         [{:uid   examples/alert-uid
+                                                     :title examples/alert-title}]
+                                     :folder-title examples/folder-title
+                                     :folder-uid   examples/folder-uid}}
+                :target {:url       examples/target-url
+                         :dashboard {:title        examples/dashboard-title
+                                     :uid          examples/dashboard-uid
+                                     :folder-title examples/folder-title
+                                     :folder-uid   examples/folder-uid}
+                         :panels    {:list         [{:uid  examples/panel-uid
+                                                     :name examples/panel-name}]
+                                     :folder-title examples/folder-title
+                                     :folder-uid   examples/folder-uid}
+                         :alerts    {:list         [{:uid   examples/alert-uid
+                                                     :title examples/alert-title}]
+                                     :folder-title examples/folder-title
+                                     :folder-uid   examples/folder-uid}}}
                (sut/-main "copy" "dashboard" examples/dashboard-title
                           "--source-url" examples/source-url
                           "--target-url" examples/target-url
                           "--source-token" examples/source-token
                           "--target-token" examples/target-token)))))))
+
+(comment
+  {:source-url
+   :target-url
+   :dashboard-title       examples/dashboard-title
+   :source-folder-title   examples/folder-title
+   :target-folder-title   examples/folder-title
+   :related-panels-titles (list examples/panel-name)
+   :related-alerts-titles (list examples/alert-title)})

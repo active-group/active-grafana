@@ -532,18 +532,37 @@
 
 (defn stringify-names [names]
   (->> names
-       (map surround-quotes)
        (interpose ", ")
        (apply str)))
 
+(defn surround-uid [uid]
+  (str  " (uid: " (surround-quotes uid) ")"))
+
+(defn title-and-uid [thing]
+  (str (surround-quotes (or (:name thing)
+                            (:title thing)))
+       (surround-uid (:uid thing))))
+
+(defn folder-title-and-uid [thing]
+  (str (surround-quotes (:folder-title thing))
+       (surround-uid (:folder-uid thing))))
+
+(defn related-panels-copy-summary [panels]
+  (when (not-empty (:list panels))
+    (str " with related library panels "
+         (stringify-names (map title-and-uid (:list panels)))
+         " in folder "
+         (folder-title-and-uid panels))))
+
+(defn related-alerts-copy-summary [alerts]
+  (when (not-empty (:list alerts))
+    (str " and related alerts "
+         (stringify-names (map title-and-uid (:list alerts)))
+         " in folder "
+         (folder-title-and-uid alerts))))
+
 (defn convenient-copy-summary
-  [& {:keys [source-url
-             target-url
-             dashboard-title
-             source-folder-title
-             target-folder-title
-             related-panels-titles
-             related-alerts-titles]}]
+  [& {:keys [source target]}]
   (str "\n"
        "#########################################################################"
        "#########################################################################"
@@ -551,25 +570,25 @@
        "CONVENIENT COPY SUMMARY: "
        "\n\n"
        "Found dashboard "
-       (surround-quotes dashboard-title)
-       (when (not-empty related-panels-titles)
-         (str " with related library panels "
-              (stringify-names related-panels-titles)))
-       (when (not-empty related-alerts-titles)
-         (str " and related alerts "
-              (stringify-names related-alerts-titles)))
+       (title-and-uid (:dashboard source))
        " in folder "
-       (surround-quotes source-folder-title)
+       (folder-title-and-uid (:dashboard source))
+       (related-panels-copy-summary (:panels source))
+       (related-alerts-copy-summary (:alerts source))
        " on "
-       (surround-quotes source-url)
+       (surround-quotes (:url source))
        "."
        "\n"
-       "Copied "
-       (surround-quotes dashboard-title)
-       " and its related library panels and alerts to folder "
-       (surround-quotes target-folder-title)
+       "Copied the dashboard "
+       (title-and-uid (:dashboard target))
+       " to folder "
+       (folder-title-and-uid (:dashboard target))
+       ", its related library panels to folder "
+       (folder-title-and-uid (:panels target))
+       " and its related alerts to folder "
+       (folder-title-and-uid (:alerts target))
        " on "
-       (surround-quotes target-url)
+       (surround-quotes (:url target))
        "."
        "\n\n"
        "#########################################################################"
@@ -613,20 +632,10 @@
                                         (:url source-grafana-instance)
                                         (:token source-grafana-instance)
                                         source-dashboard-uid))
+        source-dashboard-title        (get-in source-dashboard-response ["dashboard" "title"])
         source-dashboard-folder-title (get-in source-dashboard-response ["meta" "folderTitle"])
+        source-dashboard-folder-uid   (get-in source-dashboard-response ["meta" "folderUid"])
 
-        ;; NOTE: Since the alerts and panels "normally" live in the same folder as the
-        ;; dashboard itself.
-        ;; 
-        ;; FIXME THE ASSUMPTION ABOVE PROVED WRONG!!!
-        ;;
-        ;;This is due to access permissions, since access is managed using folders.
-        ;; So it seems like we can use the dashboard-folder also as the target
-        ;; for the panels and alerts.
-        ;; Anyways this is not enough, we should check if the folder with the same
-        ;; title exists on the target grafana instance and if the found folder
-        ;; uid is the same as the dashboard-folder-uid
-        ;; BUT: What to do if the checks fail?
         target-dashboard-folder-uid     (or target-folder-uid
                                             (choose-folder-uid target-grafana-instance
                                                                source-dashboard-folder-title))
@@ -638,22 +647,21 @@
                                               (helper/json->clj)
                                               (get "title")))
         target-dashboard-update-message (or message
-                                            (str "Copy " (get source-dashboard-response "title")
-                                                 " (uid: " (get source-dashboard-response "uid") ") "
+                                            (str "Copy " source-dashboard-title
+                                                 " (uid: " source-dashboard-uid ") "
                                                  "from " (:url source-grafana-instance)
                                                  "to " target-dashboard-folder-title
                                                  " (uid: " target-dashboard-folder-uid ") "
                                                  "at " (:url target-grafana-instance) "."))
 
         source-dashboard-panels         (find-dashboard-related-panels source-grafana-instance source-dashboard-uid)
-        source-dashboard-panels-titles  (map #(get % "name") source-dashboard-panels)
         dashboard-has-dependent-panels? (not-empty source-dashboard-panels)
         source-panels-folder-title      (when dashboard-has-dependent-panels? (check-and-choose-panels-folder-title source-dashboard-panels))
+        source-panels-folder-uid        (when dashboard-has-dependent-panels? (get-in (first source-dashboard-panels) ["meta" "folderUid"]))
         target-panels-folder-uid        (when dashboard-has-dependent-panels? (choose-folder-uid target-grafana-instance
                                                                                                  source-panels-folder-title))
 
         source-dashboard-alerts         (find-dashboard-related-alert-rules source-grafana-instance source-dashboard-uid)
-        source-dashboard-alerts-titles  (map #(get % "title") source-dashboard-alerts)
         dashboard-has-dependent-alerts? (not-empty source-dashboard-alerts)
         source-alerts-folder-uid        (when dashboard-has-dependent-alerts? (check-and-choose-alert-folder-uid source-dashboard-alerts))
         source-alerts-folder            (when dashboard-has-dependent-alerts?
@@ -666,13 +674,37 @@
                                           (choose-folder-uid target-grafana-instance
                                                              source-alerts-folder-title))
 
-        copy-summary-data {:source-url            (:url source-grafana-instance)
-                           :target-url            (:url target-grafana-instance)
-                           :dashboard-title       dashboard-title
-                           :source-folder-title   source-dashboard-folder-title
-                           :target-folder-title   target-dashboard-folder-title
-                           :related-panels-titles source-dashboard-panels-titles
-                           :related-alerts-titles source-dashboard-alerts-titles}]
+        copy-summary-data {:source {:url       (:url source-grafana-instance)
+                                    :dashboard {:title        source-dashboard-title
+                                                :uid          source-dashboard-uid
+                                                :folder-title source-dashboard-folder-title
+                                                :folder-uid   source-dashboard-folder-uid}
+                                    :panels    {:list         (mapv #(hash-map :name (get % "name")
+                                                                               :uid (get % "uid"))
+                                                                    source-dashboard-panels)
+                                                :folder-title source-panels-folder-title
+                                                :folder-uid   source-panels-folder-uid}
+                                    :alerts    {:list         (mapv #(hash-map :title (get % "title")
+                                                                               :uid (get % "uid"))
+                                                                    source-dashboard-alerts)
+                                                :folder-title source-alerts-folder-title
+                                                :folder-uid   source-alerts-folder-uid}}
+
+                           :target {:url       (:url target-grafana-instance)
+                                    :dashboard {:title        source-dashboard-title
+                                                :uid          source-dashboard-uid
+                                                :folder-title target-dashboard-folder-title
+                                                :folder-uid   target-dashboard-folder-uid}
+                                    :panels    {:list         (mapv #(hash-map :name (get % "name")
+                                                                               :uid (get % "uid"))
+                                                                    source-dashboard-panels)
+                                                :folder-title source-panels-folder-title
+                                                :folder-uid   target-panels-folder-uid}
+                                    :alerts    {:list         (mapv #(hash-map :title (get % "title")
+                                                                               :uid (get % "uid"))
+                                                                    source-dashboard-alerts)
+                                                :folder-title source-alerts-folder-title
+                                                :folder-uid   target-alerts-folder-uid}}}]
     (when dashboard-has-dependent-panels?
       (copy-panels source-grafana-instance
                    target-grafana-instance
