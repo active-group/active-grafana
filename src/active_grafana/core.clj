@@ -10,10 +10,10 @@
 ;; >>> SHOW
 
 (defn show-dashboards
-  ^{:doc "Print the title, uid and url of the first 1000 dashboards of the
-          grafana-instance.
+  "Print the title, uid and url of the first 1000 dashboards of the
+   grafana-instance.
 
-          grafana-instance: url and token as GrafanaInstance record."}
+   grafana-instance: url and token as GrafanaInstance record."
   [grafana-instance]
   (let [boards (helper/json->clj
                 (api/get-dashboards
@@ -23,10 +23,10 @@
     (pprint/print-table ["title" "uid" "url"] boards)))
 
 (defn show-folders
-  ^{:doc "Print the title and uid of the first 1000 folders of the grafana
-          instance.
+  "Print the title and uid of the first 1000 folders of the grafana
+   instance.
 
-          grafana-instance: url and token as GrafanaInstance record."}
+   grafana-instance: url and token as GrafanaInstance record."
   [grafana-instance]
   (let [folders (helper/json->clj
                  (api/get-folders
@@ -36,8 +36,8 @@
     (pprint/print-table ["title" "uid"] folders)))
 
 (defn show-library-panels
-  ^{:doc "Show for a given grafana-instance the name, uid and folder-uid of the
-          first 100 library panels"}
+  "Show for a given grafana-instance the name, uid and folder-uid of the
+   first 100 library panels"
   [grafana-instance]
   (let [library-panels (helper/json->clj
                         (api/get-library-panels
@@ -53,11 +53,11 @@
     (pprint/print-table panels)))
 
 (defn find-dashboard-related-alert-rules
-  ^{:doc "Find alert-rules that are related to a specific dashboard.
-          Note: searches for the uid within `annotations` > `__dashboardUid__`.
+  "Find alert-rules that are related to a specific dashboard.
+   Note: searches for the uid within `annotations` > `__dashboardUid__`.
 
-          grafana-instance: url and token as GrafanaInstance record.
-          dashboard-uid:    to search for in the alert-rules."}
+   grafana-instance: url and token as GrafanaInstance record.
+   dashboard-uid:    to search for in the alert-rules."
   [grafana-instance dashboard-uid]
   (let [alert-rules (helper/json->clj
                      (api/get-all-alert-rules
@@ -75,10 +75,10 @@
             alert-rules)))
 
 (defn show-dashboard-alerts
-  ^{:doc "Show alert-rules related to a specific dashboard.
+  "Show alert-rules related to a specific dashboard.
 
-          grafana-instance: url and token as GrafanaInstance record.
-          dashboard-uid:    to search for in the alert-rules."}
+   grafana-instance: url and token as GrafanaInstance record.
+   dashboard-uid:    to search for in the alert-rules."
   [grafana-instance board-uid]
   (let [alert-rules (find-dashboard-related-alert-rules grafana-instance board-uid)]
     (println (str "Alert alert-uids related to dashboard: " board-uid))
@@ -89,10 +89,10 @@
 ;; alternative: get all library-panel - for each library-panel, search all connections, check whether connection is dashboard-uid
 ;; note: you only get the first 100 library-panels
 (defn find-dashboard-related-panels
-  ^{:doc "Find library panels that are related to a specific dashboard.
+  "Find library panels that are related to a specific dashboard.
 
-          grafana-instance: url and token as GrafanaInstance record.
-          dashboard-uid:    to search for in the panels."}
+   grafana-instance: url and token as GrafanaInstance record.
+   dashboard-uid:    to search for in the panels."
   [grafana-instance dashboard-uid]
   (let [dashboard (helper/json->clj
                    (api/get-dashboard-by-uid (-> grafana-instance :url)
@@ -113,21 +113,21 @@
          panel-uids)))
 
 (defn show-dashboard-panels
-  ^{:doc "Show panels related to a specific dashboard.
+  "Show panels related to a specific dashboard.
 
-          grafana-instance: url and token as GrafanaInstance record.
-          dashboard-uid:    to search for in the panels."}
+   grafana-instance: url and token as GrafanaInstance record.
+   dashboard-uid:    to search for in the panels."
   [grafana-instance board-uid]
   (let [panels (find-dashboard-related-panels grafana-instance board-uid)]
     (println (str "Panels related to dashboard: " board-uid))
     (pprint/print-table ["uid" "name"] panels)))
 
 (defn copy-show
-  ^{:doc "Based on the given arguments, print information about the first 1000
-          dashboards and/or the first 1000 folders and/or the first 100 library panels.
+  "Based on the given arguments, print information about the first 1000
+   dashboards and/or the first 1000 folders and/or the first 100 library panels.
 
-          args: Provided arguments, as Copy-Arguments record.
-                If neither `from`, nor `to` is set, default to show both."}
+   args: Provided arguments, as Copy-Arguments record.
+   If neither `from`, nor `to` is set, default to show both."
   [args]
   ;; if neither from nor to is set, show both
   (let [from-to-not-set (and (nil? (-> args :from)) (nil? (-> args :to)))]
@@ -195,7 +195,7 @@
      "folderUid" to-folder-uid}))
 
 (defn copy-dashboard
-  ^{:doc "Copy a dashboard from a grafana instance to another instance.
+  "Copy a dashboard from a grafana instance to another instance.
           Note: an existing dashboard in the 'to'-instance will be overwritten.
 
           from-grafana:  url and token as GrafanaInstance record.
@@ -203,10 +203,10 @@
           dashboard-uid: uid of a dashboard in the 'from'-instance,
                          that will be copied to the 'to'-instance.
           to-folder-uid: uid of a folder within the 'to'-instance,
-                         where the dashboard will be copied/moved to.
-                         If \"General\" the General-folder (root) of the
+   where the dashboard will be copied/moved to.
+   If \"General\" the General-folder (root) of the
                          'to'-instance will be used.
-          to-message:    The change-message. "}
+   to-message:    The change-message. "
   [from-grafana to-grafana dashboard-uid to-folder-uid to-message]
   (let [dashboard-request-body (source-dashboard->dashboard-request-body from-grafana
                                                                          dashboard-uid
@@ -217,11 +217,11 @@
                                  (helper/clj->json dashboard-request-body))))
 
 (defn copy-alert
-  ^{:doc "Copy (create/update) a rule to a given folder.
+  "Copy (create/update) a rule to a given folder.
 
           instance:     url and token as GrafanaInstance record.
           rule-to-copy: the rule to copy.
-          folder-uid:   the folder-uid where the rule should be copied to."}
+          folder-uid:   the folder-uid where the rule should be copied to."
   ;; Note: inefficient to run the available-alerts within copy-alert for every
   ;; rule within copy-alerts
   ;; However, if the alert-rules-list contains duplicates, we can handle it.
@@ -249,13 +249,13 @@
                               (assoc rule-to-copy "folderuid" folder-uid))))))
 
 (defn copy-alerts
-  ^{:doc "Copy (create/update) all alert-rules associated with a dashboard.
+  "Copy (create/update) all alert-rules associated with a dashboard.
 
           from-instance: url and token as GrafanaInstance record.
-          to-instance:   url and token as GrafanaInstance record.
-          dashboard-uid: uid of a dashboard in the 'from'-instance
-          to-folder-uid: uid of a folder in the 'to'-instance, where the
-                         alert-rules should be copied to."}
+   to-instance:   url and token as GrafanaInstance record.
+   dashboard-uid: uid of a dashboard in the 'from'-instance
+   to-folder-uid: uid of a folder in the 'to'-instance, where the
+   alert-rules should be copied to."
   [from-instance to-instance dashboard-uid to-folder-uid]
   (let [alert-rules (find-dashboard-related-alert-rules from-instance dashboard-uid)]
       ;; Note: folder must exist (otherwise rule will be added but cannot be
@@ -268,12 +268,12 @@
 
 (defn copy-panel
   [grafana-instance panel folder-uid]
-  ^{:doc "Copy (create/update) a library-panel.
+  "Copy (create/update) a library-panel.
 
           instance:   url and token as GrafanaInstance record.
           panel:      the panel to copy.
           folder-uid: uid of a folder in the instance, where the
-                      library-panel should be copied to."}
+                      library-panel should be copied to."
   ;; Note: inefficient to run the available-panels within copy-panel for every
   ;; panel within copy-panels
   ;; However, if the panels-list contains duplicates, we can handle it.
@@ -314,22 +314,22 @@
                                     (helper/clj->json panel-to-create))))))
 
 (defn copy-panels
-  ^{:doc "Copy (create/update) all library-panels associated with a dashboard.
+  "Copy (create/update) all library-panels associated with a dashboard.
 
           from-instance: url and token as GrafanaInstance record.
-          to-instance:   url and token as GrafanaInstance record.
-          dashboard-uid: uid of a dashboard in the 'from'-instance
-          to-folder-uid: uid of a folder in the 'to'-instance, where the
-                         library-panels should be copied to."}
+   to-instance:   url and token as GrafanaInstance record.
+   dashboard-uid: uid of a dashboard in the 'from'-instance
+   to-folder-uid: uid of a folder in the 'to'-instance, where the
+   library-panels should be copied to."
   [from-instance to-instance dashboard-uid to-folder-uid]
   (let [panels (find-dashboard-related-panels from-instance dashboard-uid)]
     (run! (fn [panel] (copy-panel to-instance panel to-folder-uid)) panels)))
 
 (defn copy
-  ^{:doc "Based on the given arguments, copy a dashboard and/or its
-          associated alert-rules and/or panels.
+  "Based on the given arguments, copy a dashboard and/or its
+   associated alert-rules and/or panels.
 
-          args: Provided arguments, as Copy-Arguments record."}
+   args: Provided arguments, as Copy-Arguments record."
   [args]
   ;; if associated panels aren't there, the dashboard copy will fail
   (when (-> args :panels)
@@ -728,8 +728,7 @@
 ;; >>> ADJUST
 
 (defn standard-target->target
-  ^{:doc "Create target from reference-target.
- Use datasource-uid also as refId."}
+  "Create target from reference-target.  Use datasource-uid also as refId."
   [reference-target uid]
   ;; target { "datasource" { "uid" <datasource-uid>, ...},
   ;;          "refId" <ref-id>,
@@ -745,13 +744,13 @@
          "refId" uid))
 
 (defn target->target-from-file
-  ^{:doc "Create target from reference-target. Creation of the target is
+  "Create target from reference-target. Creation of the target is
   determined by the `expert-string`. The `expert-string` has the form: `\"{:path
   <path to a function target->target in a file> :data '<some-data>'}\"`The
   `expert-string` is read with `clojure.edn/read-string`. The function
   `target->target` is loaded via `(load-string (slurp file-path))`. The function
   `target->target` is provided with the arguments `reference-target`, `uid` and
-  `data`."}
+  `data`."
   [expert-string reference-target uid]
   (let [path-data-map (edn/read-string expert-string)
         f-target->target (load-string (slurp (:path path-data-map)))
@@ -759,10 +758,10 @@
     (f-target->target reference-target uid data)))
 
 (defn create-targets
-  ^{:doc "Create targets based on a reference-target and given datasource-uids.
+  "Create targets based on a reference-target and given datasource-uids.
   By default uses `standard-target->target` to create targets. When an
   `expert-string` is provided, more advanced targets can be created. See
-  `target->target-from-file` and the README for more information."}
+  `target->target-from-file` and the README for more information."
   [reference-target datasource-uids expert-string]
 
   (assert (not= [""] datasource-uids)
@@ -780,10 +779,10 @@
     (map (partial target->target-from-file expert-string reference-target) datasource-uids)))
 
 (defn create-patch
-  ^{:doc "Creates a patch for a panel, providing the panel version and kind
+  "Creates a patch for a panel, providing the panel version and kind
   (patch-must-haves) and the adjustd model, where the targets are replaced,
   based on the first target of the provided panel, the provided datasource-uids
-  and optionally an expert-string."}
+  and optionally an expert-string."
   [panel datasource-uids expert-string]
   ;; panel map:
   ;; {"result": { "version": <version>,
@@ -805,9 +804,9 @@
      "kind"    kind}))
 
 (defn adjust-library-panel
-  ^{:doc "Adjust a given library-panel within a grafana-instance, where the
+  "Adjust a given library-panel within a grafana-instance, where the
   targets of the panel-model are replaced based on the first target of a given
-  library-panel, the provided datasource-uids and optionally an expert-string."}
+  library-panel, the provided datasource-uids and optionally an expert-string."
   [grafana-instance panel-uid datasource-uids expert-string]
   (let [panel (helper/json->clj
                (api/get-library-element-by-uid
@@ -821,10 +820,10 @@
                                 (helper/clj->json patch))))
 
 (defn adjust
-  ^{:doc "Adjust a given library-panel within a grafana-instance, where the
+  "Adjust a given library-panel within a grafana-instance, where the
   targets of the panel-model are replaced based on the first target of given
   library-panel, the provided datasource-uids and optionally an expert-string.
-  args: Provided arguments, as Adjust-Arguments record."}
+  args: Provided arguments, as Adjust-Arguments record."
   [args]
   (adjust-library-panel (-> args :grafana-instance)
                         (-> args :panel-uid)
@@ -834,10 +833,10 @@
   (println "Adjusted."))
 
 (defn adjust-show
-  ^{:doc "Show for a given grafana-instance the name, uid and folder-uid of the
-          first 100 library panels
+  "Show for a given grafana-instance the name, uid and folder-uid of the
+   first 100 library panels
 
-          args: Provided arguments, as Adjust-Arguments record. "}
+   args: Provided arguments, as Adjust-Arguments record. "
   [args]
   (show-library-panels (-> args :grafana-instance)))
 
