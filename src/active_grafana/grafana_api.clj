@@ -22,11 +22,27 @@
 
 ;; >>> ALERTS
 
+(defn find-alerts-by-query
+  [base-url token alert-name]
+  (let [api-url (str base-url
+                     "/apis/notifications.alerting.grafana.app/v1beta1/namespaces/default/inhibitionrules/"
+                     (URLEncoder/encode alert-name "UTF-8"))]
+    (helper/log (str "Api-url: " api-url))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
+
 ;; GET /api/v1/provisioning/alert-rules
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/alerting_provisioning/#route-get-alert-rules
 (defn get-all-alert-rules
   [base-url token]
   (let [api-url (str base-url "/api/v1/provisioning/alert-rules")]
+    (helper/log (str "Api-url: " api-url))
+    (client/get api-url {:insecure?   true
+                         :oauth-token token})))
+
+(defn get-alert-rule-by-uid
+  [base-url token alert-uid]
+  (let [api-url (str base-url "/api/v1/provisioning/alert-rules/" alert-uid)]
     (helper/log (str "Api-url: " api-url))
     (client/get api-url {:insecure?   true
                          :oauth-token token})))

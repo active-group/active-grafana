@@ -15,14 +15,24 @@
 ;; for completions in fish use:
 ;; ./src/active_grafana/main.clj org.babashka.cli/completions snippet --shell fish | source
 
-(defn convenient-copy [{:keys [opts]}]
+(defn convenient-dashboard-copy [{:keys [opts]}]
+  (println "opts: " (pr-str opts))
   (let [source-grafana-instance (settings/make-source-grafana-instance opts)
         target-grafana-instance (settings/make-target-grafana-instance opts)
         dashboard-title         (:title opts)]
-    (core/convenient-copy source-grafana-instance
-                          target-grafana-instance
-                          dashboard-title
-                          opts)))
+    (core/convenient-dashboard-copy source-grafana-instance
+                                    target-grafana-instance
+                                    dashboard-title
+                                    opts)))
+
+(defn convenient-alert-copy [{:keys [opts]}]
+  (println "opts: " (pr-str opts))
+  (let [source-grafana-instance (settings/make-source-grafana-instance opts)
+        target-grafana-instance (settings/make-target-grafana-instance opts)
+        alert-title             (:title opts)]
+    (core/convenient-alert-copy source-grafana-instance
+                                target-grafana-instance
+                                alert-title)))
 
 (defn legacy-copy [{:keys [opts]}]
   (let [copy-arguments (settings/create-copy-arguments! opts)]
@@ -51,23 +61,29 @@
    :cmd
    {"copy"
     {:doc       "Copy a grafana thing from a source instance to a target instance."
-     :cmd-order ["dashboard"]
+     :spec      {:source-url   {:desc    "URL of the source grafana instance to copy the dashboard from."
+                                :require true}
+                 :source-token {:desc    "Token to authenticate against the source grafana instance."
+                                :require true}
+                 :target-url   {:desc    "URL of the target grafana instance to copy the dashboard to."
+                                :require true}
+                 :target-token {:desc    "Token to authenticate against the target grafana instance."
+                                :require true}}
+     :cmd-order ["dashboard" "alert"]
      :cmd
      {"dashboard"
-      {:fn         convenient-copy
+      {:fn         convenient-dashboard-copy
        :doc        "Copy a dashboard matched by title from a source to a target grafana instance. Throws Exception if not possible."
        :spec       {:title                {:desc    "The title of the dashboard on the source grafana instance."
                                            :require true}
                     :message              {:desc "An optional message to use as commit message for the updated/created dashboard on the target grafana instance."}
                     :target-folder-uid    {:desc "An optional target folder uid used to copy the dashboard to on the target grafana instance."}
-                    :source-dashboard-uid {:desc "An optional dashboard uid to use instead of using "}
-                    :source-url           {:desc    "URL of the source grafana instance to copy the dashboard from."
-                                           :require true}
-                    :source-token         {:desc    "Token to authenticate against the source grafana instance."
-                                           :require true}
-                    :target-url           {:desc    "URL of the target grafana instance to copy the dashboard to."
-                                           :require true}
-                    :target-token         {:desc    "Token to authenticate against the target grafana instance."
+                    :source-dashboard-uid {:desc "An optional dashboard uid to use instead of using "}}
+       :args->opts [:title]}
+      "alert"
+      {:fn         convenient-alert-copy
+       :doc        "Copy an alert matched by its name from a source to a target grafana instance. Throws Exception if not possible."
+       :spec       {:title                {:desc    "The title of the dashboard on the source grafana instance."
                                            :require true}}
        :args->opts [:title]}}}
     "legacy"

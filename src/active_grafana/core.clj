@@ -242,11 +242,15 @@
                              (-> instance :token)
                              (get rule-to-copy "uid")
                              (helper/clj->json
-                              (assoc rule-to-copy "folderuid" folder-uid)))
+                              (assoc rule-to-copy
+                                     "folderuid" folder-uid
+                                     "folderUID" folder-uid)))
       (api/create-alert-rule (-> instance :url)
                              (-> instance :token)
                              (helper/clj->json
-                              (assoc rule-to-copy "folderuid" folder-uid))))))
+                              (assoc rule-to-copy
+                                     "folderuid" folder-uid
+                                     "folderUID" folder-uid))))))
 
 (defn copy-alerts
   "Copy (create/update) all alert-rules associated with a dashboard.
@@ -561,13 +565,13 @@
          " in folder "
          (folder-title-and-uid alerts))))
 
-(defn convenient-copy-summary
+(defn convenient-dashboard-copy-summary
   [& {:keys [source target]}]
   (str "\n"
        "#########################################################################"
        "#########################################################################"
        "\n\n"
-       "CONVENIENT COPY SUMMARY: "
+       "CONVENIENT DASHBOARD COPY SUMMARY: "
        "\n\n"
        "Found dashboard "
        (title-and-uid (:dashboard source))
@@ -594,7 +598,7 @@
        "#########################################################################"
        "#########################################################################"))
 
-(defn convenient-copy
+(defn convenient-dashboard-copy
   "Copy a dashboard titled [[dashboard-title]] from [[from-grafana-instance]] to
    [[to-grafana-instance]] conveniently.  Also copy the library panels and
    alerts the dashboard depends on.  The convenience this function provides
@@ -720,8 +724,132 @@
                    target-grafana-instance
                    source-dashboard-uid
                    target-alerts-folder-uid))
-    (helper/log (convenient-copy-summary copy-summary-data))
+    (helper/log (convenient-dashboard-copy-summary copy-summary-data))
     copy-summary-data))
+
+(defn choose-alert-uid
+  "Searches an alert on a given [[grafana-instance]] by using a given
+   [[alert-title]] as query string returning the alert UID, if the
+   search yields an unambiguous result.  If the search yields an ambiguous or no
+   result at all, this function throws an Exception."
+  [grafana-instance alert-title]
+  (let [clean-alert-title (clean-whitespace alert-title)
+        alert-candidates  (->> (api/get-all-alert-rules
+                                (:url grafana-instance)
+                                (:token grafana-instance))
+                               (helper/json->clj)
+                               (remove deleted?)
+                               (filter (name-matcher clean-alert-title #(get % "title"))))]
+    (case (ambiguous-candidates alert-candidates)
+      :none
+      (let [first-thousand-alerts
+            (->> (api/get-all-alert-rules
+                  (:url grafana-instance)
+                  (:token grafana-instance))
+                 (helper/json->clj))]
+        (pprint/print-table ["title" "uid" "url" "description" "folderTitle" "folderUrl"]
+                            first-thousand-alerts)
+        (throw (ex-info (str "No alert with the following title was found: "
+                             alert-title)
+                        {:alert-title      alert-title
+                         :alert-candidates alert-candidates
+                         :grafana-url      (:url grafana-instance)})))
+
+      :ambiguous
+      (do
+        ;; TODO: We need a convenient way to choose the
+        ;; alert to copy or to refine the search
+        (pprint/print-table ["title" "uid" "url" "description" "folderTitle" "folderUrl"]
+                            alert-candidates)
+        (throw (ex-info (str "More than one alert was found using the search query: " alert-title)
+                        {:alert-title      alert-title
+                         :alert-candidates alert-candidates
+                         :grafana-url      (:url grafana-instance)})))
+
+      :unambiguous
+      (let [alert-uid (get (first alert-candidates) "uid")]
+        alert-uid)
+
+      (throw (ex-info "Unexpected choose-alert-uid result!"
+                      {:alert-title      alert-title
+                       :alert-candidates alert-candidates
+                       :grafana-url      (:url grafana-instance)})))))
+
+(defn convenient-alert-copy-summary
+  [& {:keys [source target]}]
+  (str "\n"
+       "#########################################################################"
+       "#########################################################################"
+       "\n\n"
+       "CONVENIENT ALERT COPY SUMMARY: "
+       "\n\n"
+       "Found alert rule "
+       (title-and-uid (:alert source))
+       " in folder "
+       (folder-title-and-uid (:alert source))
+       " on "
+       (surround-quotes (:url source))
+       "."
+       "\n"
+       "Copied the alert rule "
+       (title-and-uid (:alert target))
+       " to folder "
+       (folder-title-and-uid (:alert target))
+       " on "
+       (surround-quotes (:url target))
+       "."
+       "\n\n"
+       "#########################################################################"
+       "#########################################################################"))
+
+(defn convenient-alert-copy
+  "Copy an alert-rule titled [[alert-title]] from [[from-grafana-instance]] to
+   [[to-grafana-instance]] conveniently. The convenience this function provides
+   consists of several simple heuristics:
+
+   1. It tries to find a dashboard titled [[alert-title]] on the given
+   [[from-grafana-instance]] ignoring unnecessary whitespace and case.
+
+   2. It tries to identify the folder to copy the alert-rule to using the name of
+   the folder the alert-rule titled [[alert-title]] is located on the
+   [[from-grafana-instance]]. See the fn [[choose-folder-uid]] for details.
+
+   3. It creates the folder to copy the alert-rule to, if it does not find one on
+   [[to-grafana-instance]], which has the same title as on the
+   [[from-grafana-instance]]."
+  [source-grafana-instance target-grafana-instance alert-title]
+  (let [alert-uid                 (choose-alert-uid source-grafana-instance alert-title)
+        source-alert              (-> (api/get-alert-rule-by-uid (:url source-grafana-instance)
+                                                                 (:token source-grafana-instance)
+                                                                 alert-uid)
+                                      (helper/json->clj))
+        source-alert-title        (get source-alert "title")
+        source-alert-folder-uid   (or (get source-alert "folderUID")
+                                      (get source-alert "folderUid")
+                                      (get source-alert "folderuid"))
+        source-alert-folder       (-> (api/get-folder-by-folder-uid (:url source-grafana-instance)
+                                                                    (:token source-grafana-instance)
+                                                                    source-alert-folder-uid)
+                                      (helper/json->clj))
+        source-alert-folder-title (get source-alert-folder "title")
+        target-alert-folder-uid   (choose-folder-uid target-grafana-instance
+                                                     source-alert-folder-title)
+        target-alert              source-alert
+        target-alert-title        (get target-alert "title")
+        target-alert-uid          (get target-alert "uid")
+        alert-copy-summary-data   {:source {:url   (:url source-grafana-instance)
+                                            :alert {:title        source-alert-title
+                                                    :uid          alert-uid
+                                                    :folder-uid   source-alert-folder-uid
+                                                    :folder-title source-alert-folder-title}}
+                                   :target {:url   (:url target-grafana-instance)
+                                            :alert {:title        target-alert-title
+                                                    :uid          target-alert-uid
+                                                    :folder-uid   target-alert-folder-uid
+                                                    :folder-title source-alert-folder-title}}}]
+    (copy-alert target-grafana-instance target-alert-folder-uid source-alert)
+    (helper/log (convenient-alert-copy-summary alert-copy-summary-data))
+    alert-copy-summary-data))
 
 ;; <<< COPY
 
