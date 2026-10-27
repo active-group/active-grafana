@@ -135,7 +135,7 @@
               :show            {:desc   "Show information on the first 100 library panels of the grafana-instance (GRAFANA_URL and GRAFANA_TOKEN)."
                                 :alias  :s
                                 :coerce :boolean}
-              :panel-uid       {:desc     "The panel uid. (env var: PANEL_UID)"}
+              :panel-uid       {:desc "The panel uid. (env var: PANEL_UID)"}
               :datasource-uids {:desc "Datasource uids used within the target-template as comma separated string. (env var: DATASOURCE_UIDS)"}
               :i-am-an-expert  {:desc "{:path <path-to-f-target->target> :data <data>}, see Readme for details. (env var: EXPERT_DATA)"}}}}}}
    :epilog    "Docs: https://github.com/active-group/active-grafana/blob/main/README.md"})
