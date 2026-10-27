@@ -8,7 +8,8 @@
             [clojure.string :as str]
             [clojure.test :as t :refer [deftest testing is]]
             [bond.james :refer [with-stub!]]
-            [active-grafana.convenient-bond :refer [called-once? not-called?]]))
+            [active-grafana.convenient-bond :refer [called-once? not-called?]]
+            [bond.james :as bond]))
 
 (deftest ambiguous-candidates
   (testing "no candidates"
@@ -372,6 +373,51 @@
         (is (not-called? api/create-folder))
         (is (not-called? api/create-library-element))
         (is (not-called? api/create-alert-rule))))))
+
+(deftest choose-alert-uid-test
+  (let [alert-title                       examples/alert-title
+        alert-uid                         examples/alert-uid
+        alert                             {:title alert-title
+                                           :uid   alert-uid}
+        another-alert-title               examples/alert-title
+        another-alert-uid                 examples/another-alert-uid
+        another-alert-with-the-same-title {:title another-alert-title
+                                           :uid   another-alert-uid}]
+    (testing "no alert is found"
+      (with-stub!
+        [[api/get-all-alert-rules
+          (api-stub/get-all-alert-rules [])]]
+        (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                              #"No alert with the following title was found"
+                              (sut/choose-alert-uid examples/grafana-a-instance
+                                                    alert-title)))
+        (is (bond/calls api/get-all-alert-rules))))
+    (testing "1 alert is found (perfect match)"
+      (with-stub!
+        [[api/get-all-alert-rules
+          (api-stub/get-all-alert-rules [alert])]]
+        (is (= alert-uid
+               (sut/choose-alert-uid examples/grafana-a-instance
+                                     alert-title)))))
+    (testing "1 alert is found (fuzzy match)"
+      (let [search-query "   SIMPLE    alert     title "
+            alert-title  " simple Alert   title  "]
+        (with-stub!
+          [[api/get-all-alert-rules
+            (api-stub/get-all-alert-rules [{:title alert-title
+                                            :uid   alert-uid}])]]
+          (is (= alert-uid
+                 (sut/choose-alert-uid examples/grafana-a-instance
+                                       search-query))))))
+    (testing "more than 1 alert is found"
+      (with-stub!
+        [[api/get-all-alert-rules
+          (api-stub/get-all-alert-rules [alert
+                                         another-alert-with-the-same-title])]]
+        (is (thrown-with-msg? clojure.lang.ExceptionInfo
+                              #"More than one alert was found"
+                              (sut/choose-alert-uid examples/grafana-a-instance
+                                                    alert-title)))))))
 
 (deftest convenient-alert-copy-test
   (testing "convenient-alert-copy to a folder that exists by updating an existing alert"
