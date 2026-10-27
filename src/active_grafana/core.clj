@@ -599,29 +599,29 @@
        "#########################################################################"))
 
 (defn convenient-dashboard-copy
-  "Copy a dashboard titled [[dashboard-title]] from [[from-grafana-instance]] to
-   [[to-grafana-instance]] conveniently.  Also copy the library panels and
+  "Copy a dashboard titled [[dashboard-title]] from [[source-grafana-instance]] to
+   [[target-grafana-instance]] conveniently.  Also copy the library panels and
    alerts the dashboard depends on.  The convenience this function provides
    consists of several simple heuristics:
 
    1. It tries to find a dashboard titled [[dashboard-title]] on the given
-   [[from-grafana-instance]] ignoring unnecessary whitespace and case.
+   [[source-grafana-instance]] ignoring unnecessary whitespace and case.
 
    2. It tries to identify the folder to copy the dashboard to using the name of
    the folder the dashboard titled [[dashboard-title]] is located on the
-   [[from-grafana-instance]]. See the fn [[choose-folder-uid]] for details.
+   [[source-grafana-instance]]. See the fn [[choose-folder-uid]] for details.
 
    3. It creates the folder to copy the dashboard to, if it does not find one on
-   [[to-grafana-instance]], which has the same title as on the
-   [[from-grafana-instance]].
+   [[target-grafana-instance]], which has the same title as on the
+   [[source-grafana-instance]].
 
    4. It checks if the library panels and alerts the dashboard depends on are
    all located in the same folder. See [[choose-panel-folder-tiele]] and
    [[choose-alert-folder-uid]] for details.
 
    5. If the folders where the library panels and alerts are located in
-   [[from-grafana-instance]] do not exist on [[to-grafana-instance]], they are
-   created using the title of the folders on [[from-grafana-instance]]. See
+   [[source-grafana-instance]] do not exist on [[target-grafana-instance]], they are
+   created using the title of the folders on [[source-grafana-instance]]. See
    [[choose-folder-uid]] for details."
   [source-grafana-instance target-grafana-instance dashboard-title & {:as   _opts
                                                                       :keys [message
@@ -803,20 +803,20 @@
        "#########################################################################"))
 
 (defn convenient-alert-copy
-  "Copy an alert-rule titled [[alert-title]] from [[from-grafana-instance]] to
-   [[to-grafana-instance]] conveniently. The convenience this function provides
+  "Copy an alert-rule titled [[alert-title]] from [[source-grafana-instance]] to
+   [[target-grafana-instance]] conveniently. The convenience this function provides
    consists of several simple heuristics:
 
    1. It tries to find a dashboard titled [[alert-title]] on the given
-   [[from-grafana-instance]] ignoring unnecessary whitespace and case.
+   [[source-grafana-instance]] ignoring unnecessary whitespace and case.
 
    2. It tries to identify the folder to copy the alert-rule to using the name of
    the folder the alert-rule titled [[alert-title]] is located on the
-   [[from-grafana-instance]]. See the fn [[choose-folder-uid]] for details.
+   [[source-grafana-instance]]. See the fn [[choose-folder-uid]] for details.
 
    3. It creates the folder to copy the alert-rule to, if it does not find one on
-   [[to-grafana-instance]], which has the same title as on the
-   [[from-grafana-instance]]."
+   [[target-grafana-instance]], which has the same title as on the
+   [[source-grafana-instance]]."
   [source-grafana-instance target-grafana-instance alert-title]
   (let [alert-uid                 (choose-alert-uid source-grafana-instance alert-title)
         source-alert              (-> (api/get-alert-rule-by-uid (:url source-grafana-instance)
