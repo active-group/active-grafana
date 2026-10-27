@@ -311,7 +311,7 @@
           (is (= updated-folder-uid (get copy-dashboard-response "folderUid"))))))))
 
 (deftest convenient-dashboard-copy-test
-  (testing "convenient-copy to a folder that existxs and update the panels and alerts it uses"
+  (testing "convenient-dashboard-copy to a folder that exists and update the panels and alerts it uses"
     (let [folder     examples/folder
           dashboard  (assoc examples/dashboard
                             :folder-uid (:uid folder)
