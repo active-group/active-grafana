@@ -176,7 +176,7 @@
 ;; >>> COPY
 
 (defn source-dashboard->dashboard-request-body
-  "TODO"
+  "Prepare a dashboard for a create/update dashboard request."
   [from-grafana dashboard-uid to-folder-uid to-message]
   (let [source-dashboard (helper/json->clj
                           (api/get-dashboard-by-uid
@@ -605,7 +605,7 @@
    consists of several simple heuristics:
 
    1. It tries to find a dashboard titled [[dashboard-title]] on the given
-   [[from-grafana-instance]].
+   [[from-grafana-instance]] ignoring unnecessary whitespace and case.
 
    2. It tries to identify the folder to copy the dashboard to using the name of
    the folder the dashboard titled [[dashboard-title]] is located on the
