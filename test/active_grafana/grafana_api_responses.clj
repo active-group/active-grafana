@@ -440,6 +440,14 @@
         (vec)
         (helper/clj->json))})
 
+(defn get-alert-rule-by-uid [alert-rule]
+  {:headers {},
+   :status  200,
+   :body
+   (->> alert-rule
+        (make-alert-rule 1)
+        (helper/clj->json))})
+
 (defn get-library-panels-response [panels]
   {:headers {},
    :status  200,

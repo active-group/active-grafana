@@ -42,3 +42,6 @@
 
 (defn create-update-dashboard [dashboard]
   (constantly (api-responses/create-update-dashboard-response dashboard)))
+
+(defn get-alert-rule-by-uid [alert]
+  (constantly (api-responses/get-alert-rule-by-uid alert)))

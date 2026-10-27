@@ -310,7 +310,7 @@
           (is (= dashboard-uid (get copy-dashboard-response "uid")))
           (is (= updated-folder-uid (get copy-dashboard-response "folderUid"))))))))
 
-(deftest convenient-copy-test
+(deftest convenient-dashboard-copy-test
   (testing "convenient-copy to a folder that existxs and update the panels and alerts it uses"
     (let [folder     examples/folder
           dashboard  (assoc examples/dashboard
@@ -366,9 +366,9 @@
                                                       :title examples/alert-title}]
                                       :folder-title examples/folder-title
                                       :folder-uid   examples/folder-uid}}}
-                (sut/convenient-copy examples/grafana-a-instance
-                                     examples/grafana-b-instance
-                                     examples/dashboard-title)))
+                (sut/convenient-dashboard-copy examples/grafana-a-instance
+                                               examples/grafana-b-instance
+                                               examples/dashboard-title)))
         (is (not-called? api/create-folder))
         (is (not-called? api/create-library-element))
         (is (not-called? api/create-alert-rule))))))

@@ -62,17 +62,40 @@
                                                      :title examples/alert-title}]
                                      :folder-title examples/folder-title
                                      :folder-uid   examples/folder-uid}}}
-               (sut/-main "copy" "dashboard" examples/dashboard-title
+               (sut/-main "copy"
                           "--source-url" examples/source-url
                           "--target-url" examples/target-url
                           "--source-token" examples/source-token
-                          "--target-token" examples/target-token)))))))
+                          "--target-token" examples/target-token
+                          "dashboard" examples/dashboard-title)))))))
 
-(comment
-  {:source-url
-   :target-url
-   :dashboard-title       examples/dashboard-title
-   :source-folder-title   examples/folder-title
-   :target-folder-title   examples/folder-title
-   :related-panels-titles (list examples/panel-name)
-   :related-alerts-titles (list examples/alert-title)})
+(deftest copy-alert-command-test
+  (testing "Copy an alert rule."
+    (let [folder examples/folder
+          alert  (assoc examples/alert
+                        :folder-uid (:uid folder))
+          alerts [alert examples/another-alert]]
+      (with-stub!
+        [[api/get-alert-rule-by-uid (api-stub/get-alert-rule-by-uid alert)]
+         [api/find-folders-by-query (api-stub/find-folders-by-query [folder])]
+         [api/create-folder]
+         [api/get-folder-by-folder-uid (api-stub/get-folder-by-folder-uid folder)]
+         [api/get-all-alert-rules (api-stub/get-all-alert-rules alerts)]
+         [api/update-alert-rule (api-stub/update-alert-rule alert)]
+         [api/create-alert-rule]]
+        (is (= {:source {:url   examples/source-url
+                         :alert {:title        examples/alert-title
+                                 :uid          examples/alert-uid
+                                 :folder-uid   examples/folder-uid
+                                 :folder-title examples/folder-title}}
+                :target {:url   examples/target-url
+                         :alert {:title        examples/alert-title
+                                 :uid          examples/alert-uid
+                                 :folder-uid   examples/folder-uid
+                                 :folder-title examples/folder-title}}}
+               (sut/-main "copy"
+                          "--source-url" examples/source-url
+                          "--target-url" examples/target-url
+                          "--source-token" examples/source-token
+                          "--target-token" examples/target-token
+                          "alert" examples/alert-title)))))))
