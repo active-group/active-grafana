@@ -372,3 +372,33 @@
         (is (not-called? api/create-folder))
         (is (not-called? api/create-library-element))
         (is (not-called? api/create-alert-rule))))))
+
+(deftest convenient-alert-copy-test
+  (testing "convenient-alert-copy to a folder that exists by updating an existing alert"
+    (let [folder examples/folder
+          alert  (assoc examples/alert
+                        :folder-uid (:uid folder))
+          alerts [alert examples/another-alert]]
+      (with-stub!
+        [[api/get-alert-rule-by-uid (api-stub/get-alert-rule-by-uid alert)]
+         [api/find-folders-by-query (api-stub/find-folders-by-query [folder])]
+         [api/create-folder]
+         [api/get-folder-by-folder-uid (api-stub/get-folder-by-folder-uid folder)]
+         [api/get-all-alert-rules (api-stub/get-all-alert-rules alerts)]
+         [api/update-alert-rule (api-stub/update-alert-rule alert)]
+         [api/create-alert-rule]]
+        (is  (= {:source {:url   examples/source-url
+                          :alert {:title        examples/alert-title
+                                  :uid          examples/alert-uid
+                                  :folder-uid   examples/folder-uid
+                                  :folder-title examples/folder-title}}
+                 :target {:url   examples/target-url
+                          :alert {:title        examples/alert-title
+                                  :uid          examples/alert-uid
+                                  :folder-uid   examples/folder-uid
+                                  :folder-title examples/folder-title}}}
+                (sut/convenient-alert-copy examples/grafana-a-instance
+                                           examples/grafana-b-instance
+                                           examples/alert-title)))
+        (is (not-called? api/create-folder))
+        (is (not-called? api/create-alert-rule))))))
