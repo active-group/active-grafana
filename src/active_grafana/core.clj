@@ -374,7 +374,7 @@
                    " ")))
 
 (defn name-pattern [thing-name]
-  (re-pattern (str "(?i)" thing-name)))
+  (re-pattern (str "(?i)^" thing-name "$")))
 
 (defn name-matcher [thing-name accessor]
   (fn name-matches? [thing]
