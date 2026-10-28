@@ -304,15 +304,7 @@
                                     (-> grafana-instance :token)
                                     panel-uid
                                     (helper/clj->json updated-panel)))
-      (let [;; FIXME: if (=root-folder-uid? folder-uid)
-            ;; this probably does not work with current
-            ;; grafana versions, since the uid of the root-folder
-            ;; is not "General" anymore.
-            ;; Also see the api namespace stating that the root-folder
-            ;; and root-folder-uid is "General". This assumption
-            ;; does not hold anymore.
-            ;; Find out how to handle the root folder with the current grafana api.
-            panel-to-create (assoc clean-panel "folderUID" folder-uid)]
+      (let [panel-to-create (assoc clean-panel "folderUID" folder-uid)]
         (api/create-library-element (-> grafana-instance :url)
                                     (-> grafana-instance :token)
                                     (helper/clj->json panel-to-create))))))
