@@ -1,6 +1,13 @@
-TODO: fine tune the readme and test the examples.
+[//]: # (TODO: update the readme and test the examples.)
 
 # active-grafana
+
+**We are reworking active-grafana currently.  All commands that were part of
+active-grafana before the 19th of May 2026 (commit hash: 367e94538925e8aa21ffc756d539fe8fd77db198) are available through the top-level
+`legacy` command, and its respective subcommands.**
+
+**Because we are working on everything else, but the `legacy` command and its subcommands
+you should expect everything else being unstable and subject to change.**
 
 A [babashka](https://book.babashka.org/) script designed to help dealing with [Grafana](https://grafana.com/).
 
