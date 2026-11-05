@@ -1,5 +1,6 @@
 (ns active-grafana.settings)
 
+;; TODO: Write down some smart constructors checking all those arguments
 (set! *warn-on-reflection* true)
 
 (defrecord Grafana-Instance [url token])
