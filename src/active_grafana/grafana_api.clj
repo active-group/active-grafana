@@ -1,8 +1,9 @@
 (ns active-grafana.grafana-api
   (:require [active-grafana.helper :as helper]
             [babashka.http-client  :as http]
-            [clj-http.lite.client  :as client])
-  (:import [java.net URLEncoder]))
+            [clj-http.lite.client  :as client]
+            [clojure.string :as str])
+  (:import [java.net URLEncoder URL]))
 
 (set! *warn-on-reflection* true)
 
@@ -15,30 +16,109 @@
 (defn auxiliary-root-folder-uid? [uid]
   (= uid auxiliary-root-folder-uid))
 
-;; >>> SHOW
+(def insecure-client (http/client (assoc-in http/default-client-opts [:ssl-context :insecure] true)))
 
-;; FIXME: remove clj-http-lite; it doesn't provide 'PATCH'
-;;        we can use babashka.http-client for all calls
+(def bearer-token-prefix "Bearer ")
+(def json-accept-header "application/json") ;; Format of the response
+(def json-content-type-header "application/json") ;; Format of the body
+
+;; NOTE: The X-Disable-Provenance header is a custom HTTP header in Grafana
+;; used to allow resources created or updated through the Grafana
+;; provisioning API to remain editable directly within the Grafana user
+;; interface.
+(def grafana-disable-provenance-header "X-Disable-Provenance")
+
+(defn bearer-token? [token]
+  {:post [#(boolean? %)]}
+  (boolean (and (string? token)
+                (str/starts-with? token bearer-token-prefix)
+                (-> token
+                    (str/replace bearer-token-prefix "")
+                    (str/blank?)
+                    (not)))))
+
+(defn make-bearer-token [token]
+  {:pre  [(string? token)
+          (not (str/blank? token))]
+   :post [bearer-token?]}
+  (str bearer-token-prefix token))
+
+;; TODO:
+;; dsiable-provenance and also
+;; content-type headers only make sense on
+;; mutating requests like post, put or patch
+(defn make-query-client-headers
+  "Contruct client headers for GET HTTP requests as a clojure map."
+  [& {:keys [token]}]
+  {:post [#(contains? % "Authorization")
+          #(bearer-token? (get % "Authorization"))
+          #(contains? % "Accept")
+          #(= json-accept-header (get % "Accept"))
+          #(contains? % "Content-Type")
+          #(= json-content-type-header (get % "Content-Type"))]}
+  {"Authorization" (make-bearer-token token)
+   "Accept"        json-accept-header})
+
+(defn make-mutation-client-headers
+  "Contruct client headers for POST/PUT/PATCH HTTP requests as a clojure map."
+  [& {:keys [token disable-provenance?]
+      :or   {disable-provenance? false}}]
+  {:pre  [(boolean? disable-provenance?)]
+   :post [#(contains? % "Authorization")
+          #(bearer-token? (get % "Authorization"))
+          #(contains? % "Accept")
+          #(= json-accept-header (get % "Accept"))
+          #(contains? % "Content-Type")
+          #(= json-content-type-header (get % "Content-Type"))
+          #(if disable-provenance?
+             (= "true" (get % grafana-disable-provenance-header))
+             true)]}
+  (cond-> {"Authorization" (make-bearer-token token)
+           "Accept"        json-accept-header
+           "Content-Type"  json-content-type-header}
+    disable-provenance? (assoc grafana-disable-provenance-header "true")))
+
+(defn make-request-map [& {:keys [token body]}]
+  {:pre  [(helper/json-string? body)]
+   :post [#(contains? % :client)
+          #(contains? % :headers)
+          #(if (contains? % :body)
+             (helper/json-string? (:body %))
+             true)]}
+  (cond-> {:client insecure-client}
+    (not body) (assoc :headers (make-query-client-headers :token token))
+    body       (assoc :headers (make-mutation-client-headers :token token :disable-provenance? true))
+    body       (assoc :body body)))
+
+(defn make-request-url [base-url endpoint-url & more-fragments]
+  {:pre  [(string? base-url)
+          (or (str/starts-with? base-url "http://")
+              (str/starts-with? base-url "https://"))
+          (string? endpoint-url)
+          (str/starts-with? endpoint-url "/")
+          (not (str/ends-with? endpoint-url "/"))
+          (not (re-find #"[/]{2,}" endpoint-url))
+          (every? (comp not coll?) more-fragments)]
+   :post [#(string? %)]}
+  (->> more-fragments
+       (map #(URLEncoder/encode (str %) "UTF-8"))
+       (concat [(str base-url endpoint-url)])
+       (str/join "/")
+       (URL/new)
+       ;; lets validate using java.net.URL
+       (.toURI)
+       (.toString)))
 
 ;; >>> ALERTS
-
-(defn find-alerts-by-query
-  [base-url token alert-name]
-  (let [api-url (str base-url
-                     "/apis/notifications.alerting.grafana.app/v1beta1/namespaces/default/inhibitionrules/"
-                     (URLEncoder/encode alert-name "UTF-8"))]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
 
 ;; GET /api/v1/provisioning/alert-rules
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/alerting_provisioning/#route-get-alert-rules
 (defn get-all-alert-rules
   [base-url token]
-  (let [api-url (str base-url "/api/v1/provisioning/alert-rules")]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+  (let [endpoint-url "api/v1/provisioning/alert-rules"
+        request-url (make-request-url base-url endpoint-url)]
+    (helper/log (str "Going to request: " request-url))
+    (http/get request-url (make-request-map :bearer-token token))))
 
 (defn get-alert-rule-by-uid
   [base-url token alert-uid]
