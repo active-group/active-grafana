@@ -27,9 +27,9 @@
 (defn json-string? [x]
   (boolean
    (and (string? x)
-        (try (json/parse-string x)
-             (catch clojure.lang.ExceptionInfo _e
-               false)))))
+        (not (false? (try (json/parse-string x)
+                          (catch clojure.lang.ExceptionInfo _e
+                            false)))))))
 
 (defn json->clj
   [request]
