@@ -90,6 +90,10 @@ command option in the proper way, e.g.:
 ./grafurious adjust <... other command options ...> --i-am-an-expert="{:path \"file.path\" :data {\"uid-1\" \"my-uid-1-data\"}}"
 ```
 
+## Development
+
+To watch test files and rerun the tests those files contain on changes use `bb volley-test --watch`.
+
 ## Known Issues and 'good to know'
 
 - Error handling:

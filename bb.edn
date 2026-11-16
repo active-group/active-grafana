@@ -18,16 +18,30 @@
                              (deref (promise)))}
 
          ;; NOTE: See https://blog.michielborkent.nl/babashka-test-runner.html
-         test {:extra-paths      ["test"]
-               :extra-deps       {io.github.cognitect-labs/test-runner
-                                  {:git/tag "v0.5.1" :git/sha "dfb30dd"}
-                                  circleci/bond
-                                  {:mvn/version "0.6.0"}}
-               :requires         ([clojure.test :as t])
-               :task             (do
-                                  ;; NOTE: See https://github.com/babashka/babashka/issues/1518#issuecomment-2371439578
-                                   (alter-var-root (var t/*stack-trace-depth*) (constantly 1))
-                                   (exec 'cognitect.test-runner.api/test))
-               :exec-args        {:dirs ["test"]}
-               :org.babashka/cli {:coerce {:nses [:symbol]
-                                           :vars [:symbol]}}}}}
+         test        {:extra-paths      ["test"]
+                      :extra-deps       {io.github.cognitect-labs/test-runner
+                                         {:git/tag "v0.5.1" :git/sha "dfb30dd"}
+                                         circleci/bond
+                                         {:mvn/version "0.6.0"}}
+                      :requires         ([clojure.test :as t])
+                      :task             (do
+                                         ;; NOTE: See https://github.com/babashka/babashka/issues/1518#issuecomment-2371439578
+                                          (alter-var-root (var t/*stack-trace-depth*) (constantly 1))
+                                          (exec 'cognitect.test-runner.api/test))
+                      :exec-args        {:dirs ["test"]}
+                      :org.babashka/cli {:coerce {:nses [:symbol]
+                                                  :vars [:symbol]}}}
+         ;; NOTE: See https://github.com/kirahowe/volley/#babashka
+         ;; and https://blog.michielborkent.nl/babashka-test-runner.html
+         ;; the below is a combination of both
+         ;; NOTE: Usage watching for changes: `bb volley-test --watch`
+         volley-test {:doc         "Run the tests"
+                      :extra-paths ["test"]
+                      :extra-deps  {com.kirahowe/volley {:mvn/version "0.1.0-alpha.2"}
+                                    circleci/bond       {:mvn/version "0.6.0"}}
+                      :requires    ([volley.main]
+                                    [clojure.test :as t])
+                      :task        (do
+                                    ;; NOTE: See https://github.com/babashka/babashka/issues/1518#issuecomment-2371439578
+                                     (alter-var-root (var t/*stack-trace-depth*) (constantly 1))
+                                     (apply volley.main/-main *command-line-args*))}}}
