@@ -3,8 +3,7 @@
 ;; NOTE: only use compatible libraries in :deps
 ;; See https://github.com/babashka/babashka/blob/master/doc/projects.md
 {:paths ["src"]
- :deps  {org.clj-commons/clj-http-lite {:mvn/version "1.0.13"}
-         ;; NOTE: use the newest version of babashka.cli
+ :deps  {;; NOTE: use the newest version of babashka.cli
          ;; since the one built-in to babashka does not support the --help features
          org.babashka/cli              {:mvn/version "0.12.78"}}
  :tasks {dev {:extra-deps  {circleci/bond

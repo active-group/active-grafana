@@ -1,7 +1,6 @@
 (ns active-grafana.grafana-api
   (:require [active-grafana.helper :as helper]
             [babashka.http-client  :as http]
-            [clj-http.lite.client  :as client]
             [clojure.string :as str])
   (:import [java.net URLEncoder URL]))
 
@@ -43,10 +42,6 @@
    :post [bearer-token?]}
   (str bearer-token-prefix token))
 
-;; TODO:
-;; dsiable-provenance and also
-;; content-type headers only make sense on
-;; mutating requests like post, put or patch
 (defn make-query-client-headers
   "Contruct client headers for GET HTTP requests as a clojure map."
   [& {:keys [token]}]
@@ -78,36 +73,69 @@
            "Content-Type"  json-content-type-header}
     disable-provenance? (assoc grafana-disable-provenance-header "true")))
 
+(defn jsonize-body [body]
+  (if (helper/json-string? body)
+    body
+    (helper/clj->json body)))
+
 (defn make-request-map [& {:keys [token body]}]
-  {:pre  [(helper/json-string? body)]
+  {:pre  [(string? token)]
    :post [#(contains? % :client)
           #(contains? % :headers)
-          #(if (contains? % :body)
+          #(if body
              (helper/json-string? (:body %))
              true)]}
   (cond-> {:client insecure-client}
     (not body) (assoc :headers (make-query-client-headers :token token))
-    body       (assoc :headers (make-mutation-client-headers :token token :disable-provenance? true))
-    body       (assoc :body body)))
+    body       (assoc :headers (make-mutation-client-headers :token token
+                                                             :disable-provenance? true)
+                      :body (jsonize-body body))))
+
+(defn sanitize-base-url [endpoint-url]
+  {:pre  [(string? endpoint-url)]
+   :post [(string? endpoint-url)]}
+  (-> endpoint-url
+      (str/replace #"/+$" "")
+      (str/replace #"[/]{3,}" "//")))
+
+(defn sanitize-endpoint-url [endpoint-url]
+  {:pre  [(string? endpoint-url)]
+   :post [(string? endpoint-url)]}
+  (-> endpoint-url
+      (str/replace #"/+$" "")
+      (str/replace #"^/+" "")
+      (str/replace #"[/]{2,}" "/")))
 
 (defn make-request-url [base-url endpoint-url & more-fragments]
   {:pre  [(string? base-url)
           (or (str/starts-with? base-url "http://")
               (str/starts-with? base-url "https://"))
           (string? endpoint-url)
-          (str/starts-with? endpoint-url "/")
-          (not (str/ends-with? endpoint-url "/"))
+          (not (str/blank? endpoint-url))
           (not (re-find #"[/]{2,}" endpoint-url))
           (every? (comp not coll?) more-fragments)]
    :post [#(string? %)]}
-  (->> more-fragments
-       (map #(URLEncoder/encode (str %) "UTF-8"))
-       (concat [(str base-url endpoint-url)])
-       (str/join "/")
-       (URL/new)
-       ;; lets validate using java.net.URL
-       (.toURI)
-       (.toString)))
+  (let [sane-endpoint-url (sanitize-endpoint-url endpoint-url)
+        sane-base-url     (sanitize-base-url base-url)
+
+        [fragments [_ & query-params]] (split-with #(not (= "?" %)) more-fragments)]
+    (->> (str (->> fragments
+                   (map #(URLEncoder/encode (str %) "UTF-8"))
+                   (concat [(str sane-base-url "/" sane-endpoint-url)])
+                   (str/join "/"))
+              (when (not-empty query-params)
+                (->> query-params
+                     (map #(URLEncoder/encode (str %) "UTF-8"))
+                     (partition 2)
+                     (map (partial interpose "="))
+                     (interpose "&")
+                     (flatten)
+                     (str/join)
+                     (str "?"))))
+         ;; lets validate using java.net.URL
+         (URL/new)
+         (.toURI)
+         (.toString))))
 
 ;; >>> ALERTS
 
@@ -115,51 +143,41 @@
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/alerting_provisioning/#route-get-alert-rules
 (defn get-all-alert-rules
   [base-url token]
-  (let [endpoint-url "api/v1/provisioning/alert-rules"
-        request-url (make-request-url base-url endpoint-url)]
+  (let [endpoint-url "/api/v1/provisioning/alert-rules"
+        request-url  (make-request-url base-url endpoint-url)
+        request-map  (make-request-map :token token)]
     (helper/log (str "Going to request: " request-url))
-    (http/get request-url (make-request-map :bearer-token token))))
+    (http/get request-url request-map)))
 
 (defn get-alert-rule-by-uid
   [base-url token alert-uid]
-  (let [api-url (str base-url "/api/v1/provisioning/alert-rules/" alert-uid)]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+  {:pre [(string? alert-uid)]}
+  (let [endpoint-url "/api/v1/provisioning/alert-rules/"
+        request-url (make-request-url base-url endpoint-url alert-uid)
+        request-map (make-request-map :token token)]
+    (helper/log (str "Going to request: " request-url))
+    (http/get request-url request-map)))
 
 ;; POST /api/v1/provisioning/alert-rules
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/alerting_provisioning/#route-post-alert-rule
 (defn create-alert-rule
   [base-url token alert-rule]
-  {:pre [(helper/json-string? alert-rule)]}
-  (let [api-url (str base-url "/api/v1/provisioning/alert-rules")]
-    (helper/log (str "Api-url: " api-url))
-    (client/post api-url {:insecure?    true
-                          :oauth-token  token
-                          ;; without this header the rule is not editable in the gui
-                          ;; see: https://grafana.com/docs/grafana/v12.3/developer-resources/api-reference/http-api/alerting_provisioning/#edit-resources-in-the-grafana-ui
-                          :headers      {"X-Disable-Provenance" "true"}
-                          :body         alert-rule
-                          :accept       :json
-                          :content-type :json})))
+  (let [endpoint-url "/api/v1/provisioning/alert-rules"
+        request-url (make-request-url base-url endpoint-url)
+        request-map (make-request-map :token token :body alert-rule)]
+    (helper/log (str "Going to request: " request-url))
+    (http/post request-url request-map)))
 
 ;; PUT /api/v1/provisioning/alert-rules/{UID}
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/alerting_provisioning/#span-idroute-put-alert-rulespan-update-an-existing-alert-rule-_routeputalertrule_
 (defn update-alert-rule
-  [base-url token alert-rule-uid alert-rule-update]
-  {:pre [(string? alert-rule-uid)
-         (helper/json-string? alert-rule-update)]}
-  (let [api-url (str base-url "/api/v1/provisioning/alert-rules/" alert-rule-uid)]
-    (helper/log (str "Api-url: " api-url))
-    (client/put api-url {:insecure?    true
-                         :oauth-token  token
-                         ;; without this header the rule is not editable in the gui
-                         ;; TODO: only endpoint POST - not PUT - but shouldn't harm
-                         ;; see: https://grafana.com/docs/grafana/v12.3/developer-resources/api-reference/http-api/alerting_provisioning/#edit-resources-in-the-grafana-ui
-                         :headers      {"X-Disable-Provenance" "true"}
-                         :body         alert-rule-update
-                         :accept       :json
-                         :content-type :json})))
+  [base-url token alert-uid alert-rule-update]
+  {:pre [(string? alert-uid)]}
+  (let [endpoint-url "/api/v1/provisioning/alert-rules"
+        request-url (make-request-url base-url endpoint-url alert-uid)
+        request-map (make-request-map :token token :body alert-rule-update)]
+    (helper/log (str "Going to request: " request-url))
+    (http/put request-url request-map)))
 
 ;; <<< ALERTS
 
@@ -171,43 +189,46 @@
 ;; limit – Limit the number of returned results (max is 5000; default is 1000)
 (defn get-dashboards
   [base-url token]
-  (let [api-url (str base-url "/api/search?type=dash-db")]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+  (let [endpoint-url "/api/search?type=dash-db"
+        request-url (make-request-url base-url endpoint-url)
+        request-map (make-request-map :token token)]
+    (helper/log (str "Going to request: " request-url))
+    (http/get request-url request-map)))
 
 ;; GET /api/dashboards/uid/:uid
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#get-dashboard-by-uid
 (defn get-dashboard-by-uid
   [base-url token uid]
   {:pre [(string? uid)]}
-  (let [api-url (str base-url "/api/dashboards/uid/" (URLEncoder/encode uid "UTF-8"))]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+  (let [endpoint-url "/api/dashboards/uid/"
+        request-url (make-request-url base-url endpoint-url uid)
+        request-map (make-request-map :token token)]
+    (helper/log (str "Going to request: " request-url))
+    (http/get request-url request-map)))
 
 ;; POST /api/dashboards/db
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/dashboard/#create--update-dashboard
 (defn create-update-dashboard
   [base-url token dashboard]
-  {:pre [(helper/json-string? dashboard)]}
-  (let [api-url (str base-url "/api/dashboards/db")]
-    (helper/log (str "Api-url: " api-url))
-    (client/post api-url {:insecure?    true
-                          :oauth-token  token
-                          :body         dashboard
-                          :accept       :json
-                          :content-type :json})))
+  (let [endpoint-url "/api/dashboards/db"
+        request-url (make-request-url base-url endpoint-url)
+        request-map (make-request-map :token token :body dashboard)]
+    (helper/log (str "Going to request: " request-url))
+    (http/post request-url request-map)))
 
 (defn find-dashboards-by-query
   "Find dashboards using a search [[query]] from grafanas legacy http api.
    The query matches against the dashboard titles."
   [base-url token query]
   {:pre [(string? query)]}
-  (let [api-url (str base-url "/api/search?query=" (URLEncoder/encode query "UTF-8") "&type=dash-db")]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+  (let [endpoint-url "/api/search"
+        request-url (make-request-url base-url endpoint-url
+                                      "?"
+                                      "query" query
+                                      "type" "dash-db")
+        request-map (make-request-map :token token)]
+    (helper/log (str "Going to request: " request-url))
+    (http/get request-url request-map)))
 
 ;; <<< DASHBOARDS
 
@@ -229,43 +250,48 @@
 ;; Default limit: 1000 results
 (defn get-folders
   [base-url token]
-  (let [api-url (str base-url "/api/folders")]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+  (let [endpoint-url "/api/folders"
+        request-url (make-request-url base-url endpoint-url)
+        request-map (make-request-map :token token)]
+    (helper/log (str "Going to request: " request-url))
+    (http/get request-url request-map)))
 
 ;; GET /api/folders/:uid
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/folder/#get-folder-by-uid
 (defn get-folder-by-folder-uid
   [base-url token folder-uid]
   {:pre [(string? folder-uid)]}
-  (let [api-url (str base-url "/api/folders/" folder-uid)]
-    (helper/log "get-folder-by-folder-uid: " (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+  (let [endpoint-url "/api/folders/"
+        request-url (make-request-url base-url endpoint-url folder-uid)
+        request-map (make-request-map :token token)]
+    (helper/log (str "Going to request: " request-url))
+    (http/get request-url request-map)))
 
 (defn find-folders-by-query
   "Find (dashboard-)folders using a search [[query]] from grafanas legacy http api.
    The query matches against the (dashboard-)folder titles."
   [base-url token query]
   {:pre [(string? query)]}
-  (let [api-url (str base-url "/api/search?query=" (URLEncoder/encode query "UTF-8") "&type=dash-folder")]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+  (let [endpoint-url "/api/search"
+        request-url (make-request-url base-url endpoint-url
+                                      "?"
+                                      "query" query
+                                      "type" "dash-folder")
+        request-map (make-request-map :token token)]
+    (helper/log (str "Going to request: " request-url))
+    (http/get request-url request-map)))
+
 ;; POST /api/folders
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/folder/#create-folder
 (defn create-folder
   "Create a folder named [[title]] using a POST against \"[[base-url]]/api/folders\". "
   [base-url token title]
   {:pre [(string? title)]}
-  (let [api-url (str base-url "/api/folders")]
-    (helper/log (str "Api-url: " api-url))
-    (client/post api-url {:insecure?    true
-                          :oauth-token  token
-                          :body         (helper/clj->json {:title title})
-                          :accept       :json
-                          :content-type :json})))
+  (let [endpoint-url "/api/folders"
+        request-url (make-request-url base-url endpoint-url)
+        request-map (make-request-map :token token :body {:title title})]
+    (helper/log (str "Going to request: " request-url))
+    (http/post request-url request-map)))
 
 ;; <<< FOLDERS
 
@@ -279,20 +305,22 @@
 ;; perPage - The number of results per page; default is 100.
 (defn get-library-panels
   [base-url token]
-  (let [api-url (str base-url "/api/library-elements?kind=1")]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+  (let [endpoint-url "/api/library-elements"
+        request-url (make-request-url base-url endpoint-url "?" "kind" "1")
+        request-map (make-request-map :token token)]
+    (helper/log (str "Going to request: " request-url))
+    (http/get request-url request-map)))
 
 ;; GET /api/library-elements/:uid
 ;;  https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#get-library-element-by-uid
 (defn get-library-element-by-uid
   [base-url token uid]
   {:pre [(string? uid)]}
-  (let [api-url (str base-url "/api/library-elements/" uid)]
-    (helper/log (str "Api-url: " api-url))
-    (client/get api-url {:insecure?   true
-                         :oauth-token token})))
+  (let [endpoint-url "/api/library-elements/"
+        request-url (make-request-url base-url endpoint-url uid)
+        request-map (make-request-map :token token)]
+    (helper/log (str "Going to request: " request-url))
+    (http/get request-url request-map)))
 
 ;; GET /api/library-elements/:uid/connections
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#get-library-element-connections
@@ -307,27 +335,21 @@
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#create-library-element
 (defn create-library-element
   [base-url token panel]
-  {:pre [(helper/json-string? panel)]}
-  (let [api-url (str base-url "/api/library-elements")]
-    (helper/log (str "Api-url: " api-url))
-    (client/post api-url {:insecure?    true
-                          :oauth-token  token
-                          :body         panel
-                          :accept       :json
-                          :content-type :json})))
+  (let [endpoint-url "/api/library-elements"
+        request-url (make-request-url base-url endpoint-url)
+        request-map (make-request-map :token token :body panel)]
+    (helper/log (str "Going to request: " request-url))
+    (http/post request-url request-map)))
 
 ;; PATCH /api/library-elements/:uid
 ;; https://grafana.com/docs/grafana/latest/developers/http_api/library_element/#update-library-element
 (defn update-library-element
   [base-url token uid patch]
-  {:pre [(string? uid)
-         (helper/json-string? patch)]}
-  (let [api-url (str base-url "/api/library-elements/" uid)]
-    (helper/log (str "Api-url: " api-url))
-    (http/patch api-url {:client  (http/client (assoc-in http/default-client-opts [:ssl-context :insecure] true))
-                         :headers {:authorization (str "Bearer " token)
-                                   :accept        "application/json"
-                                   :content-type  "application/json"}
-                         :body    patch})))
+  {:pre [(string? uid)]}
+  (let [endpoint-url "/api/library-elements"
+        request-url  (make-request-url base-url endpoint-url uid)
+        request-map  (make-request-map :token token :body patch)]
+    (helper/log (str "Going to request: " request-url))
+    (http/patch request-url request-map)))
 
 ;; <<< LIBRARY-ELEMENTS
