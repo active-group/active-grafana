@@ -25,6 +25,9 @@
 (def another-folder-uid "abcduecbw00000")
 (def folder {:uid   folder-uid
              :title folder-title})
+(def another-folder {:uid   another-folder-uid
+                     :title another-folder-title})
+(def folders [folder another-folder])
 
 (def panel-uid "my-panel")
 (def panel-name "My panel name")
