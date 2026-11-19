@@ -38,13 +38,10 @@
   ;; https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#admin_password
   (gf-security-env "admin_password" password))
 
-(defn grafana-env-disable-initial-admin []
-  ;;https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#disable_initial_admin_creation
-  (gf-security-env "disable_initial_admin_creation" "true"))
-
 (defn wait-for-grafana! [attempt grafana-instance]
   (if (> attempt 25)
-    (throw (ex-info "Grafana did not become available" {:grafana-instance grafana-instance}))
+    (throw (ex-info "Grafana did not become available"
+                    {:grafana-instance grafana-instance}))
     (try
       (http/get (str (settings/grafana-instance-url grafana-instance)
                      "/api/health")
@@ -68,7 +65,7 @@
         service-account-id (-> response
                                (helper/json->clj)
                                (get "id"))]
-    (println "Created service account:" service-account-id)
+    (println "Created service account: " service-account-id)
     service-account-id))
 
 (defn create-api-token! [grafana-instance service-account-id]
@@ -82,7 +79,9 @@
                              :body       (helper/clj->json
                                           {:name "api-token"})})
 
-        token (get (helper/json->clj response) "key")]
+        token (-> response
+                  (helper/json->clj)
+                  (get "key"))]
     (println "Grafana API token:")
     (println token)
     token))
