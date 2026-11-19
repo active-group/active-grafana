@@ -1,10 +1,9 @@
 (ns active-grafana.grafana-api-test
   (:require [active-grafana.grafana-api :as sut]
-            [active-grafana.grafana-api-stub :as api-stub]
             [babashka.http-client  :as http]
             [active-grafana.helper :as helper]
             [bond.james :refer [with-stub!]]
-            [active-grafana.convenient-bond :refer [called-once? not-called?]]
+            [active-grafana.convenient-bond :refer [called-once?]]
             [clojure.test :as t :refer [deftest testing is]]
             [clojure.string :as str]))
 
