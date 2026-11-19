@@ -1,9 +1,49 @@
-(ns active-grafana.settings)
+(ns active-grafana.settings
+  (:require [clojure.string :as str]))
 
 ;; TODO: Write down some smart constructors checking all those arguments
 (set! *warn-on-reflection* true)
 
 (defrecord Grafana-Instance [url token])
+
+(defn grafana-instance-token
+  ([gi]
+   (:token gi))
+  ([gi val]
+   (assoc gi :token val)))
+
+(defn grafana-instance-url
+  ([gi]
+   (:url gi))
+  ([gi val]
+   (assoc gi :url val)))
+
+(defn split-url [gi]
+  (str/split (grafana-instance-url gi) #":\/\/|:"))
+
+(defn grafana-instance-port
+  ([gi]
+   (let [[_schema _host port] (split-url gi)]
+     port))
+  ([gi val]
+   (let [[schema host _port] (split-url gi)]
+     (assoc gi :url (str schema "://" host ":" val)))))
+
+(defn grafana-instance-host
+  ([gi]
+   (let [[_schema host _port] (split-url gi)]
+     host))
+  ([gi val]
+   (let [[schema _host port] (split-url gi)]
+     (assoc gi :url (str schema "://" val ":" port)))))
+
+(defn grafana-instance-schema
+  ([gi]
+   (let [[schema _host _port] (split-url gi)]
+     schema))
+  ([gi val]
+   (let [[_schema host port] (split-url gi)]
+     (assoc gi :url (str val "://" host ":" port)))))
 
 ;; >>> COPY
 
