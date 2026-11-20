@@ -189,8 +189,10 @@
 ;; limit – Limit the number of returned results (max is 5000; default is 1000)
 (defn get-dashboards
   [base-url token]
-  (let [endpoint-url "/api/search?type=dash-db"
-        request-url (make-request-url base-url endpoint-url)
+  (let [endpoint-url "/api/search"
+        request-url (make-request-url base-url endpoint-url
+                                      "?"
+                                      "type" "dash-db")
         request-map (make-request-map :token token)]
     (helper/log (str "Going to request: " request-url))
     (http/get request-url request-map)))
