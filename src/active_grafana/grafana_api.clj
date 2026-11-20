@@ -1,5 +1,6 @@
 (ns active-grafana.grafana-api
   (:require [active-grafana.helper :as helper]
+            [active-grafana.settings :as settings]
             [babashka.http-client  :as http]
             [clojure.string :as str])
   (:import [java.net URLEncoder URL]))
@@ -136,6 +137,61 @@
          (URL/new)
          (.toURI)
          (.toString))))
+
+(defn method->crud-verb [method]
+  (case method
+    :get    "read"
+    :post   "create"
+    :put    "update using put"
+    :patch  "update using patch"
+    :delete "delete"
+    :head   "head"))
+
+(defn endpoint->resource-name [endpoint]
+  (case (re-find #"alert|dash-folder|dash|folder|library-elements" endpoint)
+    "alert"            "Alert Rule(s)"
+    "dash"             "Dashboard(s)"
+    "dash-folder"      "Folder(s)"
+    "folder"           "Folder(s)"
+    "library-elements" "Library Panel(s)"))
+
+(defn request-name [grafana-instance endpoint method]
+  (let [crud-verb (method->crud-verb method)
+        instance-name (settings/grafana-instance-name grafana-instance)
+        resource-name (endpoint->resource-name endpoint)]
+    (str (str/capitalize crud-verb)
+         " "
+         resource-name
+         " on "
+         instance-name
+         ".")))
+
+(defn log-request [log-fn name {:keys [uri method body query-params]}]
+  (log-fn name)
+  (log-fn (str (str/upper-case (name method)) " `" uri "`: "))
+  (log-fn (if body
+            (str "\n  -Using body: " (pr-str body) ".")
+            "\n  -Using no body."))
+  (log-fn (if query-params
+            (str "\n  -Using query parameters: " (pr-str query-params) ".")
+            "\n  -Using no query parameters.")))
+
+;; TODO: after the refactoring using make-request,
+;; also refactor request-map above to be named request-opts
+;; and return opts, which are a subset of the opts expected by
+;; http/request...
+(defn make-request [endpoint method & {:keys [static-query-params]}]
+  (fn request [grafana-instance & {:keys [body query-params]}]
+    (let [request-opts (merge (make-request-map :token (settings/grafana-instance-token grafana-instance)
+                                                :body body)
+                              {:uri          (make-request-url (settings/grafana-instance-url grafana-instance) endpoint)
+                               :method       method
+                               :query-params (merge static-query-params
+                                                    query-params)})]
+      (log-request helper/log
+                   (request-name grafana-instance endpoint method)
+                   request-opts)
+      (http/request request-opts))))
 
 ;; >>> ALERTS
 
