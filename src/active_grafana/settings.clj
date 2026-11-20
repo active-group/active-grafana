@@ -18,6 +18,9 @@
   ([gi val]
    (assoc gi :url val)))
 
+(defn grafana-instance-name [gi]
+  (grafana-instance-url gi))
+
 (defn split-url [gi]
   (str/split (grafana-instance-url gi) #":\/\/|:"))
 
