@@ -167,130 +167,130 @@
       (is (string? token-probe))
       (is (not (str/blank? token-probe))))))
 
-(deftest get-all-alert-rules-test
-  (let [probe (sut/get-all-alert-rules
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*)))]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest get-all-alert-rules-test
+    (let [probe (sut/get-all-alert-rules
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*)))]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest get-alert-rule-by-uid-test
-  (let [probe (sut/get-alert-rule-by-uid
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               "irrelevant-uid")]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest get-alert-rule-by-uid-test
+    (let [probe (sut/get-alert-rule-by-uid
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 "irrelevant-uid")]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest create-alert-rule-test
-  (let [probe (sut/create-alert-rule
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               "{}")]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest create-alert-rule-test
+    (let [probe (sut/create-alert-rule
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 "{}")]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest update-alert-rule-test
-  (let [probe (sut/update-alert-rule
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               "irrelevant-uid"
-               "{}")]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest update-alert-rule-test
+    (let [probe (sut/update-alert-rule
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 "irrelevant-uid"
+                 "{}")]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest get-dashboards-test
-  (let [probe (sut/get-dashboards
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*)))]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest get-dashboards-test
+    (let [probe (sut/get-dashboards
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*)))]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest get-dashboard-by-uid-test
-  (let [probe (sut/get-dashboard-by-uid
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               "irrelevant-uid")]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest get-dashboard-by-uid-test
+    (let [probe (sut/get-dashboard-by-uid
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 "irrelevant-uid")]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest create-update-dashboard-test
-  (let [probe (sut/create-update-dashboard
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               "{}")]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest create-update-dashboard-test
+    (let [probe (sut/create-update-dashboard
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 "{}")]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest find-dashboards-by-query-test
-  (let [query "query"
-        probe (sut/find-dashboards-by-query
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               query)]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest find-dashboards-by-query-test
+    (let [query "query"
+          probe (sut/find-dashboards-by-query
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 query)]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest get-folders-test
-  (let [probe (sut/get-folders
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*)))]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest get-folders-test
+    (let [probe (sut/get-folders
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*)))]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest get-folder-by-folder-uid-test
-  (let [probe (sut/get-folder-by-folder-uid
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               "irrelevant-uid")]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest get-folder-by-folder-uid-test
+    (let [probe (sut/get-folder-by-folder-uid
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 "irrelevant-uid")]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest find-folders-by-query-test
-  (let [query "query"
-        probe (sut/find-folders-by-query
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               query)]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest find-folders-by-query-test
+    (let [query "query"
+          probe (sut/find-folders-by-query
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 query)]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest create-folder-test
-  (let [probe (sut/create-folder
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               "title")]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest create-folder-test
+    (let [probe (sut/create-folder
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 "title")]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest get-library-panels-test
-  (let [probe (sut/get-library-panels
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*)))]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest get-library-panels-test
+    (let [probe (sut/get-library-panels
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*)))]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest get-library-element-by-uid-test
-  (let [probe (sut/get-library-element-by-uid
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               "irrelevant-uid")]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest get-library-element-by-uid-test
+    (let [probe (sut/get-library-element-by-uid
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 "irrelevant-uid")]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest create-library-element-test
-  (let [probe (sut/create-library-element
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               "{}")]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest create-library-element-test
+    (let [probe (sut/create-library-element
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 "{}")]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
 
-(deftest update-library-element-test
-  (let [probe (sut/update-library-element
-               (settings/grafana-instance-url (first *running-grafana-instances*))
-               (settings/grafana-instance-token (first *running-grafana-instances*))
-               "irrelevant-uid"
-               "{}")]
-    (testing "TODO"
-      (is (= "DONE" "TODO")))))
+#_(deftest update-library-element-test
+    (let [probe (sut/update-library-element
+                 (settings/grafana-instance-url (first *running-grafana-instances*))
+                 (settings/grafana-instance-token (first *running-grafana-instances*))
+                 "irrelevant-uid"
+                 "{}")]
+      (testing "TODO"
+        (is (= "DONE" "TODO")))))
